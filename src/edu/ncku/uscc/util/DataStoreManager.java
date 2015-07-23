@@ -41,15 +41,15 @@ public class DataStoreManager {
 		return false;
 	}
 	
-	public Panel getPanel(int room){
+	public IReferenceable getPanel(int room){
 		return panels[room];
 	}
 	
-	public Dehumidifier getDehumidifier(int room, int deviceID){
+	public IReferenceable getDehumidifier(int room, int deviceID){
 		return dehumidifiers[room][deviceID];
 	}
 	
-	public class Panel implements IDevice{
+	class Panel implements IReferenceable{
 		
 		int offset;
 
@@ -262,7 +262,7 @@ public class DataStoreManager {
 
 	}
 
-	public class Dehumidifier implements IDevice{
+	class Dehumidifier implements IReferenceable{
 		
 		int offset;
 

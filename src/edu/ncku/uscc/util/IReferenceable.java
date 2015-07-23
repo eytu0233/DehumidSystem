@@ -1,6 +1,6 @@
 package edu.ncku.uscc.util;
 
-public interface IDevice {
+public interface IReferenceable {
 	
 	public boolean isOn();
 	public void setOn(boolean onoff);
