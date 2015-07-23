@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry exported="true" kind="lib" path="libs/j2mod-1.03.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="file:/C:/Users/steve%20chen/Desktop/j2mod-1.03-javadoc/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="libs/RXTXcomm.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="NCKUDehumidSystem/libs"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="libs/comm.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
