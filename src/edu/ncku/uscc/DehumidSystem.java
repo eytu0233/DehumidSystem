@@ -20,15 +20,13 @@ public class DehumidSystem {
 		try{
 			Log.init();
 			
-//			ModbusTCPSlave slave = new ModbusTCPSlave(NUM_ROOMS * DEVICES_A_ROOM * REGISTERS_A_DEVICE);
-//			slave.initialize();
-//			System.out.println("Modbus TCP Slave Started...");
+			ModbusTCPSlave slave = new ModbusTCPSlave(NUM_ROOMS * DEVICES_A_ROOM * REGISTERS_A_DEVICE);
+			slave.initialize();
+			System.out.println("Modbus TCP Slave Started...");
 //
 //			Dehumid demumid = new Dehumid(slave, NUM_ROOMS);
 //			demumid.initialize();
 //			System.out.println("Started");
-			
-			throw new Exception();
 			
 		}catch(Exception e){
 			logger.error(e.toString(), e);

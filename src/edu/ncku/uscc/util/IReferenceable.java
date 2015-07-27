@@ -20,6 +20,9 @@ public interface IReferenceable {
 	public void setLive(boolean live);
 	public int getHumid();
 	public void setHumid(int humid);
-	public void setTimer(int timer);
+	public int getHumidSet();
+	public void setHumidSet(int humid);
+	public int getTimerSet();
+	public void setTimerSet(int timer);
 	
 }
