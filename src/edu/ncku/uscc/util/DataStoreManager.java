@@ -33,12 +33,58 @@ public class DataStoreManager {
 		}
 	}
 	
-	public boolean isPanelChange(int room) {
-		for (int i = 0; i < backupPanel.length; i++) {
-			if (backupPanel[i] != modbusSlave.getResgister(i + room * OFFSET_A_DEVICE * DEVICES_A_ROOM))
-				return true;
-		}
-		return false;
+	public boolean isPanelONOFFChange(int room) {
+		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
+		int backupStatus = backupPanel[room + ADDR_STATUS];
+		int mask = 0x01;
+		return (backupStatus & mask) == (nowStatus & mask);
+	}
+	
+	public boolean isPanelModeChange(int room) {
+		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
+		int backupStatus = backupPanel[room + ADDR_STATUS];
+		int mask = 0x06;
+		return (backupStatus & mask) == (nowStatus & mask);
+	}
+	
+	public boolean isPanelTimerSetFlagChange(int room) {
+		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
+		int backupStatus = backupPanel[room + ADDR_STATUS];
+		int mask = 0x08;
+		return (backupStatus & mask) == (nowStatus & mask);
+	}
+	
+	public boolean isPanelDehumiditySetFlagChange(int room) {
+		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
+		int backupStatus = backupPanel[room + ADDR_STATUS];
+		int mask = 0x10;
+		return (backupStatus & mask) == (nowStatus & mask);
+	}
+	
+	public boolean isPanelHighTempAbnormalChange(int room) {
+		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
+		int backupStatus = backupPanel[room + ADDR_STATUS];
+		int mask = 0x20;
+		return (backupStatus & mask) == (nowStatus & mask);
+	}
+	
+	public boolean isPanelTempAbnormalChange(int room) {
+		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
+		int backupStatus = backupPanel[room + ADDR_STATUS];
+		int mask = 0x40;
+		return (backupStatus & mask) == (nowStatus & mask);
+	}
+	
+	public boolean isPanelDehumiditySetChange(int room) {
+		int nowDehumiditySet = modbusSlave.getResgister(ADDR_HUMID_SET + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
+		int backupDehumiditySet = backupPanel[room + ADDR_HUMID_SET];
+		return backupDehumiditySet == nowDehumiditySet;
+	}
+	
+	public boolean isPanelTimerSetChange(int room) {
+		int nowTimerSet = modbusSlave.getResgister(ADDR_TIMER_SET + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
+		int backupTimerSet = backupPanel[room + ADDR_TIMER_SET];
+		return backupTimerSet == nowTimerSet;
 	}
 	
 	public IReferenceable getPanel(int room){
@@ -51,10 +97,12 @@ public class DataStoreManager {
 	
 	class Panel implements IReferenceable{
 		
-		int offset;
+		
+		private int room, offset;
 
 		public Panel(int room) {
 			super();
+			this.room = room;
 			this.offset = room * DEVICES_A_ROOM * OFFSET_A_DEVICE;
 		}
 
@@ -153,6 +201,7 @@ public class DataStoreManager {
 				tempRegister &= mask;
 			}
 			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			backupPanel[room + ADDR_STATUS] = tempRegister;
 		}
 
 		@Override
@@ -168,6 +217,7 @@ public class DataStoreManager {
 				tempRegister &= mask;
 			}
 			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			backupPanel[room + ADDR_STATUS] = tempRegister;
 		}
 
 		@Override
@@ -183,6 +233,7 @@ public class DataStoreManager {
 				tempRegister &= mask;
 			}
 			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			backupPanel[room + ADDR_STATUS] = tempRegister;
 		}
 
 		@Override
@@ -198,6 +249,7 @@ public class DataStoreManager {
 				tempRegister &= mask;
 			}
 			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			backupPanel[room + ADDR_STATUS] = tempRegister;
 		}
 
 		@Override
@@ -213,6 +265,7 @@ public class DataStoreManager {
 				tempRegister &= mask;
 			}
 			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			backupPanel[room + ADDR_STATUS] = tempRegister;
 		}
 
 		@Override
@@ -228,6 +281,7 @@ public class DataStoreManager {
 				tempRegister &= mask;
 			}
 			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			backupPanel[room + ADDR_STATUS] = tempRegister;
 		}
 
 		@Override
@@ -243,6 +297,7 @@ public class DataStoreManager {
 				tempRegister &= mask;
 			}
 			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			backupPanel[room + ADDR_STATUS] = tempRegister;
 		}
 
 		@Override
@@ -258,24 +313,27 @@ public class DataStoreManager {
 				tempRegister &= mask;
 			}
 			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			backupPanel[room + ADDR_STATUS] = tempRegister;
 		}
 
 		@Override
 		public void setHumid(int humid) {
 			// TODO Auto-generated method stub
-			modbusSlave.setResgister(ADDR_HUMID + offset, humid);
+			
 		}
 
 		@Override
 		public void setHumidSet(int humid) {
 			// TODO Auto-generated method stub
 			modbusSlave.setResgister(ADDR_HUMID_SET + offset, humid);
+			backupPanel[room + ADDR_HUMID_SET] = humid;
 		}
 
 		@Override
 		public void setTimerSet(int timer) {
 			// TODO Auto-generated method stub
 			modbusSlave.setResgister(ADDR_TIMER_SET + offset, timer);
+			backupPanel[room + ADDR_TIMER_SET] = timer;
 		}
 
 	}

@@ -2,7 +2,7 @@ package edu.ncku.uscc;
 
 import org.apache.log4j.Logger;
 
-import edu.ncku.uscc.io.Dehumid;
+import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.io.ModbusTCPSlave;
 import edu.ncku.uscc.util.Log;
 
@@ -23,10 +23,8 @@ public class DehumidSystem {
 			ModbusTCPSlave slave = new ModbusTCPSlave(NUM_ROOMS * DEVICES_A_ROOM * REGISTERS_A_DEVICE);
 			slave.initialize();
 			System.out.println("Modbus TCP Slave Started...");
-//
-//			Dehumid demumid = new Dehumid(slave, NUM_ROOMS);
-//			demumid.initialize();
-//			System.out.println("Started");
+			
+			
 			
 		}catch(Exception e){
 			logger.error(e.toString(), e);
