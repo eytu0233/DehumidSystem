@@ -24,8 +24,6 @@ public class DehumidSystem {
 			slave.initialize();
 			System.out.println("Modbus TCP Slave Started...");
 			
-			
-			
 		}catch(Exception e){
 			logger.error(e.toString(), e);
 		}
