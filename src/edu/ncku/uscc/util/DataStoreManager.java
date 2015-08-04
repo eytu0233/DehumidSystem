@@ -173,7 +173,7 @@ public class DataStoreManager {
 		@Override
 		public int getHumid() {
 			// TODO Auto-generated method stub
-			return 0;
+			return modbusSlave.getResgister(ADDR_HUMID + offset);
 		}	
 
 		@Override
@@ -319,21 +319,22 @@ public class DataStoreManager {
 		@Override
 		public void setHumid(int humid) {
 			// TODO Auto-generated method stub
-			
+			modbusSlave.setResgister(ADDR_HUMID + offset, humid);
+			backupPanel[room + ADDR_HUMID] = humid;
 		}
 
 		@Override
-		public void setHumidSet(int humid) {
+		public void setHumidSet(int humidSet) {
 			// TODO Auto-generated method stub
-			modbusSlave.setResgister(ADDR_HUMID_SET + offset, humid);
-			backupPanel[room + ADDR_HUMID_SET] = humid;
+			modbusSlave.setResgister(ADDR_HUMID_SET + offset, humidSet);
+			backupPanel[room + ADDR_HUMID_SET] = humidSet;
 		}
 
 		@Override
-		public void setTimerSet(int timer) {
+		public void setTimerSet(int timerSet) {
 			// TODO Auto-generated method stub
-			modbusSlave.setResgister(ADDR_TIMER_SET + offset, timer);
-			backupPanel[room + ADDR_TIMER_SET] = timer;
+			modbusSlave.setResgister(ADDR_TIMER_SET + offset, timerSet);
+			backupPanel[room + ADDR_TIMER_SET] = timerSet;
 		}
 
 	}
@@ -414,7 +415,7 @@ public class DataStoreManager {
 		@Override
 		public int getHumid() {
 			// TODO Auto-generated method stub
-			return 0;
+			return modbusSlave.getResgister(ADDR_HUMID + offset);
 		}	
 
 		@Override
@@ -556,15 +557,15 @@ public class DataStoreManager {
 		}
 
 		@Override
-		public void setHumidSet(int humid) {
+		public void setHumidSet(int humidSet) {
 			// TODO Auto-generated method stub
-			modbusSlave.setResgister(ADDR_HUMID_SET + offset, humid);
+			modbusSlave.setResgister(ADDR_HUMID_SET + offset, humidSet);
 		}
 
 		@Override
-		public void setTimerSet(int timer) {
+		public void setTimerSet(int timerSet) {
 			// TODO Auto-generated method stub
-			modbusSlave.setResgister(ADDR_TIMER_SET + offset, timer);
+			modbusSlave.setResgister(ADDR_TIMER_SET + offset, timerSet);
 		}
 	}
 
