@@ -89,9 +89,9 @@ public class DehumidRoomController extends Thread implements
 	 * @param slave
 	 * @param serialPort
 	 */
-	public DehumidRoomController(ModbusTCPSlave slave, SerialPort serialPort) {
+	public DehumidRoomController(DataStoreManager dataStoreManager, SerialPort serialPort) {
 		super();
-		this.slave = slave;
+		this.dataStoreManager = dataStoreManager;
 		this.serialPort = serialPort;
 	}
 
@@ -143,8 +143,6 @@ public class DehumidRoomController extends Thread implements
 			if (roomIndex < 0) {
 				logger.warn("Could not scan any room index.");
 				throw new Exception("Could not scan any room index.");
-			} else {
-				dataStoreManager = new DataStoreManager(slave, roomIndex);
 			}
 			while (true) {
 				synPanel(roomIndex);
@@ -217,7 +215,7 @@ public class DehumidRoomController extends Thread implements
 	private int roomIndexScan() throws IOException, Exception {
 		// TODO Auto-generated method stub
 		byte[] txBuf = new byte[1];
-		final int ROOM_MAX = 4, DEHUMIDIFIER_MAX = 8, LOCAL_TIME_OUT = 500;
+		final int ROOM_MAX = 4, DEHUMIDIFIER_MAX = 8, LOCAL_TIME_OUT = 1000;
 
 		for (int roomScanIndex = 0; roomScanIndex < ROOM_MAX; roomScanIndex++) {
 			for (int did = 0; did < DEHUMIDIFIER_MAX; did++) {

@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.io.ModbusTCPSlave;
 import edu.ncku.uscc.io.SerialPortDisconnectListener;
+import edu.ncku.uscc.util.DataStoreManager;
 import edu.ncku.uscc.util.Log;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
@@ -35,6 +36,8 @@ public class DehumidSystem {
 	private static SerialPort serialPort;
 	private static ModbusTCPSlave slave;
 	private static Map<String, Boolean> portRoomAvailable = new HashMap<String, Boolean>();
+	/** A interface to manager modbus dataStore for DehumidSystem */
+	private static DataStoreManager dataStoreManager;
 	
 	private final static CountDownLatch LATCH = new CountDownLatch(1);
 		
@@ -51,6 +54,8 @@ public class DehumidSystem {
 			slave = new ModbusTCPSlave(NUM_ROOMS * DEVICES_A_ROOM * REGISTERS_A_DEVICE);
 			slave.initialize();
 			logger.info("Modbus TCP Slave Started...");
+			
+			dataStoreManager = new DataStoreManager(slave);
 			
 			Timer timer = new Timer();
 			timer.schedule(new PortScanTask(), 0, 1000);
@@ -77,7 +82,6 @@ public class DehumidSystem {
 					CommPortIdentifier currPortId = (CommPortIdentifier) portEnum.nextElement();
 					for (String portName : PORT_NAMES) {
 						if (currPortId.getName().equals(portName) && !portRoomAvailable.get(portName)) {
-							System.out.println(portName);
 							portRoomAvailable.put(portName, true);
 							logger.info("Open " + portName);
 							
@@ -89,7 +93,7 @@ public class DehumidSystem {
 							serialPort.setSerialPortParams(DATA_RATE, SerialPort.DATABITS_8,
 									SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 							
-							DehumidRoomController dehumid = new DehumidRoomController(slave,
+							DehumidRoomController dehumid = new DehumidRoomController(dataStoreManager,
 									serialPort);
 							dehumid.addDisconnectListener(new SerialPortDisconnectListener(){
 

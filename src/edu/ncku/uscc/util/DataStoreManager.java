@@ -10,6 +10,7 @@ public class DataStoreManager {
 	private static final int ADDR_TIMER_SET = 0x03;
 	private static final int OFFSET_A_DEVICE = 4;
 	private static final int DEVICES_A_ROOM = 9;
+	private static final int NUM_ROOMS = 4;
 
 	private int[] backupPanel;
 	
@@ -18,14 +19,14 @@ public class DataStoreManager {
 	private Panel[] panels;
 	private Dehumidifier[][] dehumidifiers;
 
-	public DataStoreManager(ModbusTCPSlave modbusSlave, int numRooms) {
+	public DataStoreManager(ModbusTCPSlave modbusSlave) {
 		super();
 		this.modbusSlave = modbusSlave;
 		
-		this.backupPanel = new int[numRooms * 4];
-		this.panels = new Panel[numRooms];
-		this.dehumidifiers = new Dehumidifier[numRooms][DEVICES_A_ROOM - 1];
-		for(int room = 0; room < numRooms; room++){
+		this.backupPanel = new int[NUM_ROOMS * 4];
+		this.panels = new Panel[NUM_ROOMS];
+		this.dehumidifiers = new Dehumidifier[NUM_ROOMS][DEVICES_A_ROOM - 1];
+		for(int room = 0; room < NUM_ROOMS; room++){
 			panels[room] = new Panel(room);
 			for(int did = 0; did < DEVICES_A_ROOM - 1; did++){
 				dehumidifiers[room][did] = new Dehumidifier(room, did);
