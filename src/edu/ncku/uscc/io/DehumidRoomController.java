@@ -247,8 +247,7 @@ public class DehumidRoomController extends Thread implements
 	/**
 	 * To synchronize data between panel status and modbus dataStore
 	 * 
-	 * @param roomIndex
-	 *            The panel belongs
+	 * @param roomIndex - The panel belongs
 	 * @throws IOException
 	 * @throws InterruptedException
 	 */

@@ -18,18 +18,12 @@ import gnu.io.SerialPort;
 
 public class DehumidSystem {
 
-	private static final int NUM_ROOMS = 1;
+	private static final int NUM_ROOMS = 4;
 	private static final int REGISTERS_A_DEVICE = 4;
 	private static final int DEVICES_A_ROOM = 9;
 	private static final int TIME_OUT = 2000;
 	private static final int DATA_RATE = 9600;
-	
-	private static Logger logger = Log.getLogger();
-	private static SerialPort serialPort;
-	private static ModbusTCPSlave slave;
-	private final static CountDownLatch LATCH = new CountDownLatch(1);
-	
-	private static Map<String, Boolean> portRoomAvailable = new HashMap<String, Boolean>();
+
 	private static final String PORT_NAMES[] = { 
 			"/dev/ttyUSB0", // Linux
 			"/dev/ttyUSB1",
@@ -37,29 +31,37 @@ public class DehumidSystem {
 			"/dev/ttyUSB3"
 	};
 	
+	private static Logger logger = Log.getLogger();
+	private static SerialPort serialPort;
+	private static ModbusTCPSlave slave;
+	private static Map<String, Boolean> portRoomAvailable = new HashMap<String, Boolean>();
+	
+	private final static CountDownLatch LATCH = new CountDownLatch(1);
+		
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		portRoomAvailable.put("/dev/ttyUSB0", false);
-		portRoomAvailable.put("/dev/ttyUSB1", false);
-		portRoomAvailable.put("/dev/ttyUSB2", false);
-		portRoomAvailable.put("/dev/ttyUSB3", false);
 		
 		try{
 			Log.init();
+
+			for(String portName : PORT_NAMES){
+				portRoomAvailable.put(portName, false);
+			}
 			
 			slave = new ModbusTCPSlave(NUM_ROOMS * DEVICES_A_ROOM * REGISTERS_A_DEVICE);
 			slave.initialize();
-			System.out.println("Modbus TCP Slave Started...");
+			logger.info("Modbus TCP Slave Started...");
 			
 			Timer timer = new Timer();
 			timer.schedule(new PortScanTask(), 0, 1000);
+			logger.info("PortScanTask Started...");
 			LATCH.await();
 			
 		}catch(Exception e){
-			logger.error(e.toString(), e);
+			logger.error(e, e);
 		}
 		
-		
+		logger.warn("System stop!");
 	}
 	
 	public static class PortScanTask extends TimerTask {
@@ -77,7 +79,7 @@ public class DehumidSystem {
 						if (currPortId.getName().equals(portName) && !portRoomAvailable.get(portName)) {
 							System.out.println(portName);
 							portRoomAvailable.put(portName, true);
-							logger.info(portName);
+							logger.info("Open " + portName);
 							
 							// open serial port, and use class name for the appName.
 							serialPort = (SerialPort) currPortId.open(this.getClass().getName(),
@@ -95,6 +97,7 @@ public class DehumidSystem {
 								public void onDisconnectEvent(String portName) {
 									// TODO Auto-generated method stub
 									portRoomAvailable.put(portName, false);
+									logger.info("Close " + portName);
 								}
 								
 							});
@@ -104,6 +107,7 @@ public class DehumidSystem {
 					}
 				}			
 			}catch(Exception e){
+				logger.error(e, e);
 				LATCH.countDown();
 			}
 		}
