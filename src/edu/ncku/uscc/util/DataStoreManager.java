@@ -9,6 +9,7 @@ public class DataStoreManager {
 	private static final int ADDR_HUMID_SET = 0x02;
 	private static final int ADDR_TIMER_SET = 0x03;
 	private static final int OFFSET_A_DEVICE = 4;
+	private static final int NUM_PANEL = 1;
 	private static final int DEVICES_A_ROOM = 9;
 	private static final int NUM_ROOMS = 4;
 
@@ -101,10 +102,10 @@ public class DataStoreManager {
 		
 		private int room, offset;
 
-		public Panel(int room) {
+		public Panel(int roomIndex) {
 			super();
-			this.room = room;
-			this.offset = room * DEVICES_A_ROOM * OFFSET_A_DEVICE;
+			this.room = roomIndex;
+			this.offset = roomIndex * DEVICES_A_ROOM * OFFSET_A_DEVICE;
 		}
 
 		@Override
@@ -346,7 +347,7 @@ public class DataStoreManager {
 
 		public Dehumidifier(int room, int deviceID) {
 			super();
-			this.offset = room * DEVICES_A_ROOM * OFFSET_A_DEVICE + OFFSET_A_DEVICE + deviceID;
+			this.offset = room * DEVICES_A_ROOM * OFFSET_A_DEVICE + OFFSET_A_DEVICE * (deviceID + NUM_PANEL);
 		}
 
 		@Override
