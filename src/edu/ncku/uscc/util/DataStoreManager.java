@@ -39,54 +39,54 @@ public class DataStoreManager {
 		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
 		int backupStatus = backupPanel[room + ADDR_STATUS];
 		int mask = 0x01;
-		return (backupStatus & mask) == (nowStatus & mask);
+		return (backupStatus & mask) != (nowStatus & mask);
 	}
 	
 	public boolean isPanelModeChange(int room) {
 		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
 		int backupStatus = backupPanel[room + ADDR_STATUS];
 		int mask = 0x06;
-		return (backupStatus & mask) == (nowStatus & mask);
+		return (backupStatus & mask) != (nowStatus & mask);
 	}
 	
 	public boolean isPanelTimerSetFlagChange(int room) {
 		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
 		int backupStatus = backupPanel[room + ADDR_STATUS];
 		int mask = 0x08;
-		return (backupStatus & mask) == (nowStatus & mask);
+		return (backupStatus & mask) != (nowStatus & mask);
 	}
 	
 	public boolean isPanelDehumiditySetFlagChange(int room) {
 		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
 		int backupStatus = backupPanel[room + ADDR_STATUS];
 		int mask = 0x10;
-		return (backupStatus & mask) == (nowStatus & mask);
+		return (backupStatus & mask) != (nowStatus & mask);
 	}
 	
 	public boolean isPanelHighTempAbnormalChange(int room) {
 		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
 		int backupStatus = backupPanel[room + ADDR_STATUS];
 		int mask = 0x20;
-		return (backupStatus & mask) == (nowStatus & mask);
+		return (backupStatus & mask) != (nowStatus & mask);
 	}
 	
 	public boolean isPanelTempAbnormalChange(int room) {
 		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
 		int backupStatus = backupPanel[room + ADDR_STATUS];
 		int mask = 0x40;
-		return (backupStatus & mask) == (nowStatus & mask);
+		return (backupStatus & mask) != (nowStatus & mask);
 	}
 	
 	public boolean isPanelDehumiditySetChange(int room) {
 		int nowDehumiditySet = modbusSlave.getResgister(ADDR_HUMID_SET + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
 		int backupDehumiditySet = backupPanel[room + ADDR_HUMID_SET];
-		return backupDehumiditySet == nowDehumiditySet;
+		return backupDehumiditySet != nowDehumiditySet;
 	}
 	
 	public boolean isPanelTimerSetChange(int room) {
 		int nowTimerSet = modbusSlave.getResgister(ADDR_TIMER_SET + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
 		int backupTimerSet = backupPanel[room + ADDR_TIMER_SET];
-		return backupTimerSet == nowTimerSet;
+		return backupTimerSet != nowTimerSet;
 	}
 	
 	public IReferenceable getPanel(int room){
