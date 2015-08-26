@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.io.ModbusTCPSlave;
@@ -31,6 +34,7 @@ public class DehumidSystem {
 	};
 	
 	private static Map<String, Boolean> portRoomAvailable = new HashMap<String, Boolean>();
+	private static Map<String, Thread> portRoomThreads = new HashMap<String, Thread>();
 	/** A interface to manager modbus dataStore for DehumidSystem */
 	private static DataStoreManager dataStoreManager;
 	
@@ -52,8 +56,8 @@ public class DehumidSystem {
 			
 			dataStoreManager = new DataStoreManager(slave);
 			
-			Timer timer = new Timer();
-			timer.schedule(new PortScanTask(), 0, 1000);
+			ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(1);
+			scheduledThreadPool.scheduleAtFixedRate(new PortScanTask(), 0, 1, TimeUnit.SECONDS);
 			Log.info("PortScanTask Started...");
 			LATCH.await();
 			
@@ -64,7 +68,7 @@ public class DehumidSystem {
 		Log.debug("System stop!");
 	}
 	
-	public static class PortScanTask extends TimerTask {
+	public static class PortScanTask extends Thread {
 
 		@Override
 		public void run() {
@@ -77,35 +81,49 @@ public class DehumidSystem {
 				while (portEnum.hasMoreElements()) {
 					CommPortIdentifier currPortId = (CommPortIdentifier) portEnum.nextElement();
 					for (String portName : PORT_NAMES) {
-						if (currPortId.getName().equals(portName) && !portRoomAvailable.get(portName)) {
-							portRoomAvailable.put(portName, true);
-							Log.info("Open " + portName);
-							
-							// open serial port, and use class name for the appName.
-							SerialPort serialPort = (SerialPort) currPortId.open(this.getClass().getName(),
-									TIME_OUT);
-							
-							// set port parameters
-							serialPort.setSerialPortParams(BAUD_RATE, SerialPort.DATABITS_8,
-									SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-							
-							DehumidRoomController dehumid = new DehumidRoomController(dataStoreManager,
-									serialPort);
-							dehumid.addDisconnectListener(new SerialPortDisconnectListener(){
-
-								@Override
-								public void onDisconnectEvent(String portName) {
-									// TODO Auto-generated method stub
-									portRoomAvailable.put(portName, false);
-									Log.info("Close " + portName);
-								}
+						if (currPortId.getName().equals(portName)) {							
+							if(!portRoomAvailable.get(portName)){
+								portRoomAvailable.put(portName, true);
+								Log.info("Open " + portName);
 								
-							});
-							dehumid.initialize();
+								// open serial port, and use class name for the appName.
+								SerialPort serialPort = (SerialPort) currPortId.open(this.getClass().getName(),
+										TIME_OUT);
+								
+								// set port parameters
+								serialPort.setSerialPortParams(BAUD_RATE, SerialPort.DATABITS_8,
+										SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+								
+								DehumidRoomController dehumid = new DehumidRoomController(dataStoreManager,
+										serialPort);
+								portRoomThreads.put(portName, dehumid);
+								dehumid.addDisconnectListener(new SerialPortDisconnectListener(){
+
+									@Override
+									public void onDisconnectEvent(String portName) {
+										// TODO Auto-generated method stub
+										portRoomAvailable.put(portName, false);
+										Log.info("Close " + portName);
+									}
+									
+								});
+								dehumid.initialize();
+							}else{
+								DehumidRoomController dehumid = (DehumidRoomController) portRoomThreads.get(portName);
+								if(dehumid != null){
+									Log.debug(dehumid.getName() + " : " + dehumid.isAlive());
+								}else{
+									throw new Exception();
+								}
+							}			
+
 							break;
 						}
 					}
-				}			
+				}		
+				
+				
+				
 			}catch(Exception e){
 				Log.error(e, e);
 				LATCH.countDown();
