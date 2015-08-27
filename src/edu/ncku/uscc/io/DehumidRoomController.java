@@ -474,7 +474,7 @@ public class DehumidRoomController extends Thread implements
 							panelTimerScheduledThread.shutdownNow();
 						}
 						panelTimerScheduledThread = Executors.newScheduledThreadPool(1);
-						panelTimerScheduledThread.schedule(new panelTimerThread(panel, rxBuf), 1, TimeUnit.MINUTES);
+						panelTimerScheduledThread.schedule(new panelTimerThread(panel, rxBuf), 1, TimeUnit.HOURS);
 					}
 				}
 				Log.info(String.format("The timer set of Panel %d is %d.",
@@ -589,7 +589,7 @@ public class DehumidRoomController extends Thread implements
 				}
 
 				if (backupPanelTimeSet > 0) {
-					panelTimerScheduledThread.schedule(this, 1, TimeUnit.MINUTES);
+					panelTimerScheduledThread.schedule(this, 1, TimeUnit.HOURS);
 				} else {
 					panelTimerScheduledThread.shutdownNow();
 				}
