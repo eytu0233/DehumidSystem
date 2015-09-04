@@ -3,8 +3,6 @@ package edu.ncku.uscc;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -34,7 +32,6 @@ public class DehumidSystem {
 	};
 	
 	private static Map<String, Boolean> portRoomAvailable = new HashMap<String, Boolean>();
-	private static Map<String, Thread> portRoomThreads = new HashMap<String, Thread>();
 	/** A interface to manager modbus dataStore for DehumidSystem */
 	private static DataStoreManager dataStoreManager;
 	
@@ -96,7 +93,6 @@ public class DehumidSystem {
 								
 								DehumidRoomController dehumid = new DehumidRoomController(dataStoreManager,
 										serialPort);
-								portRoomThreads.put(portName, dehumid);
 								dehumid.addDisconnectListener(new SerialPortDisconnectListener(){
 
 									@Override
@@ -108,14 +104,7 @@ public class DehumidSystem {
 									
 								});
 								dehumid.initialize();
-							}else{
-								DehumidRoomController dehumid = (DehumidRoomController) portRoomThreads.get(portName);
-								if(dehumid != null){
-									Log.debug(dehumid.getName() + " : " + dehumid.isAlive());
-								}else{
-									throw new Exception();
-								}
-							}			
+							}	
 
 							break;
 						}
