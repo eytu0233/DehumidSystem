@@ -35,6 +35,12 @@ public class DataStoreManager {
 		}
 	}
 	
+	public boolean isChnage(int room) {
+		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
+		int backupStatus = backupPanel[room + ADDR_STATUS];
+		return backupStatus != nowStatus;
+	}
+	
 	public boolean isPanelONOFFChange(int room) {
 		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
 		int backupStatus = backupPanel[room + ADDR_STATUS];
@@ -98,8 +104,7 @@ public class DataStoreManager {
 	}
 	
 	class Panel implements IReferenceable{
-		
-		
+			
 		private int room, offset;
 
 		public Panel(int roomIndex) {
@@ -193,8 +198,8 @@ public class DataStoreManager {
 		@Override
 		public void setOn(boolean onoff) {
 			// TODO Auto-generated method stub
-			int mask = 0x01;
-			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset);
+			int mask = 1 << 0;
+			int tempRegister = backupPanel[room + ADDR_STATUS];
 			if(onoff){
 				tempRegister |= mask;
 			}else{
@@ -209,8 +214,8 @@ public class DataStoreManager {
 		@Override
 		public void setModeDehumid(boolean modeDehumid) {
 			// TODO Auto-generated method stub
-			int mask = 0x02;
-			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset);
+			int mask = 1 << 1;
+			int tempRegister = backupPanel[room + ADDR_STATUS];
 			if(modeDehumid){
 				tempRegister |= mask;
 			}else{
@@ -225,8 +230,8 @@ public class DataStoreManager {
 		@Override
 		public void setModeDry(boolean modeDry) {
 			// TODO Auto-generated method stub
-			int mask = 0x04;
-			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset);
+			int mask = 1 << 2;
+			int tempRegister = backupPanel[room + ADDR_STATUS];
 			if(modeDry){
 				tempRegister |= mask;
 			}else{
@@ -241,8 +246,8 @@ public class DataStoreManager {
 		@Override
 		public void setTimerSet(boolean timerSet) {
 			// TODO Auto-generated method stub
-			int mask = 0x08;
-			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset);
+			int mask = 1 << 3;
+			int tempRegister = backupPanel[room + ADDR_STATUS];
 			if(timerSet){
 				tempRegister |= mask;
 			}else{
@@ -257,8 +262,8 @@ public class DataStoreManager {
 		@Override
 		public void setHumidSet(boolean humidSet) {
 			// TODO Auto-generated method stub
-			int mask = 0x10;
-			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset);
+			int mask = 1 << 4;
+			int tempRegister = backupPanel[room + ADDR_STATUS];
 			if(humidSet){
 				tempRegister |= mask;
 			}else{
@@ -273,8 +278,8 @@ public class DataStoreManager {
 		@Override
 		public void setHighTempWarn(boolean highTempWarn) {
 			// TODO Auto-generated method stub
-			int mask = 0x20;
-			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset);
+			int mask = 1 << 5;
+			int tempRegister = backupPanel[room + ADDR_STATUS];
 			if(highTempWarn){
 				tempRegister |= mask;
 			}else{
@@ -289,8 +294,8 @@ public class DataStoreManager {
 		@Override
 		public void setTempWarn(boolean tempWarn) {
 			// TODO Auto-generated method stub
-			int mask = 0x40;
-			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset);
+			int mask = 1 << 6;
+			int tempRegister = backupPanel[room + ADDR_STATUS];
 			if(tempWarn){
 				tempRegister |= mask;
 			}else{
@@ -305,8 +310,8 @@ public class DataStoreManager {
 		@Override
 		public void setLive(boolean live) {
 			// TODO Auto-generated method stub
-			int mask = 0x80;
-			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset);
+			int mask = 1 << 7;
+			int tempRegister = backupPanel[room + ADDR_STATUS];
 			if(live){
 				tempRegister |= mask;
 			}else{
@@ -326,14 +331,14 @@ public class DataStoreManager {
 		}
 
 		@Override
-		public void setHumidSet(int humidSet) {
+		public void setHumidSetValue(int humidSet) {
 			// TODO Auto-generated method stub
 			modbusSlave.setResgister(ADDR_HUMID_SET + offset, humidSet);
 			backupPanel[room + ADDR_HUMID_SET] = humidSet;
 		}
 
 		@Override
-		public void setTimerSet(int timerSet) {
+		public void setTimerSetValue(int timerSet) {
 			// TODO Auto-generated method stub
 			modbusSlave.setResgister(ADDR_TIMER_SET + offset, timerSet);
 			backupPanel[room + ADDR_TIMER_SET] = timerSet;
@@ -435,7 +440,7 @@ public class DataStoreManager {
 		@Override
 		public void setOn(boolean onoff) {
 			// TODO Auto-generated method stub
-			int mask = 0x01;
+			int mask = 1 << 0;
 			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset);
 			if(onoff){
 				tempRegister |= mask;
@@ -450,7 +455,7 @@ public class DataStoreManager {
 		@Override
 		public void setModeDehumid(boolean modeDehumid) {
 			// TODO Auto-generated method stub
-			int mask = 0x02;
+			int mask = 1 << 1;
 			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset);
 			if(modeDehumid){
 				tempRegister |= mask;
@@ -465,7 +470,7 @@ public class DataStoreManager {
 		@Override
 		public void setModeDry(boolean modeDry) {
 			// TODO Auto-generated method stub
-			int mask = 0x04;
+			int mask = 1 << 2;
 			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset);
 			if(modeDry){
 				tempRegister |= mask;
@@ -480,7 +485,7 @@ public class DataStoreManager {
 		@Override
 		public void setTimerSet(boolean timerSet) {
 			// TODO Auto-generated method stub
-			int mask = 0x08;
+			int mask = 1 << 3;
 			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset);
 			if(timerSet){
 				tempRegister |= mask;
@@ -495,7 +500,7 @@ public class DataStoreManager {
 		@Override
 		public void setHumidSet(boolean humidSet) {
 			// TODO Auto-generated method stub
-			int mask = 0x10;
+			int mask = 1 << 4;
 			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset);
 			if(humidSet){
 				tempRegister |= mask;
@@ -510,7 +515,7 @@ public class DataStoreManager {
 		@Override
 		public void setHighTempWarn(boolean highTempWarn) {
 			// TODO Auto-generated method stub
-			int mask = 0x20;
+			int mask = 1 << 5;
 			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset);
 			if(highTempWarn){
 				tempRegister |= mask;
@@ -525,7 +530,7 @@ public class DataStoreManager {
 		@Override
 		public void setTempWarn(boolean tempWarn) {
 			// TODO Auto-generated method stub
-			int mask = 0x40;
+			int mask = 1 << 6;
 			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset);
 			if(tempWarn){
 				tempRegister |= mask;
@@ -540,7 +545,7 @@ public class DataStoreManager {
 		@Override
 		public void setLive(boolean live) {
 			// TODO Auto-generated method stub
-			int mask = 0x80;
+			int mask = 1 << 7;
 			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset);
 			if(live){
 				tempRegister |= mask;
@@ -559,13 +564,13 @@ public class DataStoreManager {
 		}
 
 		@Override
-		public void setHumidSet(int humidSet) {
+		public void setHumidSetValue(int humidSet) {
 			// TODO Auto-generated method stub
 			modbusSlave.setResgister(ADDR_HUMID_SET + offset, humidSet);
 		}
 
 		@Override
-		public void setTimerSet(int timerSet) {
+		public void setTimerSetValue(int timerSet) {
 			// TODO Auto-generated method stub
 			modbusSlave.setResgister(ADDR_TIMER_SET + offset, timerSet);
 		}

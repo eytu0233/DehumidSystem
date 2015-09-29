@@ -32,7 +32,6 @@ public class DehumidSystem {
 	};
 	
 	private static Map<String, Boolean> portRoomAvailable = new HashMap<String, Boolean>();
-	private static Map<String, Thread> portRoomThreads = new HashMap<String, Thread>();
 	/** A interface to manager modbus dataStore for DehumidSystem */
 	private static DataStoreManager dataStoreManager;
 	
@@ -94,7 +93,6 @@ public class DehumidSystem {
 								
 								DehumidRoomController dehumid = new DehumidRoomController(dataStoreManager,
 										serialPort);
-								portRoomThreads.put(portName, dehumid);
 								dehumid.addDisconnectListener(new SerialPortDisconnectListener(){
 
 									@Override
@@ -106,14 +104,7 @@ public class DehumidSystem {
 									
 								});
 								dehumid.initialize();
-							}else{
-								DehumidRoomController dehumid = (DehumidRoomController) portRoomThreads.get(portName);
-								if(dehumid != null){
-									Log.debug(dehumid.getName() + " : " + dehumid.isAlive());
-								}else{
-									throw new Exception();
-								}
-							}			
+							}	
 
 							break;
 						}

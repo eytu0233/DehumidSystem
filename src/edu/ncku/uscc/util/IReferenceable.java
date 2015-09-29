@@ -21,8 +21,8 @@ public interface IReferenceable {
 	public int getHumid();
 	public void setHumid(int humid);
 	public int getHumidSet();
-	public void setHumidSet(int humid);
+	public void setHumidSetValue(int humid);
 	public int getTimerSet();
-	public void setTimerSet(int timer);
+	public void setTimerSetValue(int timer);
 	
 }

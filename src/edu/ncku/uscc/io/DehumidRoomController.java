@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import edu.ncku.uscc.util.DataStoreManager;
 import edu.ncku.uscc.util.IReferenceable;
 import edu.ncku.uscc.util.Log;
+import edu.ncku.uscc.util.panelTimerThread;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
@@ -28,7 +29,9 @@ public class DehumidRoomController extends Thread implements
 	private static final int PANEL_CMD_SHUTDOWM = 0x86;
 	// private static final int PANEL_CMD_TEMP_ABNORMAL = 0x87;
 	// private static final int PANEL_CMD_DEFROST = 0x88;
-//	private static final int PANEL_CMD_MINUS_TIMER = 0x89;
+	private static final int PANEL_CMD_MINUS_TIMER = 0x89;
+	private static final int PANEL_CMD_DEHUMID_MODE = 0x8A;
+	private static final int PANEL_CMD_DRYCLOTHES_MODE = 0x8B;
 	private static final int PANEL_CMD_HUMID = 0x68;
 
 	private static final int PANEL_REP_ON = 0x30;
@@ -44,8 +47,8 @@ public class DehumidRoomController extends Thread implements
 	private static final int DEHUMID_CMD_OFF = 0x31;
 	private static final int DEHUMID_CMD_DEHUMID_MODE = 0x32;
 	private static final int DEHUMID_CMD_DRY_CLOTHES_MODE = 0x33;
-	// private static final int DEHUMID_CMD_DEHUMIDITY_SET = 0x34;
-	// private static final int DEHUMID_CMD_TIMER_SET = 0x35;
+	private static final int DEHUMID_CMD_DEHUMIDITY_SET = 0x34;
+	private static final int DEHUMID_CMD_TIMER_SET = 0x35;
 	private static final int DEHUMID_CMD_DEHUMIDITY_DIGIT_ONES = 0x38;
 	private static final int DEHUMID_CMD_DEHUMIDITY_DIGIT_TENS = 0x39;
 
@@ -59,12 +62,15 @@ public class DehumidRoomController extends Thread implements
 	private static final int ROOM_ID_MAX = 5;
 
 	/** Milliseconds to block while waiting for port open */
-	private static final int TIME_OUT = 300;
+	private static final int TIME_OUT = 400;
 	private static final int ERR = 2;
 
 	private static final int INITIAL_RATE = 100;
 	private static final int RATE_CONSTANT = 3;
 	private static final double DROP_RATIO = 0.77;
+
+	private static final int MIN_HUMIDITY = 40;
+	private static final int MAX_HUMIDITY = 90;
 
 	/** A synchronization lock */
 	private final Object lock = new Object();
@@ -81,6 +87,9 @@ public class DehumidRoomController extends Thread implements
 	private OutputStream output;
 	/** The buff receives byte data from serial port interface */
 	private Byte rxBuf;
+
+	/** The panel timer */
+	private panelTimerThread panelTimerThread = new panelTimerThread();
 
 	/** The index of the room after room index scan */
 	private int roomIndex;
@@ -214,7 +223,6 @@ public class DehumidRoomController extends Thread implements
 	 * Handle an event on the serial port. Read the data and print it.
 	 */
 	public synchronized void serialEvent(SerialPortEvent oEvent) {
-
 		if (oEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
 
 			try {
@@ -319,24 +327,21 @@ public class DehumidRoomController extends Thread implements
 
 		byte[] txBuf = new byte[1];
 		byte err = ERR + 1;
-		IReferenceable panel = dataStoreManager.getPanel(roomIndex
-				- ROOM_ID_MIN);
+		int offsetRoomIndex = roomIndex - ROOM_ID_MIN;
+		IReferenceable panel = dataStoreManager.getPanel(offsetRoomIndex);
 
-		if (!init
-				&& dataStoreManager.isPanelONOFFChange(roomIndex - ROOM_ID_MIN)) {
-			txBuf[0] = (panel.isOn()) ? (byte) PANEL_CMD_START
-					: (byte) PANEL_CMD_SHUTDOWM;
-		} else {
-			// ask panel it is on or off
-			txBuf[0] = (byte) PANEL_CMD_ONOFF;
-		}
 		while (true) {
+			if (!init && dataStoreManager.isPanelONOFFChange(offsetRoomIndex)) {
+				txBuf[0] = (panel.isOn()) ? (byte) PANEL_CMD_START
+						: (byte) PANEL_CMD_SHUTDOWM;
+			} else {
+				// ask panel it is on or off
+				txBuf[0] = (byte) PANEL_CMD_ONOFF;
+			}
 			rxBuf = -1;
 			if (output == null)
 				return;
 			output.write(txBuf);
-//			Log.info(String.format("Send to panel : %x in room %d",
-//					((int) txBuf[0] & 0xff), roomIndex));
 			synchronized (lock) {
 				lock.wait(TIME_OUT);
 			}
@@ -344,73 +349,78 @@ public class DehumidRoomController extends Thread implements
 			if (rxBuf == PANEL_REP_ON) {
 				panel.setOn(true);
 				panel.setLive(true);
-				Log.info(String.format("Panel %d is ON.", roomIndex
-						- ROOM_ID_MIN));
+				Log.info(String.format("Panel %d is ON.", offsetRoomIndex));
 				break;
 			} else if (rxBuf == PANEL_REP_OFF) {
 				panel.setOn(false);
 				panel.setLive(true);
-				Log.info(String.format("Panel %d is OFF.", roomIndex
-						- ROOM_ID_MIN));
+				Log.info(String.format("Panel %d is OFF.", offsetRoomIndex));
 				break;
 			} else {
 				panel.setLive(false);
-				Log.debug(String.format("Panel %d is not live.", roomIndex
-						- ROOM_ID_MIN));
 				if (--err <= 0) {
-					Log.info("Timeout or data is not expected.");
+					Log.warn(String.format("Panel %d is not live.",
+							offsetRoomIndex));
 					return;
 				}
 			}
 		}
 
+		if (!panel.isOn())
+			return;
+
 		// ask panel its mode
-		txBuf[0] = (byte) PANEL_CMD_MODE;
 		while (panel.isOn()) {
+			//這段目前有bug 該方法只回傳false 裡面的值會是 131 != 131 133 != 133 表示值有改但卻連備份的一起改導致只傳false
+			if (dataStoreManager.isPanelModeChange(offsetRoomIndex)) {
+				if (panel.isModeDehumid()) {
+					txBuf[0] = (byte) PANEL_CMD_DEHUMID_MODE;
+				} else if (panel.isModeDry()) {
+					txBuf[0] = (byte) PANEL_CMD_DRYCLOTHES_MODE;
+				}
+			} else {
+				txBuf[0] = (byte) PANEL_CMD_MODE;
+			}
 			rxBuf = -1;
 			if (output == null)
 				return;
 			output.write(txBuf);
-//			Log.info(String.format("Send to panel : %x in room %d",
-//					((int) txBuf[0] & 0xff), roomIndex));
 			synchronized (lock) {
 				lock.wait(TIME_OUT);
 			}
 
 			if (rxBuf == PANEL_REP_DEHUMID) {
+				
 				panel.setModeDehumid(true);
 				panel.setModeDry(false);
 				panel.setLive(true);
-				Log.info(String.format("Panel %d is dehumid mode.", roomIndex
-						- ROOM_ID_MIN));
+				Log.info(String.format("Panel %d is dehumid mode.",
+						offsetRoomIndex));
 				break;
 			} else if (rxBuf == PANEL_REP_DRY_CLOTHES) {
 				panel.setModeDehumid(false);
 				panel.setModeDry(true);
 				panel.setLive(true);
 				Log.info(String.format("Panel %d is dry clothes mode.",
-						roomIndex - ROOM_ID_MIN));
+						offsetRoomIndex));
 				break;
 			} else {
 				panel.setLive(false);
-				Log.warn(String.format("Panel %d is not live.", roomIndex
-						- ROOM_ID_MIN));
 				if (--err <= 0) {
-					Log.info("Timeout or data is not expected.");
+					Log.warn(String.format("Panel %d is not live.",
+							offsetRoomIndex));
 					return;
 				}
 			}
 		}
 
 		// ask panel its set status
-		txBuf[0] = (byte) PANEL_CMD_SET;
 		while (panel.isOn()) {
+			txBuf[0] = (byte) PANEL_CMD_SET;
 			rxBuf = -1;
 			if (output == null)
 				return;
 			output.write(txBuf);
-//			Log.info(String.format("Send to panel : %x in room %d",
-//					((int) txBuf[0] & 0xff), roomIndex));
 			synchronized (lock) {
 				lock.wait(TIME_OUT);
 			}
@@ -419,134 +429,169 @@ public class DehumidRoomController extends Thread implements
 				panel.setHumidSet(false);
 				panel.setTimerSet(false);
 				panel.setLive(true);
-				Log.info(String.format("Panel %d hasn't any set.", roomIndex
-						- ROOM_ID_MIN));
+				Log.info(String.format("Panel %d hasn't any set.",
+						offsetRoomIndex));
 				break;
 			} else if (rxBuf == PANEL_REP_HUMID_SET) {
 				panel.setHumidSet(true);
 				panel.setTimerSet(false);
 				panel.setLive(true);
-				Log.info(String.format("Panel %d has humidity set.", roomIndex
-						- ROOM_ID_MIN));
+				Log.info(String.format("Panel %d has humidity set.",
+						offsetRoomIndex));
 				break;
 			} else if (rxBuf == PANEL_REP_TIMER_SET) {
 				panel.setHumidSet(false);
 				panel.setTimerSet(true);
 				panel.setLive(true);
-				Log.info(String.format("Panel %d has timer set.", roomIndex
-						- ROOM_ID_MIN));
+				Log.info(String.format("Panel %d has timer set.",
+						offsetRoomIndex));
 				break;
 			} else {
 				panel.setLive(false);
-				Log.warn(String.format("Panel %d is not live.", roomIndex
-						- ROOM_ID_MIN));
 				if (--err <= 0) {
-					Log.info("Timeout or data is not expected.");
+					Log.warn(String.format("Panel %d is not live.",
+							offsetRoomIndex));
 					return;
 				}
 			}
 		}
 
 		// ask panel its humidity set
-		txBuf[0] = (byte) PANEL_CMD_HUMID_SET;
 		while (panel.isOn()) {
+			txBuf[0] = (byte) PANEL_CMD_HUMID_SET;
 			rxBuf = -1;
 			if (output == null)
 				return;
 			output.write(txBuf);
-//			Log.info(String.format("Send to panel : %x in room %d",
-//					((int) txBuf[0] & 0xff), roomIndex));
 			synchronized (lock) {
 				lock.wait(TIME_OUT);
 			}
 
 			if (rxBuf >= 0) {
-				panel.setHumidSet((int) rxBuf);
+				panel.setHumidSetValue((int) rxBuf);
 				panel.setLive(true);
 				Log.info(String.format("The humidity set of Panel %d is %d.",
-						roomIndex - ROOM_ID_MIN, (int) rxBuf));
+						offsetRoomIndex, (int) rxBuf));
 				break;
 			} else {
 				panel.setLive(false);
-				Log.warn(String.format("Panel %d is not live.", roomIndex
-						- ROOM_ID_MIN));
 				if (--err <= 0) {
-					Log.info("Timeout or data is not expected.");
+					Log.warn(String.format("Panel %d is not live.",
+							offsetRoomIndex));
 					return;
 				}
 			}
 		}
 
 		// ask panel its timer
-		txBuf[0] = (byte) PANEL_CMD_TIMER_SET;
 		while (panel.isOn()) {
+			txBuf[0] = (byte) PANEL_CMD_TIMER_SET;
 			rxBuf = -1;
 			if (output == null)
 				return;
 			output.write(txBuf);
-//			Log.info(String.format("Send to panel : %x in room %d",
-//					((int) txBuf[0] & 0xff), roomIndex));
 			synchronized (lock) {
 				lock.wait(TIME_OUT);
 			}
 
 			if (rxBuf >= 0) {
-				panel.setTimerSet(rxBuf);
+				panel.setTimerSetValue(rxBuf);
 				panel.setLive(true);
-				Log.info(String.format("The timer set of Panel %d is %d.",
-						roomIndex - ROOM_ID_MIN, rxBuf));
+				Log.debug(String.format("The timer set of Panel %d is %d.",
+						offsetRoomIndex, rxBuf));
 				break;
 			} else {
 				panel.setLive(false);
-				Log.warn(String.format("Panel %d is not live.", roomIndex
-						- ROOM_ID_MIN));
 				if (--err <= 0) {
-					Log.info("Timeout or data is not expected.");
+					Log.warn(String.format("Panel %d is not live.",
+							offsetRoomIndex));
 					return;
+				}
+			}
+		}
+
+		// set panel timer
+		if (panel.getTimerSet() > 0) {
+			if (panelTimerThread.getBackupTimerSet() != panel.getTimerSet()) {
+
+				panelTimerThread.newScheduleThread(panel.getTimerSet());
+
+			} else if (panelTimerThread.getTimerMinusOneFlag()) {
+				while (panel.isOn()) {
+					txBuf[0] = (byte) PANEL_CMD_MINUS_TIMER;
+					rxBuf = -1;
+					if (output == null)
+						return;
+					output.write(txBuf);
+					synchronized (lock) {
+						lock.wait(TIME_OUT);
+					}
+
+					if (rxBuf == PANEL_REP_OK) {
+						panelTimerThread.backpuTimerMinusOne();
+						panel.setTimerSetValue(panelTimerThread
+								.getBackupTimerSet());
+						panelTimerThread.setTimerMinusOneFlag(false);
+						Log.debug(String
+								.format("The timer set of Panel %d minus one hour. : %d : %d",
+										offsetRoomIndex, panel.getTimerSet(),
+										panelTimerThread.getBackupTimerSet()));
+						break;
+					} else {
+						panel.setLive(false);
+						if (--err <= 0) {
+							Log.warn(String.format("Panel %d is not live.",
+									offsetRoomIndex));
+							return;
+						}
+					}
 				}
 			}
 		}
 
 		// synchronize humidity in the room
 		int humid = 0, avgHumid = 0;
-		for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; did++) {
-			IReferenceable dehumidifier = dataStoreManager.getDehumidifier(
-					roomIndex - ROOM_ID_MIN, did);
-			if (dehumidifier.isLive()) {
-				// Log.debug(String.format(
-				// "The humidity for dehumidifier %d in room %d is %d.",
-				// did, roomIndex, dehumidifier.getHumid()));
-				humid += dehumidifier.getHumid();
-				avgHumid++;
+		IReferenceable dehumidifier;
+
+		/* count the sum and the avg of humidity. */
+		if (panel.isOn()) {
+			for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; did++) {
+				dehumidifier = dataStoreManager.getDehumidifier(
+						offsetRoomIndex, did);
+				if (dehumidifier.isLive()) {
+					humid += dehumidifier.getHumid();
+					avgHumid++;
+				}
 			}
-		}
-		if (avgHumid > 0) {
-			avgHumid = humid / avgHumid;
-		} else {
+			if (avgHumid > 0) {
+				avgHumid = humid / avgHumid;
+			} else {
+				return;
+			}
+		}else{
 			return;
 		}
-		if (humid >= 40 && humid <= 90) {
+
+		if (avgHumid >= MIN_HUMIDITY && avgHumid <= MAX_HUMIDITY) {
 			txBuf[0] = (byte) (PANEL_CMD_HUMID + avgHumid);
-			while (true) {
+			while (panel.isOn()) {
 				rxBuf = -1;
 				if (output == null)
 					return;
 				output.write(txBuf);
-//				Log.info(String.format("Send to panel : %x in room %d",
-//						((int) txBuf[0] & 0xff), roomIndex));
 				synchronized (lock) {
 					lock.wait(TIME_OUT);
 				}
 
 				if (rxBuf == PANEL_REP_OK) {
 					Log.info(String.format("The humidity of Panel %d is %d.",
-							roomIndex - ROOM_ID_MIN, avgHumid));
+							offsetRoomIndex, avgHumid));
 					panel.setHumid(avgHumid);
 					break;
 				} else {
 					panel.setLive(false);
-					Log.warn(String.format("Panel %d is not live.", roomIndex
-							- ROOM_ID_MIN));
+					Log.warn(String.format("Panel %d is not live.",
+							offsetRoomIndex));
 					if (--err <= 0) {
 						Log.info("Timeout or data is not expected.");
 						return;
@@ -554,11 +599,24 @@ public class DehumidRoomController extends Thread implements
 				}
 			}
 		} else {
-			Log.warn("Humidity for panel is not in range : " + humid);
+			Log.warn("Humidity for panel is not in range : " + avgHumid);
+			int sum = 0, num = 0;
+			for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; did++) {
+				dehumidifier = dataStoreManager.getDehumidifier(
+						offsetRoomIndex, did);
+				if (dehumidifier.isLive()) {
+					Log.warn(String
+							.format("The humidity for dehumidifier %d in room %d is %d.",
+									did, roomIndex, dehumidifier.getHumid()));
+					sum += dehumidifier.getHumid();
+					num++;
+				}
+			}
+			Log.warn("The humidity sum of these dehumidifiers : " + sum);
+			Log.warn("The num of these dehumidifiers : " + num);
 		}
 
 	}
-	
 
 	/**
 	 * Before synchronizing panels, it is necessary to notify the specific
@@ -576,6 +634,7 @@ public class DehumidRoomController extends Thread implements
 			InterruptedException {
 
 		byte[] txBuf = new byte[1];
+		int offsetRoomIndex = roomIndex - ROOM_ID_MIN;
 		txBuf[0] = (byte) ((roomIndex << 3) + did);
 		IReferenceable panel = dataStoreManager.getDehumidifier(roomIndex
 				- ROOM_ID_MIN, did);
@@ -584,9 +643,6 @@ public class DehumidRoomController extends Thread implements
 		if (output == null)
 			return false;
 		output.write(txBuf);
-//		Log.info(String.format(
-//				"Sent Device ID to dehumidifier %d in room %d : %x", did,
-//				roomIndex, ((int) txBuf[0] & 0xff)));
 		synchronized (lock) {
 			lock.wait(TIME_OUT);
 		}
@@ -597,8 +653,6 @@ public class DehumidRoomController extends Thread implements
 			panel.setTempWarn(false);
 			panel.setLive(true);
 			checkRates[did] = INITIAL_RATE;
-			// Log.info(String.format(
-			// "The dehumidifier %d in room %d acks OK.", did, roomIndex));
 			return true;
 		case DEHUMID_REP_HIGH_TEMP_ABNORMAL:
 			panel.setHighTempWarn(true);
@@ -606,7 +660,7 @@ public class DehumidRoomController extends Thread implements
 			checkRates[did] = INITIAL_RATE;
 			Log.warn(String.format(
 					"The dehumidifier %d in room %d acks high temp abnormal.",
-					did, roomIndex - ROOM_ID_MIN));
+					did, offsetRoomIndex));
 			return true;
 		case DEHUMID_REP_DEFROST_TEMP_ABNORMAL:
 			panel.setTempWarn(true);
@@ -614,7 +668,7 @@ public class DehumidRoomController extends Thread implements
 			checkRates[did] = INITIAL_RATE;
 			Log.warn(String
 					.format("The dehumidifier %d in room %d acks defrost temp abnormal.",
-							did, roomIndex - ROOM_ID_MIN));
+							did, offsetRoomIndex));
 			return true;
 		default:
 			panel.setLive(false);
@@ -639,17 +693,16 @@ public class DehumidRoomController extends Thread implements
 
 		byte[] txBuf = new byte[1];
 		int err = ERR;
+		int offsetRoomIndex = roomIndex - ROOM_ID_MIN;
 		IReferenceable dehumidifier = dataStoreManager.getDehumidifier(
-				roomIndex - ROOM_ID_MIN, did);
-		IReferenceable panel = dataStoreManager.getPanel(roomIndex
-				- ROOM_ID_MIN);
+				offsetRoomIndex, did);
+		IReferenceable panel = dataStoreManager.getPanel(offsetRoomIndex);
 
 		// synchronize onoff status between panel and dehumidifier
 		while (true) {
 
 			if (!notifyDeviceID(roomIndex, did)) {
 				if (--err <= 0) {
-					Log.info("Timeout or data is not expected.");
 					return;
 				}
 				continue;
@@ -661,8 +714,6 @@ public class DehumidRoomController extends Thread implements
 			if (output == null)
 				return;
 			output.write(txBuf);
-//			Log.info(String.format("Send to dehumidifier %d in room %d : %x",
-//					did, roomIndex - ROOM_ID_MIN, ((int) txBuf[0] & 0xff)));
 			synchronized (lock) {
 				lock.wait(TIME_OUT);
 			}
@@ -672,15 +723,11 @@ public class DehumidRoomController extends Thread implements
 					|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL) {
 				dehumidifier.setOn(on);
 				checkRates[did] = INITIAL_RATE;
-				Log.info(String.format(
-						"Dehumidifier %d in room %d power sync.", did,
-						roomIndex - ROOM_ID_MIN));
 				break;
 			} else {
 				dehumidifier.setLive(false);
 				checkRates[did] = drop(checkRates[did]);
 				if (--err <= 0) {
-					Log.info("Timeout or data is not expected.");
 					return;
 				}
 			}
@@ -691,7 +738,6 @@ public class DehumidRoomController extends Thread implements
 
 			if (!notifyDeviceID(roomIndex, did)) {
 				if (--err <= 0) {
-					Log.info("Timeout or data is not expected.");
 					return;
 				}
 				continue;
@@ -707,8 +753,6 @@ public class DehumidRoomController extends Thread implements
 			if (output == null)
 				return;
 			output.write(txBuf);
-//			Log.info(String.format("Send to dehumidifier %d in room %d : %x",
-//					did, roomIndex - ROOM_ID_MIN, ((int) txBuf[0] & 0xff)));
 			synchronized (lock) {
 				lock.wait(TIME_OUT);
 			}
@@ -719,9 +763,6 @@ public class DehumidRoomController extends Thread implements
 				dehumidifier.setModeDehumid(true);
 				dehumidifier.setModeDry(false);
 				checkRates[did] = INITIAL_RATE;
-				Log.info(String.format(
-						"Dehumidifier %d in room %d dehumid mode set.", did,
-						roomIndex - ROOM_ID_MIN));
 				break;
 			} else {
 				dehumidifier.setLive(false);
@@ -754,8 +795,6 @@ public class DehumidRoomController extends Thread implements
 			if (output == null)
 				return;
 			output.write(txBuf);
-//			Log.info(String.format("Send to dehumidifier %d in room %d : %x",
-//					did, roomIndex - ROOM_ID_MIN, ((int) txBuf[0] & 0xff)));
 			synchronized (lock) {
 				lock.wait(TIME_OUT);
 			}
@@ -766,10 +805,117 @@ public class DehumidRoomController extends Thread implements
 				dehumidifier.setModeDry(true);
 				dehumidifier.setModeDehumid(false);
 				checkRates[did] = INITIAL_RATE;
-				Log.info(String.format(
-						"Dehumidifier %d in room %d dry mode set.", did,
-						roomIndex - ROOM_ID_MIN));
 				break;
+			} else {
+				dehumidifier.setLive(false);
+				checkRates[did] = drop(checkRates[did]);
+				if (--err <= 0) {
+					Log.info("Timeout or data is not expected.");
+					return;
+				}
+			}
+		}
+
+		// synchronize humidity setting between panel and dehumidifier
+		while (dehumidifier.isOn() && panel.isHumidSet()) {
+
+			if (!notifyDeviceID(roomIndex, did)) {
+				if (--err <= 0) {
+					return;
+				}
+				continue;
+			}
+
+			rxBuf = -1;
+			txBuf[0] = (byte) DEHUMID_CMD_DEHUMIDITY_SET;
+			if (output == null)
+				return;
+			output.write(txBuf);
+			synchronized (lock) {
+				lock.wait(TIME_OUT);
+			}
+
+			if (rxBuf == DEHUMID_REP_OK
+					|| rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
+					|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL) {
+				checkRates[did] = INITIAL_RATE;
+				rxBuf = -1;
+				txBuf[0] = (byte) panel.getHumidSet();
+				if (output == null)
+					return;
+				output.write(txBuf);
+				synchronized (lock) {
+					lock.wait(TIME_OUT);
+				}
+
+				if (rxBuf == DEHUMID_REP_OK
+						|| rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
+						|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL) {
+					dehumidifier.setHumidSet(true);
+					dehumidifier.setHumidSetValue(panel.getHumidSet());
+				} else {
+					dehumidifier.setLive(false);
+					checkRates[did] = drop(checkRates[did]);
+					if (--err <= 0) {
+						Log.info("Timeout or data is not expected.");
+						return;
+					}
+				}
+			} else {
+				dehumidifier.setLive(false);
+				checkRates[did] = drop(checkRates[did]);
+				if (--err <= 0) {
+					Log.info("Timeout or data is not expected.");
+					return;
+				}
+			}
+		}
+
+		// synchronize timer setting between panel and dehumidifier
+		while (dehumidifier.isOn() && panel.isTimerSet()) {
+
+			if (!notifyDeviceID(roomIndex, did)) {
+				if (--err <= 0) {
+					return;
+				}
+				continue;
+			}
+
+			rxBuf = -1;
+			txBuf[0] = (byte) DEHUMID_CMD_TIMER_SET;
+			if (output == null)
+				return;
+			output.write(txBuf);
+			synchronized (lock) {
+				lock.wait(TIME_OUT);
+			}
+
+			if (rxBuf == DEHUMID_REP_OK
+					|| rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
+					|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL) {
+				checkRates[did] = INITIAL_RATE;
+				rxBuf = -1;
+				txBuf[0] = (byte) panel.getTimerSet();
+				if (output == null)
+					return;
+				output.write(txBuf);
+				synchronized (lock) {
+					lock.wait(TIME_OUT);
+				}
+
+				if (rxBuf == DEHUMID_REP_OK
+						|| rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
+						|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL) {
+					dehumidifier.setTimerSet(true);
+					dehumidifier.setTimerSetValue(panel.getTimerSet());
+				} else {
+					dehumidifier.setLive(false);
+					checkRates[did] = drop(checkRates[did]);
+					if (--err <= 0) {
+						Log.info("Timeout or data is not expected.");
+						return;
+					}
+				}
 			} else {
 				dehumidifier.setLive(false);
 				checkRates[did] = drop(checkRates[did]);
@@ -797,8 +943,6 @@ public class DehumidRoomController extends Thread implements
 			if (output == null)
 				return;
 			output.write(txBuf);
-//			Log.info(String.format("Send to dehumidifier %d in room %d : %x",
-//					did, roomIndex - ROOM_ID_MIN, ((int) txBuf[0] & 0xff)));
 			synchronized (lock) {
 				lock.wait(TIME_OUT);
 			}
@@ -806,9 +950,6 @@ public class DehumidRoomController extends Thread implements
 			if (rxBuf >= 0) {
 				humidity += rxBuf;
 				checkRates[did] = INITIAL_RATE;
-				// Log.debug(String
-				// .format("The humidity in ones for dehumidifier %d in room %d is %d.",
-				// did, roomIndex, rxBuf));
 			} else {
 				dehumidifier.setLive(false);
 				checkRates[did] = drop(checkRates[did]);
@@ -830,29 +971,19 @@ public class DehumidRoomController extends Thread implements
 			rxBuf = -1;
 			txBuf[0] = (byte) DEHUMID_CMD_DEHUMIDITY_DIGIT_TENS;
 			output.write(txBuf);
-//			Log.info(String.format("Send to dehumidifier %d in room %d : %x",
-//					did, roomIndex - ROOM_ID_MIN, ((int) txBuf[0] & 0xff)));
 			synchronized (lock) {
 				lock.wait(TIME_OUT);
 			}
 
 			if (rxBuf >= 0) {
-				// Log.debug(String
-				// .format("The humidity in tens for dehumidifier %d in room %d
-				// is %d.",
-				// did, roomIndex, rxBuf));
 				humidity += rxBuf * 10;
 				dehumidifier.setHumid(humidity);
 				checkRates[did] = INITIAL_RATE;
-				Log.info(String.format(
-						"Dehumidifier %d in room %d humidity : %d", did,
-						roomIndex - ROOM_ID_MIN, humidity));
 				break;
 			} else {
 				dehumidifier.setLive(false);
 				checkRates[did] = drop(checkRates[did]);
 				if (--err <= 0) {
-					Log.info("Timeout or data is not expected.");
 					return;
 				}
 			}
