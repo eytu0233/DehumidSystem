@@ -199,128 +199,146 @@ public class DataStoreManager {
 		public void setOn(boolean onoff) {
 			// TODO Auto-generated method stub
 			int mask = 1 << 0;
-			int tempRegister = backupPanel[room + ADDR_STATUS];
+			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset), tempBackRegister = backupPanel[room + ADDR_STATUS];
+			
 			if(onoff){
 				tempRegister |= mask;
+				tempBackRegister |= mask;
 			}else{
 				mask = ~mask;
 				mask &= 0xff;
-				tempRegister &= mask;
+				tempRegister &= mask;				
+				tempBackRegister &= mask;
 			}
 			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
-			backupPanel[room + ADDR_STATUS] = tempRegister;
+			backupPanel[room + ADDR_STATUS] = tempBackRegister;
 		}
 
 		@Override
 		public void setModeDehumid(boolean modeDehumid) {
 			// TODO Auto-generated method stub
 			int mask = 1 << 1;
-			int tempRegister = backupPanel[room + ADDR_STATUS];
+			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset), tempBackRegister = backupPanel[room + ADDR_STATUS];
+			
 			if(modeDehumid){
 				tempRegister |= mask;
+				tempBackRegister |= mask;
 			}else{
 				mask = ~mask;
 				mask &= 0xff;
 				tempRegister &= mask;
+				tempBackRegister &= mask;
 			}
 			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
-			backupPanel[room + ADDR_STATUS] = tempRegister;
+			backupPanel[room + ADDR_STATUS] = tempBackRegister;
 		}
 
 		@Override
 		public void setModeDry(boolean modeDry) {
 			// TODO Auto-generated method stub
 			int mask = 1 << 2;
-			int tempRegister = backupPanel[room + ADDR_STATUS];
+			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset), tempBackRegister = backupPanel[room + ADDR_STATUS];
 			if(modeDry){
 				tempRegister |= mask;
+				tempBackRegister |= mask;
 			}else{
 				mask = ~mask;
 				mask &= 0xff;
 				tempRegister &= mask;
+				tempBackRegister &= mask;
 			}
 			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
-			backupPanel[room + ADDR_STATUS] = tempRegister;
+			backupPanel[room + ADDR_STATUS] = tempBackRegister;
 		}
 
 		@Override
 		public void setTimerSet(boolean timerSet) {
 			// TODO Auto-generated method stub
 			int mask = 1 << 3;
-			int tempRegister = backupPanel[room + ADDR_STATUS];
+			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset), tempBackRegister = backupPanel[room + ADDR_STATUS];
 			if(timerSet){
 				tempRegister |= mask;
+				tempBackRegister |= mask;
 			}else{
 				mask = ~mask;
 				mask &= 0xff;
 				tempRegister &= mask;
+				tempBackRegister &= mask;
 			}
 			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
-			backupPanel[room + ADDR_STATUS] = tempRegister;
+			backupPanel[room + ADDR_STATUS] = tempBackRegister;
 		}
 
 		@Override
 		public void setHumidSet(boolean humidSet) {
 			// TODO Auto-generated method stub
 			int mask = 1 << 4;
-			int tempRegister = backupPanel[room + ADDR_STATUS];
+			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset), tempBackRegister = backupPanel[room + ADDR_STATUS];
 			if(humidSet){
 				tempRegister |= mask;
+				tempBackRegister |= mask;
 			}else{
 				mask = ~mask;
 				mask &= 0xff;
 				tempRegister &= mask;
+				tempBackRegister &= mask;
 			}
 			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
-			backupPanel[room + ADDR_STATUS] = tempRegister;
+			backupPanel[room + ADDR_STATUS] = tempBackRegister;
 		}
 
 		@Override
 		public void setHighTempWarn(boolean highTempWarn) {
 			// TODO Auto-generated method stub
 			int mask = 1 << 5;
-			int tempRegister = backupPanel[room + ADDR_STATUS];
+			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset), tempBackRegister = backupPanel[room + ADDR_STATUS];
 			if(highTempWarn){
 				tempRegister |= mask;
+				tempBackRegister |= mask;
 			}else{
 				mask = ~mask;
 				mask &= 0xff;
 				tempRegister &= mask;
+				tempBackRegister &= mask;
 			}
 			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
-			backupPanel[room + ADDR_STATUS] = tempRegister;
+			backupPanel[room + ADDR_STATUS] = tempBackRegister;
 		}
 
 		@Override
 		public void setTempWarn(boolean tempWarn) {
 			// TODO Auto-generated method stub
 			int mask = 1 << 6;
-			int tempRegister = backupPanel[room + ADDR_STATUS];
+			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset), tempBackRegister = backupPanel[room + ADDR_STATUS];
 			if(tempWarn){
 				tempRegister |= mask;
+				tempBackRegister |= mask;
 			}else{
 				mask = ~mask;
 				mask &= 0xff;
 				tempRegister &= mask;
+				tempBackRegister &= mask;
 			}
 			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
-			backupPanel[room + ADDR_STATUS] = tempRegister;
+			backupPanel[room + ADDR_STATUS] = tempBackRegister;
 		}
 
 		@Override
 		public void setLive(boolean live) {
 			// TODO Auto-generated method stub
 			int mask = 1 << 7;
-			int tempRegister = backupPanel[room + ADDR_STATUS];
+			int tempRegister = modbusSlave.getResgister(ADDR_STATUS + offset), tempBackRegister = backupPanel[room + ADDR_STATUS];
 			if(live){
 				tempRegister |= mask;
+				tempBackRegister |= mask;
 			}else{
 				mask = ~mask;
 				mask &= 0xff;
 				tempRegister &= mask;
+				tempBackRegister &= mask;
 			}
 			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
-			backupPanel[room + ADDR_STATUS] = tempRegister;
+			backupPanel[room + ADDR_STATUS] = tempBackRegister;
 		}
 
 		@Override

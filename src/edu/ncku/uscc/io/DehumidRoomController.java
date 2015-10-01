@@ -371,7 +371,8 @@ public class DehumidRoomController extends Thread implements
 
 		// ask panel its mode
 		while (panel.isOn()) {
-			//這段目前有bug 該方法只回傳false 裡面的值會是 131 != 131 133 != 133 表示值有改但卻連備份的一起改導致只傳false
+			// 這段目前有bug 該方法只回傳false 裡面的值會是 131 != 131 133 != 133
+			// 表示值有改但卻連備份的一起改導致只傳false
 			if (dataStoreManager.isPanelModeChange(offsetRoomIndex)) {
 				if (panel.isModeDehumid()) {
 					txBuf[0] = (byte) PANEL_CMD_DEHUMID_MODE;
@@ -390,7 +391,7 @@ public class DehumidRoomController extends Thread implements
 			}
 
 			if (rxBuf == PANEL_REP_DEHUMID) {
-				
+
 				panel.setModeDehumid(true);
 				panel.setModeDry(false);
 				panel.setLive(true);
@@ -402,6 +403,15 @@ public class DehumidRoomController extends Thread implements
 				panel.setModeDry(true);
 				panel.setLive(true);
 				Log.info(String.format("Panel %d is dry clothes mode.",
+						offsetRoomIndex));
+				break;
+			} else if (rxBuf == PANEL_REP_OK) {
+
+				boolean dehumid_mode = (txBuf[0] == (byte) PANEL_CMD_DEHUMID_MODE);
+				panel.setModeDehumid(dehumid_mode);
+				panel.setModeDry(!dehumid_mode);
+				panel.setLive(true);
+				Log.info(String.format("Panel %d changes mode.",
 						offsetRoomIndex));
 				break;
 			} else {
@@ -568,7 +578,7 @@ public class DehumidRoomController extends Thread implements
 			} else {
 				return;
 			}
-		}else{
+		} else {
 			return;
 		}
 
