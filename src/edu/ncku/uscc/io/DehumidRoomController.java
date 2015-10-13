@@ -55,6 +55,9 @@ public class DehumidRoomController extends Thread implements
 	private static final int DEHUMID_REP_OK = 0x55;
 	private static final int DEHUMID_REP_HIGH_TEMP_ABNORMAL = 0x56;
 	private static final int DEHUMID_REP_DEFROST_TEMP_ABNORMAL = 0x57;
+	private static final int DEHUMID_REP_DEHUMID_ABNORMAL = 0x58;
+	private static final int DEHUMID_REP_FAN_ABNORMAL = 0x59;
+	private static final int DEHUMID_REP_COMPRESSOR_ABNORMAL = 0x5A;
 
 	private static final int DEHUMIDIFIERS_A_ROOM = 8;
 
@@ -714,6 +717,9 @@ public class DehumidRoomController extends Thread implements
 		case DEHUMID_REP_OK:
 			dehumidifier.setHighTempWarn(false);
 			dehumidifier.setTempWarn(false);
+			dehumidifier.setHumidWarn(true);
+			dehumidifier.setFanWarn(true);
+			dehumidifier.setCompressorWarn(true);
 			dehumidifier.setLive(true);
 			checkRates[did] = INITIAL_RATE;
 			return true;
@@ -731,6 +737,30 @@ public class DehumidRoomController extends Thread implements
 			checkRates[did] = INITIAL_RATE;
 			Log.warn(String
 					.format("The dehumidifier %d in room %d acks defrost temp abnormal.",
+							did, offsetRoomIndex));
+			return true;
+		case DEHUMID_REP_DEHUMID_ABNORMAL:
+			dehumidifier.setHumidWarn(true);
+			dehumidifier.setLive(true);
+			checkRates[did] = INITIAL_RATE;
+			Log.warn(String
+					.format("The dehumidifier %d in room %d acks dehumid abnormal.",
+							did, offsetRoomIndex));
+			return true;
+		case DEHUMID_REP_FAN_ABNORMAL:
+			dehumidifier.setFanWarn(true);
+			dehumidifier.setLive(true);
+			checkRates[did] = INITIAL_RATE;
+			Log.warn(String
+					.format("The dehumidifier %d in room %d acks fan abnormal.",
+							did, offsetRoomIndex));
+			return true;
+		case DEHUMID_REP_COMPRESSOR_ABNORMAL:
+			dehumidifier.setCompressorWarn(true);
+			dehumidifier.setLive(true);
+			checkRates[did] = INITIAL_RATE;
+			Log.warn(String
+					.format("The dehumidifier %d in room %d acks compressor abnormal.",
 							did, offsetRoomIndex));
 			return true;
 		default:
