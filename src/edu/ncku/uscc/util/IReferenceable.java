@@ -16,6 +16,14 @@ public interface IReferenceable {
 	public void setHighTempWarn(boolean highTempWarn);
 	public boolean isTempWarning();
 	public void setTempWarn(boolean tempWarn);
+	
+	public boolean isHumidWarning();
+	public void setHumidWarn(boolean HumidWarn);
+	public boolean isFanWarning();
+	public void setFanWarn(boolean FanWarn);
+	public boolean isCompressorWarning();
+	public void setCompressorWarn(boolean CompressorWarn);
+	
 	public boolean isLive();
 	public void setLive(boolean live);
 	public int getHumid();
