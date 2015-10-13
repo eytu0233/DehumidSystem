@@ -717,9 +717,9 @@ public class DehumidRoomController extends Thread implements
 		case DEHUMID_REP_OK:
 			dehumidifier.setHighTempWarn(false);
 			dehumidifier.setTempWarn(false);
-			dehumidifier.setHumidWarn(true);
-			dehumidifier.setFanWarn(true);
-			dehumidifier.setCompressorWarn(true);
+			dehumidifier.setHumidWarn(false);
+			dehumidifier.setFanWarn(false);
+			dehumidifier.setCompressorWarn(false);
 			dehumidifier.setLive(true);
 			checkRates[did] = INITIAL_RATE;
 			return true;
