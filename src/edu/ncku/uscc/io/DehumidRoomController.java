@@ -28,10 +28,15 @@ public class DehumidRoomController extends Thread implements
 	private static final int PANEL_CMD_START = 0x85;
 	private static final int PANEL_CMD_SHUTDOWM = 0x86;
 	private static final int PANEL_CMD_TEMP_ABNORMAL = 0x87;
-	private static final int PANEL_CMD_DEFROST = 0x88;
+	private static final int PANEL_CMD_DEFROST_TEMP_ABNORMAL = 0x88;
 	private static final int PANEL_CMD_MINUS_TIMER = 0x89;
 	private static final int PANEL_CMD_DEHUMID_MODE = 0x8A;
 	private static final int PANEL_CMD_DRYCLOTHES_MODE = 0x8B;
+	private static final int PANEL_CMD_HUMID_ABNORMAL = 0x8D;
+	private static final int PANEL_CMD_FAN_ABNORMAL = 0x8E;
+	private static final int PANEL_CMD_COMPRESSOR_ABNORMAL = 0x8F;
+	private static final int PANEL_CMD_SETTING_HUMID = 0xCE;
+	private static final int PANEL_CMD_SETTING_TIMER = 0xCF;
 	private static final int PANEL_CMD_HUMID = 0x68;
 
 	private static final int PANEL_REP_ON = 0x30;
@@ -469,7 +474,12 @@ public class DehumidRoomController extends Thread implements
 
 		// ask panel its humidity set
 		while (panel.isOn()) {
-			txBuf[0] = (byte) PANEL_CMD_HUMID_SET;
+			if (dataStoreManager.isPanelDehumiditySetChange(offsetRoomIndex)) {
+				txBuf[0] = (byte) PANEL_CMD_SETTING_HUMID;
+			} else {
+				txBuf[0] = (byte) PANEL_CMD_HUMID_SET;
+			}
+
 			rxBuf = -1;
 			if (output == null)
 				return;
@@ -478,7 +488,32 @@ public class DehumidRoomController extends Thread implements
 				lock.wait(TIME_OUT);
 			}
 
-			if (rxBuf >= 0) {
+			if (rxBuf == PANEL_REP_OK) {
+
+				Log.info(String.format(
+						"Start to change set of humidity of Panel %d",
+						offsetRoomIndex, (int) rxBuf));
+
+				panel.setLive(true);
+				int humidSet = panel.getHumidSet();
+				txBuf[0] = (byte) humidSet;
+				rxBuf = -1;
+				if (output == null)
+					return;
+				output.write(txBuf);
+				synchronized (lock) {
+					lock.wait(TIME_OUT);
+				}
+
+				if (rxBuf == PANEL_REP_OK) {
+					panel.setLive(true);
+					panel.setHumidSetValue(humidSet);
+					Log.info(String.format(
+							"Change set of humidity of Panel %d success",
+							offsetRoomIndex, (int) rxBuf));
+					break;
+				}
+			} else if (rxBuf >= 0) {
 				panel.setHumidSetValue((int) rxBuf);
 				panel.setLive(true);
 				Log.info(String.format("The humidity set of Panel %d is %d.",
@@ -559,30 +594,42 @@ public class DehumidRoomController extends Thread implements
 				}
 			}
 		}
-		
 
 		IReferenceable dehumidifier;
-		
-		// synchronize high temp error and defrost error
+
+		// synchronize errors
 		while (panel.isOn()) {
-			
+
 			boolean abnormal = false;
 			for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; did++) {
 				dehumidifier = dataStoreManager.getDehumidifier(
 						offsetRoomIndex, did);
 				if (dehumidifier.isHighTempWarning()) {
-					txBuf[0] = (byte) PANEL_CMD_TEMP_ABNORMAL;					
+					txBuf[0] = (byte) PANEL_CMD_TEMP_ABNORMAL;
 					abnormal = true;
 					break;
 				} else if (dehumidifier.isTempWarning()) {
-					txBuf[0] = (byte) PANEL_CMD_DEFROST;
+					txBuf[0] = (byte) PANEL_CMD_DEFROST_TEMP_ABNORMAL;
 					abnormal = true;
 					break;
-				} 
+				} else if (dehumidifier.isHumidWarning()) {
+					txBuf[0] = (byte) PANEL_CMD_HUMID_ABNORMAL;
+					abnormal = true;
+					break;
+				} else if (dehumidifier.isFanWarning()) {
+					txBuf[0] = (byte) PANEL_CMD_FAN_ABNORMAL;
+					abnormal = true;
+					break;
+				} else if (dehumidifier.isCompressorWarning()) {
+					txBuf[0] = (byte) PANEL_CMD_COMPRESSOR_ABNORMAL;
+					abnormal = true;
+					break;
+				}
 			}
-			
-			if(!abnormal) break;
-						
+
+			if (!abnormal)
+				break;
+
 			rxBuf = -1;
 			if (output == null)
 				return;
@@ -593,20 +640,22 @@ public class DehumidRoomController extends Thread implements
 
 			if (rxBuf == PANEL_REP_OK) {
 				if (txBuf[0] == (byte) PANEL_CMD_TEMP_ABNORMAL) {
-					panel.setHighTempWarn(true);					
-					Log.debug(String.format("Panel %d is high temperature abnormal.",
+					panel.setHighTempWarn(true);
+					Log.debug(String.format(
+							"Panel %d is high temperature abnormal.",
 							offsetRoomIndex));
-				} else if (txBuf[0] == (byte) PANEL_CMD_DEFROST){
+				} else if (txBuf[0] == (byte) PANEL_CMD_DEFROST_TEMP_ABNORMAL) {
 					panel.setTempWarn(true);
-					Log.debug(String.format("Panel %d is defrost temperature abnormal.",
+					Log.debug(String.format(
+							"Panel %d is defrost temperature abnormal.",
 							offsetRoomIndex));
 				}
 				panel.setLive(true);
 				break;
 			} else {
 				panel.setLive(false);
-				Log.warn(String.format("Panel %d is not live.",
-						offsetRoomIndex));
+				Log.warn(String
+						.format("Panel %d is not live.", offsetRoomIndex));
 				if (--err <= 0) {
 					Log.info("Timeout or data is not expected.");
 					return;
@@ -614,7 +663,6 @@ public class DehumidRoomController extends Thread implements
 			}
 
 		}
-		
 
 		// synchronize humidity in the room
 		int humid = 0, avgHumid = 0;
@@ -702,8 +750,8 @@ public class DehumidRoomController extends Thread implements
 		byte[] txBuf = new byte[1];
 		int offsetRoomIndex = roomIndex - ROOM_ID_MIN;
 		txBuf[0] = (byte) ((roomIndex << 3) + did);
-		IReferenceable dehumidifier = dataStoreManager.getDehumidifier(roomIndex
-				- ROOM_ID_MIN, did);
+		IReferenceable dehumidifier = dataStoreManager.getDehumidifier(
+				roomIndex - ROOM_ID_MIN, did);
 
 		rxBuf = -1;
 		if (output == null)
@@ -743,25 +791,25 @@ public class DehumidRoomController extends Thread implements
 			dehumidifier.setHumidWarn(true);
 			dehumidifier.setLive(true);
 			checkRates[did] = INITIAL_RATE;
-			Log.warn(String
-					.format("The dehumidifier %d in room %d acks dehumid abnormal.",
-							did, offsetRoomIndex));
+			Log.warn(String.format(
+					"The dehumidifier %d in room %d acks dehumid abnormal.",
+					did, offsetRoomIndex));
 			return true;
 		case DEHUMID_REP_FAN_ABNORMAL:
 			dehumidifier.setFanWarn(true);
 			dehumidifier.setLive(true);
 			checkRates[did] = INITIAL_RATE;
-			Log.warn(String
-					.format("The dehumidifier %d in room %d acks fan abnormal.",
-							did, offsetRoomIndex));
+			Log.warn(String.format(
+					"The dehumidifier %d in room %d acks fan abnormal.", did,
+					offsetRoomIndex));
 			return true;
 		case DEHUMID_REP_COMPRESSOR_ABNORMAL:
 			dehumidifier.setCompressorWarn(true);
 			dehumidifier.setLive(true);
 			checkRates[did] = INITIAL_RATE;
-			Log.warn(String
-					.format("The dehumidifier %d in room %d acks compressor abnormal.",
-							did, offsetRoomIndex));
+			Log.warn(String.format(
+					"The dehumidifier %d in room %d acks compressor abnormal.",
+					did, offsetRoomIndex));
 			return true;
 		default:
 			dehumidifier.setLive(false);

@@ -35,7 +35,7 @@ public class DataStoreManager {
 		}
 	}
 	
-	public boolean isChnage(int room) {
+	public boolean isChange(int room) {
 		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
 		int backupStatus = backupPanel[room + ADDR_STATUS];
 		return backupStatus != nowStatus;
@@ -44,7 +44,7 @@ public class DataStoreManager {
 	public boolean isPanelONOFFChange(int room) {
 		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
 		int backupStatus = backupPanel[room + ADDR_STATUS];
-		int mask = 0x01;
+		int mask = 0x01 << 0;
 		return (backupStatus & mask) != (nowStatus & mask);
 	}
 	
@@ -58,28 +58,14 @@ public class DataStoreManager {
 	public boolean isPanelTimerSetFlagChange(int room) {
 		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
 		int backupStatus = backupPanel[room + ADDR_STATUS];
-		int mask = 0x08;
+		int mask = 0x01 << 3;
 		return (backupStatus & mask) != (nowStatus & mask);
 	}
 	
 	public boolean isPanelDehumiditySetFlagChange(int room) {
 		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
 		int backupStatus = backupPanel[room + ADDR_STATUS];
-		int mask = 0x10;
-		return (backupStatus & mask) != (nowStatus & mask);
-	}
-	
-	public boolean isPanelHighTempAbnormalChange(int room) {
-		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
-		int backupStatus = backupPanel[room + ADDR_STATUS];
-		int mask = 0x20;
-		return (backupStatus & mask) != (nowStatus & mask);
-	}
-	
-	public boolean isPanelTempAbnormalChange(int room) {
-		int nowStatus = modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
-		int backupStatus = backupPanel[room + ADDR_STATUS];
-		int mask = 0x40;
+		int mask = 0x01 << 4;
 		return (backupStatus & mask) != (nowStatus & mask);
 	}
 	
