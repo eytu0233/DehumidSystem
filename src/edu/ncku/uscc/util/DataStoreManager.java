@@ -220,7 +220,7 @@ public class DataStoreManager {
 				tempRegister &= mask;				
 				tempBackRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 			backupPanel[room + ADDR_STATUS] = tempBackRegister;
 		}
 
@@ -239,7 +239,7 @@ public class DataStoreManager {
 				tempRegister &= mask;
 				tempBackRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 			backupPanel[room + ADDR_STATUS] = tempBackRegister;
 		}
 
@@ -257,7 +257,7 @@ public class DataStoreManager {
 				tempRegister &= mask;
 				tempBackRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 			backupPanel[room + ADDR_STATUS] = tempBackRegister;
 		}
 
@@ -275,7 +275,7 @@ public class DataStoreManager {
 				tempRegister &= mask;
 				tempBackRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 			backupPanel[room + ADDR_STATUS] = tempBackRegister;
 		}
 
@@ -293,7 +293,7 @@ public class DataStoreManager {
 				tempRegister &= mask;
 				tempBackRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 			backupPanel[room + ADDR_STATUS] = tempBackRegister;
 		}
 
@@ -311,7 +311,7 @@ public class DataStoreManager {
 				tempRegister &= mask;
 				tempBackRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 			backupPanel[room + ADDR_STATUS] = tempBackRegister;
 		}
 
@@ -329,7 +329,7 @@ public class DataStoreManager {
 				tempRegister &= mask;
 				tempBackRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 			backupPanel[room + ADDR_STATUS] = tempBackRegister;
 		}
 		
@@ -347,7 +347,7 @@ public class DataStoreManager {
 				tempRegister &= mask;
 				tempBackRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 			backupPanel[room + ADDR_STATUS] = tempBackRegister;
 		}
 
@@ -365,7 +365,7 @@ public class DataStoreManager {
 				tempRegister &= mask;
 				tempBackRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 			backupPanel[room + ADDR_STATUS] = tempBackRegister;
 		}
 
@@ -383,7 +383,7 @@ public class DataStoreManager {
 				tempRegister &= mask;
 				tempBackRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 			backupPanel[room + ADDR_STATUS] = tempBackRegister;
 		}
 
@@ -401,28 +401,28 @@ public class DataStoreManager {
 				tempRegister &= mask;
 				tempBackRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 			backupPanel[room + ADDR_STATUS] = tempBackRegister;
 		}
 
 		@Override
 		public void setHumid(int humid) {
 			// TODO Auto-generated method stub
-			modbusSlave.setResgister(ADDR_HUMID + offset, humid);
+			modbusSlave.setRegister(ADDR_HUMID + offset, humid);
 			backupPanel[room + ADDR_HUMID] = humid;
 		}
 
 		@Override
 		public void setHumidSetValue(int humidSet) {
 			// TODO Auto-generated method stub
-			modbusSlave.setResgister(ADDR_HUMID_SET + offset, humidSet);
+			modbusSlave.setRegister(ADDR_HUMID_SET + offset, humidSet);
 			backupPanel[room + ADDR_HUMID_SET] = humidSet;
 		}
 
 		@Override
 		public void setTimerSetValue(int timerSet) {
 			// TODO Auto-generated method stub
-			modbusSlave.setResgister(ADDR_TIMER_SET + offset, timerSet);
+			modbusSlave.setRegister(ADDR_TIMER_SET + offset, timerSet);
 			backupPanel[room + ADDR_TIMER_SET] = timerSet;
 		}
 
@@ -555,7 +555,7 @@ public class DataStoreManager {
 				mask &= 0xff;
 				tempRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 		}
 
 		@Override
@@ -570,7 +570,7 @@ public class DataStoreManager {
 				mask &= 0xff;
 				tempRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 		}
 
 		@Override
@@ -585,7 +585,7 @@ public class DataStoreManager {
 				mask &= 0xff;
 				tempRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 		}
 
 		@Override
@@ -600,7 +600,7 @@ public class DataStoreManager {
 				mask &= 0xff;
 				tempRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 		}
 
 		@Override
@@ -615,7 +615,7 @@ public class DataStoreManager {
 				mask &= 0xff;
 				tempRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 		}
 
 		@Override
@@ -630,7 +630,7 @@ public class DataStoreManager {
 				mask &= 0xff;
 				tempRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 		}
 
 		@Override
@@ -645,7 +645,7 @@ public class DataStoreManager {
 				mask &= 0xff;
 				tempRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 		}
 
 		@Override
@@ -660,7 +660,7 @@ public class DataStoreManager {
 				mask &= 0xff;
 				tempRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 		}
 
 		@Override
@@ -675,7 +675,7 @@ public class DataStoreManager {
 				mask &= 0xff;
 				tempRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 		}
 
 		@Override
@@ -690,7 +690,7 @@ public class DataStoreManager {
 				mask &= 0xff;
 				tempRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 		}
 
 		@Override
@@ -705,25 +705,25 @@ public class DataStoreManager {
 				mask &= 0xff;
 				tempRegister &= mask;
 			}
-			modbusSlave.setResgister(ADDR_STATUS + offset, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 		}
 
 		@Override
 		public void setHumid(int humid) {
 			// TODO Auto-generated method stub
-			modbusSlave.setResgister(ADDR_HUMID + offset, humid);
+			modbusSlave.setRegister(ADDR_HUMID + offset, humid);
 		}
 
 		@Override
 		public void setHumidSetValue(int humidSet) {
 			// TODO Auto-generated method stub
-			modbusSlave.setResgister(ADDR_HUMID_SET + offset, humidSet);
+			modbusSlave.setRegister(ADDR_HUMID_SET + offset, humidSet);
 		}
 
 		@Override
 		public void setTimerSetValue(int timerSet) {
 			// TODO Auto-generated method stub
-			modbusSlave.setResgister(ADDR_TIMER_SET + offset, timerSet);
+			modbusSlave.setRegister(ADDR_TIMER_SET + offset, timerSet);
 		}
 	}
 

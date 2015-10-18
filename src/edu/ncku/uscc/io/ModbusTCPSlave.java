@@ -24,7 +24,7 @@ public class ModbusTCPSlave {
 		this.port = port;
 	}
 
-	public synchronized void setResgister(int addr, int value)
+	public synchronized void setRegister(int addr, int value)
 			throws IllegalAddressException {
 		this.dataStore.setRegister(addr, new SimpleRegister(value));
 	}
