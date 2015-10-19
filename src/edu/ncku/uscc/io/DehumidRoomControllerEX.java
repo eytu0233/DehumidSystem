@@ -16,7 +16,7 @@ import gnu.io.SerialPortEventListener;
 public class DehumidRoomControllerEX extends Thread implements
 		SerialPortEventListener {	
 
-	private static final int DEHUMIDIFIERS_A_ROOM = 8;
+	public static final int DEHUMIDIFIERS_A_ROOM = 8;
 
 	public static final int ROOM_ID_MIN = 2;
 	public static final int ROOM_ID_MAX = 5;
