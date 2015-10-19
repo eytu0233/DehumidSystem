@@ -32,6 +32,7 @@ public class DehumidRoomController extends Thread implements
 	private static final int PANEL_CMD_MINUS_TIMER = 0x89;
 	private static final int PANEL_CMD_DEHUMID_MODE = 0x8A;
 	private static final int PANEL_CMD_DRYCLOTHES_MODE = 0x8B;
+	private static final int PANEL_CMD_MULTIPLE_ABNORMAL = 0x8C;
 	private static final int PANEL_CMD_HUMID_ABNORMAL = 0x8D;
 	private static final int PANEL_CMD_FAN_ABNORMAL = 0x8E;
 	private static final int PANEL_CMD_COMPRESSOR_ABNORMAL = 0x8F;
@@ -531,7 +532,12 @@ public class DehumidRoomController extends Thread implements
 
 		// ask panel its timer
 		while (panel.isOn()) {
-			txBuf[0] = (byte) PANEL_CMD_TIMER_SET;
+			if (dataStoreManager.isPanelTimerSetChange(offsetRoomIndex)) {
+				txBuf[0] = (byte) PANEL_CMD_SETTING_TIMER;
+			} else {
+				txBuf[0] = (byte) PANEL_CMD_TIMER_SET;
+			}
+			
 			rxBuf = -1;
 			if (output == null)
 				return;
@@ -540,7 +546,30 @@ public class DehumidRoomController extends Thread implements
 				lock.wait(TIME_OUT);
 			}
 
-			if (rxBuf >= 0) {
+			if (rxBuf == PANEL_REP_OK) {
+				Log.info(String.format(
+						"Start to change set of timer of Panel %d",
+						offsetRoomIndex, (int) rxBuf));
+				panel.setLive(true);
+				int timeSet = panel.getTimerSet();
+				txBuf[0] = (byte) timeSet;
+				rxBuf = -1;
+				if (output == null)
+					return;
+				output.write(txBuf);
+				synchronized (lock) {
+					lock.wait(TIME_OUT);
+				}
+
+				if (rxBuf == PANEL_REP_OK) {
+					panel.setLive(true);
+					panel.setTimerSetValue(timeSet);
+					Log.info(String.format(
+							"Change set of timer of Panel %d success",
+							offsetRoomIndex, (int) rxBuf));
+					break;
+				}
+			} else if (rxBuf >= 0) {
 				panel.setTimerSetValue(rxBuf);
 				panel.setLive(true);
 				Log.info(String.format("The timer set of Panel %d is %d.",
@@ -559,9 +588,7 @@ public class DehumidRoomController extends Thread implements
 		// set panel timer
 		if (panel.getTimerSet() > 0) {
 			if (panelTimerThread.getBackupTimerSet() != panel.getTimerSet()) {
-
 				panelTimerThread.newScheduleThread(panel.getTimerSet());
-
 			} else if (panelTimerThread.getTimerMinusOneFlag()) {
 				while (panel.isOn()) {
 					txBuf[0] = (byte) PANEL_CMD_MINUS_TIMER;
@@ -575,13 +602,10 @@ public class DehumidRoomController extends Thread implements
 
 					if (rxBuf == PANEL_REP_OK) {
 						panelTimerThread.backpuTimerMinusOne();
-						panel.setTimerSetValue(panelTimerThread
-								.getBackupTimerSet());
+						panel.setTimerSetValue(panelTimerThread.getBackupTimerSet());
 						panelTimerThread.setTimerMinusOneFlag(false);
-						Log.info(String
-								.format("The timer set of Panel %d minus one hour. : %d : %d",
-										offsetRoomIndex, panel.getTimerSet(),
-										panelTimerThread.getBackupTimerSet()));
+						Log.info(String.format("The timer set of Panel %d minus one hour. : %d",
+										offsetRoomIndex, panel.getTimerSet()));
 						break;
 					} else {
 						panel.setLive(false);
@@ -600,35 +624,32 @@ public class DehumidRoomController extends Thread implements
 		// synchronize errors
 		while (panel.isOn()) {
 
-			boolean abnormal = false;
+			byte countAbnormal = 0;
 			for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; did++) {
 				dehumidifier = dataStoreManager.getDehumidifier(
 						offsetRoomIndex, did);
 				if (dehumidifier.isHighTempWarning()) {
 					txBuf[0] = (byte) PANEL_CMD_TEMP_ABNORMAL;
-					abnormal = true;
-					break;
+					countAbnormal++;
 				} else if (dehumidifier.isTempWarning()) {
 					txBuf[0] = (byte) PANEL_CMD_DEFROST_TEMP_ABNORMAL;
-					abnormal = true;
-					break;
+					countAbnormal++;
 				} else if (dehumidifier.isHumidWarning()) {
 					txBuf[0] = (byte) PANEL_CMD_HUMID_ABNORMAL;
-					abnormal = true;
-					break;
+					countAbnormal++;
 				} else if (dehumidifier.isFanWarning()) {
 					txBuf[0] = (byte) PANEL_CMD_FAN_ABNORMAL;
-					abnormal = true;
-					break;
+					countAbnormal++;
 				} else if (dehumidifier.isCompressorWarning()) {
 					txBuf[0] = (byte) PANEL_CMD_COMPRESSOR_ABNORMAL;
-					abnormal = true;
-					break;
+					countAbnormal++;
 				}
 			}
 
-			if (!abnormal)
+			if (countAbnormal == 0)
 				break;
+			else if (countAbnormal > 1)
+				txBuf[0] = (byte) PANEL_CMD_MULTIPLE_ABNORMAL;
 
 			rxBuf = -1;
 			if (output == null)
@@ -649,6 +670,26 @@ public class DehumidRoomController extends Thread implements
 					Log.debug(String.format(
 							"Panel %d is defrost temperature abnormal.",
 							offsetRoomIndex));
+				} else if (txBuf[0] == (byte) PANEL_CMD_HUMID_ABNORMAL) {
+					panel.setHumidWarn(true);
+					Log.debug(String.format(
+							"Panel %d is humid abnormal.",
+							offsetRoomIndex));
+				} else if (txBuf[0] == (byte) PANEL_CMD_FAN_ABNORMAL) {
+					panel.setFanWarn(true);
+					Log.debug(String.format(
+							"Panel %d is fan abnormal.",
+							offsetRoomIndex));
+				} else if (txBuf[0] == (byte) PANEL_CMD_COMPRESSOR_ABNORMAL) {
+					panel.setCompressorWarn(true);
+					Log.debug(String.format(
+							"Panel %d is compressor abnormal.",
+							offsetRoomIndex));
+				} else if (txBuf[0] == (byte) PANEL_CMD_MULTIPLE_ABNORMAL) {
+//					panel.setMultipleWarn(true);
+					Log.debug(String.format(
+							"Panel %d is multiple abnormal.",
+							offsetRoomIndex));
 				}
 				panel.setLive(true);
 				break;
@@ -661,7 +702,6 @@ public class DehumidRoomController extends Thread implements
 					return;
 				}
 			}
-
 		}
 
 		// synchronize humidity in the room
