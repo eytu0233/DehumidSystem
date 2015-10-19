@@ -1,17 +1,21 @@
 package edu.ncku.uscc.io;
 
+import java.io.OutputStream;
+
 import edu.ncku.uscc.util.DataStoreManager;
 import edu.ncku.uscc.util.IReferenceable;
 
-public class SYNPanelPowerRequest extends AbstractRequest {
+public class SYNPanelPowerRequest extends AbstractRequest implements IPanelReqSet{
+
+	public SYNPanelPowerRequest(DataStoreManager dataStoreManager,
+			OutputStream output, int roomIndex) {
+		super(dataStoreManager, output, roomIndex);
+		// TODO Auto-generated constructor stub
+	}
 
 	@Override
 	public void requestEvent() throws Exception {
 		// TODO Auto-generated method stub
-		int offsetRoomIndex = controller.getRoomIndex()
-				- DehumidRoomControllerEX.ROOM_ID_MIN;
-
-		DataStoreManager dataStoreManager = controller.getDataStoreManager();
 		IReferenceable panel = dataStoreManager.getPanel(offsetRoomIndex);
 
 		byte[] txBuf = new byte[1];

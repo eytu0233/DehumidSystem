@@ -4,15 +4,17 @@ import edu.ncku.uscc.util.DataStoreManager;
 import edu.ncku.uscc.util.IReferenceable;
 import edu.ncku.uscc.util.Log;
 
-public class SYNPanelPowerReply extends AbstractReply {
+public class SYNPanelPowerReply extends AbstractReply implements IPanelRepSet{
+
+	public SYNPanelPowerReply(DehumidRoomControllerEX controller,
+			DataStoreManager dataStoreManager, int roomIndex) {
+		super(controller, dataStoreManager, roomIndex);
+		// TODO Auto-generated constructor stub
+	}
 
 	@Override
 	public void replyEvent(Byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
-		int offsetRoomIndex = controller.getRoomIndex()
-				- DehumidRoomControllerEX.ROOM_ID_MIN;
-
-		DataStoreManager dataStoreManager = controller.getDataStoreManager();
 		IReferenceable panel = dataStoreManager.getPanel(offsetRoomIndex);
 
 		if (rxBuf == PANEL_REP_ON) {
@@ -41,8 +43,6 @@ public class SYNPanelPowerReply extends AbstractReply {
 	@Override
 	public void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
-		int offsetRoomIndex = controller.getRoomIndex()
-				- DehumidRoomControllerEX.ROOM_ID_MIN;
 		Log.warn(String.format("Panel %d is not live.", offsetRoomIndex));
 		controller.nextCmd(cmd);
 	}

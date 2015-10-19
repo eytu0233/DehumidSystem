@@ -14,9 +14,7 @@ import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
 public class DehumidRoomControllerEX extends Thread implements
-		SerialPortEventListener {
-
-	private static final String LCK_REMOVE_CMD = "sudo rm -f /var/lock/LCK..ttyUSB";
+		SerialPortEventListener {	
 
 	private static final int DEHUMIDIFIERS_A_ROOM = 8;
 
@@ -28,7 +26,7 @@ public class DehumidRoomControllerEX extends Thread implements
 	
 	private final LinkedList<Command> cmdQueue = new LinkedList<Command>();
 	
-	private final LinkedList<Command> scanRoomQueue = new LinkedList<Command>();
+	private final LinkedList<ScanRoomCmd> scanRoomQueue = new LinkedList<ScanRoomCmd>();
 
 	/** The instance of SerialPort class */
 	private SerialPort serialPort;
@@ -68,6 +66,10 @@ public class DehumidRoomControllerEX extends Thread implements
 		this.dataStoreManager = dataStoreManager;
 		this.serialPort = serialPort;
 	}
+	
+	public SerialPort getSerialPort(){
+		return serialPort;
+	}
 
 	public DataStoreManager getDataStoreManager() {
 		return dataStoreManager;
@@ -75,6 +77,10 @@ public class DehumidRoomControllerEX extends Thread implements
 	
 	public OutputStream getOutputStream(){
 		return output;
+	}
+	
+	public void setRoomIndex(int roomIndex){
+		this.roomIndex = roomIndex;
 	}
 	
 	public int getRoomIndex(){
@@ -93,12 +99,16 @@ public class DehumidRoomControllerEX extends Thread implements
 		return lock;
 	}
 	
-	public void addQueueLast(Command cmd){
+	public void addQueue(Command cmd){
 		cmdQueue.add(cmd);
 	}
 	
 	public void jumpQueue(Command cmd){
 		cmdQueue.addFirst(cmd);
+	}
+	
+	public void addScanRoomQueue(ScanRoomCmd cmd){
+		scanRoomQueue.add(cmd);
 	}
 	
 	public void nextCmd(Command cmd) throws Exception{
@@ -109,7 +119,7 @@ public class DehumidRoomControllerEX extends Thread implements
 		if(currentCmd == null) throw new Exception();
 	}
 	
-	public void nextScanRoomCmd(Command cmd) throws Exception{
+	public void nextScanRoomCmd(ScanRoomCmd cmd) throws Exception{
 		if(cmd != null) scanRoomQueue.add(cmd);
 		
 		currentCmd = (scanRoomQueue != null)?scanRoomQueue.pollFirst():null;
@@ -135,64 +145,17 @@ public class DehumidRoomControllerEX extends Thread implements
 			;
 
 		for (int roomScanIndex = ROOM_ID_MIN; roomScanIndex <= ROOM_ID_MAX; roomScanIndex++) {
-			for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; did++) {
-				
-				final int finalRoomScanIndex = roomScanIndex, finalDid = did;
-				
-				scanRoomQueue.add(new Command(this, new AbstractRequest() {
-
-					@Override
-					public void requestEvent() throws Exception {
-						// TODO Auto-generated method stub						
-						// Below commands are used to avoid the warnings of RXTXcomm
-						for (int usbIndex = 0; usbIndex < 4; Runtime
-								.getRuntime().exec(LCK_REMOVE_CMD + usbIndex++))
-							;
-						byte[] txBuf = new byte[1];
-						txBuf[0] = (byte) ((finalRoomScanIndex << 3) + finalDid);
-						this.setTxBuf(txBuf);						
-
-						Log.info(String.format("Scan roomIndex : %x in %s",
-								((int) txBuf[0] & 0xff), serialPort.getName()));
-					}
-				}, new AbstractReply(){
-
-					@Override
-					public void replyEvent(Byte rxBuf) {
-						// TODO Auto-generated method stub
-						if (rxBuf == DEHUMID_REP_OK
-								|| rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
-								|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL) {
-							Log.info("Scan room index : " + finalRoomScanIndex);
-							roomIndex = finalRoomScanIndex;
-						}
-					}
-					
-
-					@Override
-					public void ackHandler() throws Exception {
-						// TODO Auto-generated method stub
-						scanRoomQueue.add(cmd);
-						nextCmd(null);
-					}
-
-					@Override
-					public void timeoutHandler() throws Exception {
-						// TODO Auto-generated method stub
-						nextScanRoomCmd(cmd);
-					}
-					
-				}, 1));
+			for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; did++) {				
+				addScanRoomQueue(new ScanRoomCmd(this, roomScanIndex, did, 1));
 			}
 		}
 		
-		addQueueLast(new Command(this, new SYNPanelPowerRequest(), new SYNPanelPowerReply()));
-		addQueueLast(new Command(this, new SYNPanelModeRequeset(), new SYNPanelModeReply()));
-		addQueueLast(new Command(this, new SYNPanelSetStatusRequest(), new SYNPanelSetStatusReply()));
-		addQueueLast(new Command(this, new SYNPanelHumiditySetRequest(), new SYNPanelHumiditySetReply()));
-		addQueueLast(new Command(this, new SYNPanelTimerSetRequest(), new SYNPanelTimerSetReply()));
-		addQueueLast(new Command(this, new SYNPanelAbnormalRequest(), new SYNPanelAbnormalReply()));
-		addQueueLast(new Command(this, new SYNPanelHumidityRequest(), new SYNPanelHumidityReply()));
+		addQueue(new SYNPanelPowerCmd(this));
+		addQueue(new SYNPanelModeCmd(this));
+		addQueue(new SYNPanelHumiditySetCmd(this));
+//		addQueue(new SYNPanelTimerSetCmd(this));
+//		addQueue(new SYNPanelAbnormalCmd(this));
+		addQueue(new SYNPanelHumidityCmd(this));
 //		for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; did++) {
 //			addQueueLast(new Command(this, new SYNPanelPowerRequest(), new SYNPanelPowerReply()));
 //			addQueueLast(new Command(this, new SYNPanelModeRequeset(), new SYNPanelModeReply()));
