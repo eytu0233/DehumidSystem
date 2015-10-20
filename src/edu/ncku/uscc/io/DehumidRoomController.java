@@ -616,6 +616,34 @@ public class DehumidRoomController extends Thread implements
 						}
 					}
 				}
+				
+				//if timer countdown finishing close the panel
+				if (panelTimerThread.getTimerCountdownFinishingFlag()) {
+					while (panel.isOn()) {
+						txBuf[0] = (byte) PANEL_CMD_SHUTDOWM;
+						rxBuf = -1;
+						if (output == null)
+							return;
+						output.write(txBuf);
+						synchronized (lock) {
+							lock.wait(TIME_OUT);
+						}
+
+						if (rxBuf == DEHUMID_CMD_OFF) {
+							panelTimerThread.setTimerCountdownFinishingFlag(false);
+							Log.info(String.format("Panel %d if OFF.",
+											offsetRoomIndex));
+							break;
+						} else {
+							panel.setLive(false);
+							if (--err <= 0) {
+								Log.warn(String.format("Panel %d is not live.",
+										offsetRoomIndex));
+								return;
+							}
+						}
+					}
+				}
 			}
 		}
 
