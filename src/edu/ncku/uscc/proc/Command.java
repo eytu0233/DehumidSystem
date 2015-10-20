@@ -1,4 +1,6 @@
-package edu.ncku.uscc.io;
+package edu.ncku.uscc.proc;
+
+import edu.ncku.uscc.io.DehumidRoomControllerEX;
 
 public class Command {
 
@@ -10,6 +12,7 @@ public class Command {
 
 	private AbstractRequest request;
 	private AbstractReply reply;
+	private Command preCommand;
 	private Command subCommand;
 
 	private int init_tolerance = 2;
@@ -17,7 +20,6 @@ public class Command {
 	private byte txBuf;
 	private byte rxBuf;
 	private boolean skip = false;
-	private boolean ack = false;
 
 	public Command(DehumidRoomControllerEX controller, AbstractRequest request,
 			AbstractReply reply) {
@@ -42,22 +44,27 @@ public class Command {
 	}
 
 	public Command(DehumidRoomControllerEX controller, AbstractRequest request,
-			AbstractReply reply, int tolerance, Command subCommand) {
+			AbstractReply reply, Command preCommand) {
 		super();
 		this.referenceLock = controller.getLock();
 		this.request = request;
 		this.request.setCmd(this);
 		this.reply = reply;
 		this.reply.setCmd(this);
-		this.init_tolerance = tolerance;
-		this.err_tolerance = tolerance;
-		this.subCommand = subCommand;
+		this.preCommand = preCommand;
 	}
 
 	public void startCommand() throws Exception {
 		if (request == null || reply == null) {
 			// throw new NullReplyException();
 			return;
+		}
+		
+		if(preCommand != null) {
+			preCommand.startCommand();
+			if(!preCommand.isAck() || !preCommand.isSkip()){
+				return;
+			}
 		}
 		
 		rxBuf = UNACK;
@@ -70,13 +77,16 @@ public class Command {
 			}
 			reply.replyEvent(rxBuf);
 		}			
+		
+		if(!isAck()) cmdTimeout();
 
-		if (ack || skip) {
+		if (isAck() || skip) {
 			init();
 			reply.ackHandler();
-			if (subCommand != null)
+			if (subCommand != null){
 				subCommand.startCommand();
-		} else if (isShutDown()) {
+			}				
+		} else if (overTolerance()) {
 			init();
 			reply.timeoutHandler();
 		}
@@ -85,7 +95,6 @@ public class Command {
 
 	public void init() {
 		this.skip = false;
-		this.ack = false;
 		this.err_tolerance = init_tolerance;
 		this.subCommand = null;
 	}
@@ -114,19 +123,15 @@ public class Command {
 		return this.skip;
 	}
 
-	public void setAck(boolean ack) {
-		this.ack = ack;
-	}
-
 	public boolean isAck() {
-		return this.ack;
+		return rxBuf != UNACK;
 	}
 
 	public void cmdTimeout() {
 		--err_tolerance;
 	}
 
-	public boolean isShutDown() {
+	public boolean overTolerance() {
 		return err_tolerance <= 0;
 	}
 

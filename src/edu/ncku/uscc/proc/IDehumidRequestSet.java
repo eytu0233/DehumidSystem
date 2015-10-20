@@ -1,6 +1,6 @@
-package edu.ncku.uscc.io;
+package edu.ncku.uscc.proc;
 
-public interface IDehumidReqSet {
+public interface IDehumidRequestSet {
 
 	public static final int DEHUMID_REQ_ON = 0x30;
 	public static final int DEHUMID_REQ_OFF = 0x31;

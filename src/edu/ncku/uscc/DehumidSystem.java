@@ -9,6 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import edu.ncku.uscc.io.DehumidRoomController;
+import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.io.ModbusTCPSlave;
 import edu.ncku.uscc.io.SerialPortDisconnectListener;
 import edu.ncku.uscc.util.DataStoreManager;
@@ -91,7 +92,7 @@ public class DehumidSystem {
 								serialPort.setSerialPortParams(BAUD_RATE, SerialPort.DATABITS_8,
 										SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 								
-								DehumidRoomController dehumid = new DehumidRoomController(dataStoreManager,
+								DehumidRoomControllerEX dehumid = new DehumidRoomControllerEX(dataStoreManager,
 										serialPort);
 								dehumid.addDisconnectListener(new SerialPortDisconnectListener(){
 

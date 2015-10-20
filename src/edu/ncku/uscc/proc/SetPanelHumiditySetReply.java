@@ -1,20 +1,21 @@
-package edu.ncku.uscc.io;
+package edu.ncku.uscc.proc;
 
-import edu.ncku.uscc.util.DataStoreManager;
+import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.IReferenceable;
 import edu.ncku.uscc.util.Log;
 
-public class SetPanelHumidityReply extends AbstractReply implements IPanelRepSet{
+public class SetPanelHumiditySetReply extends AbstractReply implements IPanelReplySet{
 
-	public SetPanelHumidityReply(DehumidRoomControllerEX controller,
-			DataStoreManager dataStoreManager, int roomIndex) {
-		super(controller, dataStoreManager, roomIndex);
+	public SetPanelHumiditySetReply(DehumidRoomControllerEX controller) {
+		super(controller);
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public void replyEvent(Byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
+		int offsetRoomIndex = controller.getRoomIndex()
+				- DehumidRoomControllerEX.ROOM_ID_MIN;
 		IReferenceable panel = dataStoreManager.getPanel(offsetRoomIndex);
 		
 		if (rxBuf == PANEL_REP_OK) {

@@ -1,25 +1,25 @@
-package edu.ncku.uscc.io;
+package edu.ncku.uscc.proc;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
+import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.DataStoreManager;
 
 public abstract class AbstractRequest {	
 	
 	private byte[] txBuf = new byte[1];
 	
+	protected DehumidRoomControllerEX controller;
 	protected DataStoreManager dataStoreManager;
 	protected OutputStream output;
-	protected int offsetRoomIndex;
 	protected Command cmd;
 	
-	public AbstractRequest(DataStoreManager dataStoreManager,
-			OutputStream output, int roomIndex) {
+	public AbstractRequest(DehumidRoomControllerEX controller) {
 		super();
-		this.dataStoreManager = dataStoreManager;
-		this.output = output;
-		this.offsetRoomIndex = roomIndex - DehumidRoomControllerEX.ROOM_ID_MIN;
+		this.controller = controller;
+		this.dataStoreManager = controller.getDataStoreManager();
+		this.output = controller.getOutputStream();
 	}
 
 	public void setTxBuf(byte[] txBuf) {

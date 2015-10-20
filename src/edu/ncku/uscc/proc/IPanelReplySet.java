@@ -1,6 +1,6 @@
-package edu.ncku.uscc.io;
+package edu.ncku.uscc.proc;
 
-public interface IPanelRepSet {
+public interface IPanelReplySet {
 
 	public static final int PANEL_REP_ON = 0x30;
 	public static final int PANEL_REP_OFF = 0x31;

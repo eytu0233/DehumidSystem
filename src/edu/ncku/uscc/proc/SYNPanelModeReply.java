@@ -1,20 +1,20 @@
-package edu.ncku.uscc.io;
+package edu.ncku.uscc.proc;
 
-import edu.ncku.uscc.util.DataStoreManager;
+import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.IReferenceable;
 import edu.ncku.uscc.util.Log;
 
-public class SYNPanelModeReply extends AbstractReply implements IPanelReqSet, IPanelRepSet{
+public class SYNPanelModeReply extends AbstractReply implements IPanelRequestSet, IPanelReplySet{
 
-	public SYNPanelModeReply(DehumidRoomControllerEX controller,
-			DataStoreManager dataStoreManager, int roomIndex) {
-		super(controller, dataStoreManager, roomIndex);
+	public SYNPanelModeReply(DehumidRoomControllerEX controller) {
+		super(controller);
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public void replyEvent(Byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
+		int offsetRoomIndex = controller.getRoomIndex() - DehumidRoomControllerEX.ROOM_ID_MIN;
 		IReferenceable panel = dataStoreManager.getPanel(offsetRoomIndex);
 		
 		if (rxBuf == PANEL_REP_DEHUMID) {
@@ -52,6 +52,7 @@ public class SYNPanelModeReply extends AbstractReply implements IPanelReqSet, IP
 	@Override
 	public void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
+		int offsetRoomIndex = controller.getRoomIndex() - DehumidRoomControllerEX.ROOM_ID_MIN;
 		Log.warn(String.format("Panel %d is not live.", offsetRoomIndex));
 		controller.nextCmd(cmd);
 	}

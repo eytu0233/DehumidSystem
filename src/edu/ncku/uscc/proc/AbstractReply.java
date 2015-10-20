@@ -1,21 +1,18 @@
-package edu.ncku.uscc.io;
+package edu.ncku.uscc.proc;
 
+import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.DataStoreManager;
 
 public abstract class AbstractReply {
 
 	protected DehumidRoomControllerEX controller;
 	protected DataStoreManager dataStoreManager;
-	protected int offsetRoomIndex;
 	protected Command cmd;	
 
-	public AbstractReply(DehumidRoomControllerEX controller,
-			DataStoreManager dataStoreManager,
-			int roomIndex) {
+	public AbstractReply(DehumidRoomControllerEX controller) {
 		super();
 		this.controller = controller;
-		this.dataStoreManager = dataStoreManager;
-		this.offsetRoomIndex = roomIndex;
+		this.dataStoreManager = controller.getDataStoreManager();
 	}
 
 	public void setCmd(Command cmd) {

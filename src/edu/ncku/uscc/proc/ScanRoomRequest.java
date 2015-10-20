@@ -1,7 +1,8 @@
-package edu.ncku.uscc.io;
+package edu.ncku.uscc.proc;
 
 import java.io.OutputStream;
 
+import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.DataStoreManager;
 import edu.ncku.uscc.util.Log;
 import gnu.io.SerialPort;
@@ -14,13 +15,12 @@ public class ScanRoomRequest extends AbstractRequest {
 	private int roomScanIndex;
 	private int did;
 
-	public ScanRoomRequest(DataStoreManager dataStoreManager,
-			OutputStream output, SerialPort serialPort, int roomIndex, int did) {
-		super(dataStoreManager, output, roomIndex);
+	public ScanRoomRequest(DehumidRoomControllerEX controller, int roomIndex, int did) {
+		super(controller);
 		// TODO Auto-generated constructor stub
+		this.serialPort = controller.getSerialPort();
 		this.roomScanIndex = roomIndex;
 		this.did = did;
-		this.serialPort = serialPort;
 	}
 
 	@Override

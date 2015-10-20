@@ -1,6 +1,6 @@
-package edu.ncku.uscc.io;
+package edu.ncku.uscc.proc;
 
-public interface IPanelReqSet {
+public interface IPanelRequestSet {
 
 	public static final int PANEL_REQ_ONOFF = 0x80;
 	public static final int PANEL_REQ_MODE = 0x81;

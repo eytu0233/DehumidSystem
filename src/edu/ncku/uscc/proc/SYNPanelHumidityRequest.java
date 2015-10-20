@@ -1,8 +1,6 @@
-package edu.ncku.uscc.io;
+package edu.ncku.uscc.proc;
 
-import java.io.OutputStream;
-
-import edu.ncku.uscc.util.DataStoreManager;
+import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.IReferenceable;
 
 public class SYNPanelHumidityRequest extends AbstractRequest {
@@ -10,22 +8,17 @@ public class SYNPanelHumidityRequest extends AbstractRequest {
 	private static final int MIN_HUMIDITY = 40;
 	private static final int MAX_HUMIDITY = 90;
 	private static final int PANEL_CMD_HUMID = 68;
-	
-	private SYNPanelHumidityCmd synPanelHumidityCmd;
 
-	public SYNPanelHumidityRequest(DataStoreManager dataStoreManager, OutputStream output, int roomIndex) {
-		super(dataStoreManager, output, roomIndex);
+	public SYNPanelHumidityRequest(DehumidRoomControllerEX controller) {
+		super(controller);
 		// TODO Auto-generated constructor stub
-		if(cmd instanceof SYNPanelHumidityCmd){
-			synPanelHumidityCmd = (SYNPanelHumidityCmd)cmd;
-		}else{
-			// throw new InvalidArgumentException();
-		}
 	}
 
 	@Override
 	public void requestEvent() throws Exception {
 		// TODO Auto-generated method stub
+		int offsetRoomIndex = controller.getRoomIndex() - DehumidRoomControllerEX.ROOM_ID_MIN;
+		
 		byte[] txBuf = new byte[1];
 		
 		int humidity = 0, avgHumidity = 0, count = 0;
@@ -44,7 +37,7 @@ public class SYNPanelHumidityRequest extends AbstractRequest {
 		} 
 		
 		if(count == 0 || avgHumidity < MIN_HUMIDITY || avgHumidity > MAX_HUMIDITY){
-			synPanelHumidityCmd.skipCommand();
+			cmd.skipCommand();
 		} else {
 			txBuf[0] = (byte) (PANEL_CMD_HUMID + avgHumidity);
 			this.setTxBuf(txBuf);

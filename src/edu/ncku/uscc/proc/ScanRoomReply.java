@@ -1,25 +1,18 @@
-package edu.ncku.uscc.io;
+package edu.ncku.uscc.proc;
 
+import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.DataStoreManager;
 import edu.ncku.uscc.util.Log;
 
-public class ScanRoomReply extends AbstractReply implements IDehumidRepSet{
+public class ScanRoomReply extends AbstractReply implements IDehumidReplySet{
 	
-	private ScanRoomCmd scanRoomCmd;
 	private int roomScanIndex;
 
 	public ScanRoomReply(DehumidRoomControllerEX controller,
-			DataStoreManager dataStoreManager,
 			int roomIndex) {
-		super(controller, dataStoreManager, roomIndex);
+		super(controller);
 		// TODO Auto-generated constructor stub
-		this.roomScanIndex = roomIndex;
-		
-		if(cmd instanceof ScanRoomCmd){
-			scanRoomCmd = (ScanRoomCmd) cmd;
-		}else{
-			// throw new InvaidArgumentException();
-		}		
+		this.roomScanIndex = roomIndex;		
 	}
 
 	@Override
@@ -32,19 +25,20 @@ public class ScanRoomReply extends AbstractReply implements IDehumidRepSet{
 			Log.info("Scan room index : " + roomScanIndex);
 			controller.setRoomIndex(roomScanIndex);
 		}
+		
 	}
 
 	@Override
 	public void ackHandler() throws Exception {
 		// TODO Auto-generated method stub
-		controller.addScanRoomQueue(scanRoomCmd);
+		controller.addScanRoomQueue((ScanRoomCmd) cmd);
 		controller.nextCmd(null);
 	}
 
 	@Override
 	public void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
-		controller.nextScanRoomCmd(scanRoomCmd);
+		controller.nextScanRoomCmd((ScanRoomCmd) cmd);
 	}
 
 }

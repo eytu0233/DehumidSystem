@@ -1,6 +1,6 @@
-package edu.ncku.uscc.io;
+package edu.ncku.uscc.proc;
 
-public interface IDehumidRepSet {
+public interface IDehumidReplySet {
 
 	public static final int DEHUMID_REP_OK = 0x55;
 	public static final int DEHUMID_REP_HIGH_TEMP_ABNORMAL = 0x56;

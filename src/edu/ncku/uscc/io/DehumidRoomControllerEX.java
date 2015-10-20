@@ -7,6 +7,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import edu.ncku.uscc.proc.Command;
+import edu.ncku.uscc.proc.SYNPanelHumidityCmd;
+import edu.ncku.uscc.proc.SYNPanelHumiditySetCmd;
+import edu.ncku.uscc.proc.SYNPanelModeCmd;
+import edu.ncku.uscc.proc.SYNPanelPowerCmd;
+import edu.ncku.uscc.proc.ScanRoomCmd;
 import edu.ncku.uscc.util.DataStoreManager;
 import edu.ncku.uscc.util.Log;
 import gnu.io.SerialPort;
@@ -84,7 +90,7 @@ public class DehumidRoomControllerEX extends Thread implements
 	}
 	
 	public int getRoomIndex(){
-		return roomIndex;
+		return this.roomIndex;
 	}
 
 	public Command getCurrentCmd() {
@@ -154,17 +160,13 @@ public class DehumidRoomControllerEX extends Thread implements
 		addQueue(new SYNPanelModeCmd(this));
 		addQueue(new SYNPanelHumiditySetCmd(this));
 //		addQueue(new SYNPanelTimerSetCmd(this));
+		
 //		addQueue(new SYNPanelAbnormalCmd(this));
-		addQueue(new SYNPanelHumidityCmd(this));
-//		for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; did++) {
-//			addQueueLast(new Command(this, new SYNPanelPowerRequest(), new SYNPanelPowerReply()));
-//			addQueueLast(new Command(this, new SYNPanelModeRequeset(), new SYNPanelModeReply()));
-//			addQueueLast(new Command(this, new SYNPanelSetStatusRequest(), new SYNPanelSetStatusReply()));
-//			addQueueLast(new Command(this, new SYNPanelHumiditySetRequest(), new SYNPanelHumiditySetReply()));
-//			addQueueLast(new Command(this, new SYNPanelTimerSetRequest(), new SYNPanelTimerSetReply()));
-//			addQueueLast(new Command(this, new SYNPanelAbnormalRequest(), new SYNPanelAbnormalReply()));
-//			addQueueLast(new Command(this, new SYNPanelHumidityRequest(), new SYNPanelHumidityReply()));
-//		}
+//		addQueue(new SYNPanelHumidityCmd(this));
+		
+		for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; did++) {
+			
+		}
 
 		setDaemon(true);
 		start();
@@ -195,7 +197,8 @@ public class DehumidRoomControllerEX extends Thread implements
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		try {
+		try {		
+			nextScanRoomCmd(null);
 			while(currentCmd != null){
 				currentCmd.startCommand();
 			}
@@ -286,7 +289,7 @@ public class DehumidRoomControllerEX extends Thread implements
 	 * @param originCheckRate
 	 * @return The value after drop action
 	 */
-	private int drop(int originCheckRate) {
+	public int drop(int originCheckRate) {
 		return (int) (originCheckRate * DROP_RATIO + RATE_CONSTANT);
 	}
 
