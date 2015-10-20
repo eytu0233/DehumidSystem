@@ -8,6 +8,7 @@ public class panelTimerThread extends Thread {
 	private int backupTimerSet = 0;
 	private int currentTimerSet = 0;
 	private boolean timerMinusOneFlag = false;
+	private boolean timerCountdownFinishingFlag = false;
 	ScheduledExecutorService panelTimerScheduledThread = Executors.newScheduledThreadPool(1);
 	
 	public void newScheduleThread(int timerSet) {
@@ -35,6 +36,14 @@ public class panelTimerThread extends Thread {
 	public boolean getTimerMinusOneFlag() {
 		return timerMinusOneFlag;
 	}
+	
+	public void setTimerCountdownFinishingFlag(boolean b) {
+		timerCountdownFinishingFlag = b;
+	}
+	
+	public boolean getTimerCountdownFinishingFlag() {
+		return timerCountdownFinishingFlag;
+	}
 
 	@Override
 	public void run() {
@@ -46,6 +55,7 @@ public class panelTimerThread extends Thread {
 		if (currentTimerSet > 0) {
 			panelTimerScheduledThread.schedule(this, 1, TimeUnit.HOURS);
 		} else {
+			timerCountdownFinishingFlag = true;
 			panelTimerScheduledThread.shutdownNow();
 		}
 	}
