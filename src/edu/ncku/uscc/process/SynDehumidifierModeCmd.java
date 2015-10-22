@@ -1,10 +1,10 @@
-package edu.ncku.uscc.proc;
+package edu.ncku.uscc.process;
 
 import edu.ncku.uscc.io.DehumidRoomControllerEX;
 
-public class SYNDehumidifierModeCmd extends SYNDehumidifierCmd {
+public class SynDehumidifierModeCmd extends SynDehumidifierCmd {
 
-	public SYNDehumidifierModeCmd(DehumidRoomControllerEX controller, int did) {
+	public SynDehumidifierModeCmd(DehumidRoomControllerEX controller, int did) {
 		super(controller, did);
 		// TODO Auto-generated constructor stub
 	}
@@ -20,8 +20,9 @@ public class SYNDehumidifierModeCmd extends SYNDehumidifierCmd {
 	protected void requestHandler() throws Exception {
 		// TODO Auto-generated method stub
 		if(panel.isModeDehumid()){
-			byte txBuf = (byte) DEHUMID_REQ_DEHUMID_MODE;
-			this.setTxBuf(txBuf);			
+			this.setTxBuf((byte) DEHUMID_REQ_DEHUMID_MODE);			
+		}else if(panel.isModeDry()){
+			this.setTxBuf((byte) DEHUMID_REQ_DRY_CLOTHES_MODE);			
 		}else{
 			this.skipCommand();
 		}		
@@ -33,8 +34,8 @@ public class SYNDehumidifierModeCmd extends SYNDehumidifierCmd {
 		if (rxBuf == DEHUMID_REP_OK
 				|| rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
 				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL) {
-			dehumidifier.setModeDehumid(true);
-			dehumidifier.setModeDry(false);
+			dehumidifier.setModeDehumid(panel.isModeDehumid());
+			dehumidifier.setModeDry(panel.isModeDry());
 //			checkRates[did] = INITIAL_RATE;
 		}
 	}

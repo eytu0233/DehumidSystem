@@ -1,4 +1,4 @@
-package edu.ncku.uscc.proc;
+package edu.ncku.uscc.process;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -48,6 +48,10 @@ public abstract class Command {
 		this.skip = false;
 		this.err_tolerance = init_tolerance;
 		this.subCommand = null;
+	}
+	
+	public void setPreCommand(Command preCommand){
+		this.preCommand = preCommand;
 	}
 	
 	public void setSubCommand(Command subCommand){

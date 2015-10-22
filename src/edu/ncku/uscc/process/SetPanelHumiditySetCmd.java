@@ -1,9 +1,9 @@
-package edu.ncku.uscc.proc;
+package edu.ncku.uscc.process;
 
 import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.Log;
 
-public class SetPanelHumiditySetCmd extends SYNPanelCommand {
+public class SetPanelHumiditySetCmd extends SynPanelCommand {
 
 	public SetPanelHumiditySetCmd(DehumidRoomControllerEX controller) {
 		super(controller);
@@ -30,12 +30,6 @@ public class SetPanelHumiditySetCmd extends SYNPanelCommand {
 					"Change set of humidity of Panel %d success",
 					offsetRoomIndex, (int) rxBuf));
 		}
-	}
-
-	@Override
-	protected void finishHandler() throws Exception {
-		// TODO Auto-generated method stub
-		// cancel the original method of super class
 	}
 
 }

@@ -1,10 +1,10 @@
-package edu.ncku.uscc.proc;
+package edu.ncku.uscc.process;
 
 import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.IReferenceable;
 import edu.ncku.uscc.util.Log;
 
-public class SYNPanelHumidityCmd extends SYNPanelCommand {
+public class SynPanelHumidityCmd extends SynPanelCommand {
 
 	private static final int MIN_HUMIDITY = 40;
 	private static final int MAX_HUMIDITY = 90;
@@ -12,7 +12,7 @@ public class SYNPanelHumidityCmd extends SYNPanelCommand {
 	
 	private int avgHumidity;
 
-	public SYNPanelHumidityCmd(DehumidRoomControllerEX controller) {
+	public SynPanelHumidityCmd(DehumidRoomControllerEX controller) {
 		super(controller);
 		// TODO Auto-generated constructor stub
 	}

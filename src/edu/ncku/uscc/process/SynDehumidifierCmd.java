@@ -1,19 +1,24 @@
-package edu.ncku.uscc.proc;
+package edu.ncku.uscc.process;
+
 import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.IReferenceable;
-import edu.ncku.uscc.util.Log;
 
+public abstract class SynDehumidifierCmd extends Command implements IDehumidProtocal{
 
-public abstract class SYNPanelCommand extends Command implements IPanelProtocal{
-	
+	protected int did;
 	protected int offsetRoomIndex;
 	protected IReferenceable panel;
+	protected IReferenceable dehumidifier;
 
-	public SYNPanelCommand(DehumidRoomControllerEX controller) {
-		super(controller);
+	public SynDehumidifierCmd(DehumidRoomControllerEX controller, int did) {
+		super(controller, new NotifyDeviceIDCmd(controller, did));
 		// TODO Auto-generated constructor stub
-		this.offsetRoomIndex = controller.getRoomIndex() - DehumidRoomControllerEX.ROOM_ID_MIN;
+		this.did = did;
+		this.offsetRoomIndex = controller.getRoomIndex()
+				- DehumidRoomControllerEX.ROOM_ID_MIN;
 		this.panel = dataStoreManager.getPanel(offsetRoomIndex);
+		this.dehumidifier = dataStoreManager.getDehumidifier(offsetRoomIndex,
+				did);
 	}
 
 	@Override
@@ -25,8 +30,7 @@ public abstract class SYNPanelCommand extends Command implements IPanelProtocal{
 	@Override
 	protected void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
-		Log.warn(String.format("Panel %d is not live.", offsetRoomIndex));
-		panel.setLive(false);
+		dehumidifier.setLive(false);
 		controller.nextCmd(this);
 	}
 
