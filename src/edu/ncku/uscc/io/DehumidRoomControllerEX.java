@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import edu.ncku.uscc.proc.Command;
+import edu.ncku.uscc.proc.SYNDehumidifierPowerCmd;
 import edu.ncku.uscc.proc.SYNPanelHumidityCmd;
 import edu.ncku.uscc.proc.SYNPanelHumiditySetCmd;
 import edu.ncku.uscc.proc.SYNPanelModeCmd;
@@ -74,7 +75,11 @@ public class DehumidRoomControllerEX extends Thread implements
 	}
 	
 	public SerialPort getSerialPort(){
-		return serialPort;
+		SerialPort sp;
+		synchronized (lock) {
+			sp = serialPort;
+		}
+		return sp;
 	}
 
 	public DataStoreManager getDataStoreManager() {
@@ -82,7 +87,11 @@ public class DehumidRoomControllerEX extends Thread implements
 	}
 	
 	public OutputStream getOutputStream(){
-		return output;
+		OutputStream ops;
+		synchronized (lock) {
+			ops = output;
+		}
+		return ops;
 	}
 	
 	public void setRoomIndex(int roomIndex){
@@ -93,28 +102,16 @@ public class DehumidRoomControllerEX extends Thread implements
 		return this.roomIndex;
 	}
 
-	public Command getCurrentCmd() {
-		return currentCmd;
-	}
-
-	public void setCurrentCmd(Command currentCmd) {
-		this.currentCmd = currentCmd;
-	}
-
 	public Object getLock() {
 		return lock;
 	}
 	
-	public void addQueue(Command cmd){
-		cmdQueue.add(cmd);
-	}
-	
-	public void jumpQueue(Command cmd){
-		cmdQueue.addFirst(cmd);
-	}
-	
 	public void addScanRoomQueue(ScanRoomCmd cmd){
 		scanRoomQueue.add(cmd);
+	}
+	
+	public void jumpCmdQueue(Command cmd){
+		cmdQueue.addFirst(cmd);
 	}
 	
 	public void nextCmd(Command cmd) throws Exception{
@@ -131,6 +128,21 @@ public class DehumidRoomControllerEX extends Thread implements
 		currentCmd = (scanRoomQueue != null)?scanRoomQueue.pollFirst():null;
 		
 		if(currentCmd == null) throw new Exception();
+	}
+	
+	public void initCmdQueue(){
+		clearQueue();
+		
+		addCmdQueue(new SYNPanelPowerCmd(this));
+		addCmdQueue(new SYNPanelModeCmd(this));
+		addCmdQueue(new SYNPanelHumiditySetCmd(this));
+//		addQueue(new SYNPanelTimerSetCmd(this));		
+//		addQueue(new SYNPanelAbnormalCmd(this));
+//		addQueue(new SYNPanelHumidityCmd(this));
+		
+		for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; did++) {
+			addCmdQueue(new SYNDehumidifierPowerCmd(this, did));
+		}
 	}
 
 	/**
@@ -154,18 +166,6 @@ public class DehumidRoomControllerEX extends Thread implements
 			for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; did++) {				
 				addScanRoomQueue(new ScanRoomCmd(this, roomScanIndex, did, 1));
 			}
-		}
-		
-		addQueue(new SYNPanelPowerCmd(this));
-		addQueue(new SYNPanelModeCmd(this));
-		addQueue(new SYNPanelHumiditySetCmd(this));
-//		addQueue(new SYNPanelTimerSetCmd(this));
-		
-//		addQueue(new SYNPanelAbnormalCmd(this));
-//		addQueue(new SYNPanelHumidityCmd(this));
-		
-		for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; did++) {
-			
 		}
 
 		setDaemon(true);
@@ -291,6 +291,14 @@ public class DehumidRoomControllerEX extends Thread implements
 	 */
 	public int drop(int originCheckRate) {
 		return (int) (originCheckRate * DROP_RATIO + RATE_CONSTANT);
+	}
+	
+	private void clearQueue(){
+		cmdQueue.clear();
+	}
+	
+	private void addCmdQueue(Command cmd){
+		cmdQueue.add(cmd);
 	}
 
 }

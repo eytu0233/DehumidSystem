@@ -1,8 +1,12 @@
 package edu.ncku.uscc.proc;
 
-import edu.ncku.uscc.io.DehumidRoomControllerEX;
+import java.io.IOException;
+import java.io.OutputStream;
 
-public class Command {
+import edu.ncku.uscc.io.DehumidRoomControllerEX;
+import edu.ncku.uscc.util.DataStoreManager;
+
+public abstract class Command {
 
 	private static int TIME_OUT = 400;
 
@@ -10,8 +14,8 @@ public class Command {
 
 	private Object referenceLock;
 
-	private AbstractRequest request;
-	private AbstractReply reply;
+	protected DehumidRoomControllerEX controller;
+	protected DataStoreManager dataStoreManager;
 	private Command preCommand;
 	private Command subCommand;
 
@@ -21,76 +25,23 @@ public class Command {
 	private byte rxBuf;
 	private boolean skip = false;
 
-	public Command(DehumidRoomControllerEX controller, AbstractRequest request,
-			AbstractReply reply) {
+	public Command(DehumidRoomControllerEX controller) {
 		super();
 		this.referenceLock = controller.getLock();
-		this.request = request;
-		this.request.setCmd(this);
-		this.reply = reply;
-		this.reply.setCmd(this);
 	}
 
-	public Command(DehumidRoomControllerEX controller, AbstractRequest request,
-			AbstractReply reply, int tolerance) {
+	public Command(DehumidRoomControllerEX controller, int tolerance) {
 		super();
 		this.referenceLock = controller.getLock();
-		this.request = request;
-		this.request.setCmd(this);
-		this.reply = reply;
-		this.reply.setCmd(this);
 		this.init_tolerance = tolerance;
-		this.err_tolerance = tolerance;
+		this.init();
 	}
 
-	public Command(DehumidRoomControllerEX controller, AbstractRequest request,
-			AbstractReply reply, Command preCommand) {
+	public Command(DehumidRoomControllerEX controller, Command preCommand) {
 		super();
 		this.referenceLock = controller.getLock();
-		this.request = request;
-		this.request.setCmd(this);
-		this.reply = reply;
-		this.reply.setCmd(this);
 		this.preCommand = preCommand;
-	}
-
-	public void startCommand() throws Exception {
-		if (request == null || reply == null) {
-			// throw new NullReplyException();
-			return;
-		}
-		
-		if(preCommand != null) {
-			preCommand.startCommand();
-			if(!preCommand.isAck() || !preCommand.isSkip()){
-				return;
-			}
-		}
-		
-		rxBuf = UNACK;
-		request.requestEvent();
-
-		if (!skip) {
-			synchronized (referenceLock) {
-				request.requestEmit();
-				referenceLock.wait(TIME_OUT);
-			}
-			reply.replyEvent(rxBuf);
-		}			
-		
-		if(!isAck()) cmdTimeout();
-
-		if (isAck() || skip) {
-			init();
-			reply.ackHandler();
-			if (subCommand != null){
-				subCommand.startCommand();
-			}				
-		} else if (overTolerance()) {
-			init();
-			reply.timeoutHandler();
-		}
-		
+		this.init();
 	}
 
 	public void init() {
@@ -134,5 +85,60 @@ public class Command {
 	public boolean overTolerance() {
 		return err_tolerance <= 0;
 	}
+	
+	private void requestEmit() throws IOException{
+		OutputStream output = controller.getOutputStream();
+		if(output != null){
+			output.write(txBuf);
+		}else{
+			//throw new NullOutputSreamException();
+		}
+	}
+
+	public void startCommand() throws Exception {
+		
+		if(preCommand != null) {
+			preCommand.startCommand();
+			if(!preCommand.isAck() && !preCommand.isSkip()){
+				return;
+			}
+		}
+		
+		rxBuf = UNACK;
+		requestHandler();
+
+		if (!isSkip()) {
+			synchronized (referenceLock) {
+				requestEmit();
+				referenceLock.wait(TIME_OUT);
+			}
+			replyHandler(rxBuf);
+		}			
+		
+		if(!isAck()) {
+			cmdTimeout();
+			if (overTolerance()) {
+				init();
+				timeoutHandler();
+				return;
+			}
+		}
+
+		if (isAck() || isSkip()) {
+			init();
+			if (subCommand != null){
+				subCommand.startCommand();
+				if(!subCommand.isAck() && !subCommand.isSkip()){
+					return;
+				}
+			}
+			finishHandler();			
+		}	
+	}
+	
+	abstract protected void requestHandler() throws Exception;
+	abstract protected void replyHandler(Byte rxBuf) throws Exception;
+	abstract protected void finishHandler() throws Exception;
+	abstract protected void timeoutHandler() throws Exception;
 
 }

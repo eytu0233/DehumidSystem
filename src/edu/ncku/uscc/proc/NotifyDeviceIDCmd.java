@@ -1,27 +1,35 @@
-package edu.ncku.uscc.io;
+package edu.ncku.uscc.proc;
 
-import edu.ncku.uscc.proc.AbstractReply;
-import edu.ncku.uscc.proc.IDehumidReplySet;
+import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.IReferenceable;
 import edu.ncku.uscc.util.Log;
 
-public class NotifyDeviceIDReply extends AbstractReply implements
-		IDehumidReplySet {
+public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 
-	public NotifyDeviceIDReply(DehumidRoomControllerEX controller) {
+	private int did;
+	
+	public NotifyDeviceIDCmd(DehumidRoomControllerEX controller, int did) {
 		super(controller);
 		// TODO Auto-generated constructor stub
+		this.did = did;
 	}
 
 	@Override
-	public void replyEvent(Byte rxBuf) throws Exception {
+	protected void requestHandler() throws Exception {
 		// TODO Auto-generated method stub
 		int roomIndex = controller.getRoomIndex();
-		int did = ((NotifyDeviceIDCmd) cmd).getDid();
-		int offsetRoomIndex = roomIndex - DehumidRoomControllerEX.ROOM_ID_MIN;
+		
+		byte txBuf = (byte) ((roomIndex << 3) + did);
+		this.setTxBuf(txBuf);
+	}
+
+	@Override
+	protected void replyHandler(Byte rxBuf) throws Exception {
+		// TODO Auto-generated method stub
+		int offsetRoomIndex = controller.getRoomIndex() - DehumidRoomControllerEX.ROOM_ID_MIN;
 		IReferenceable dehumidifier = dataStoreManager.getDehumidifier(
 				offsetRoomIndex, did);
-
+		
 		switch (rxBuf) {
 		case DEHUMID_REP_OK:
 			dehumidifier.setHighTempWarn(false);
@@ -73,15 +81,15 @@ public class NotifyDeviceIDReply extends AbstractReply implements
 	}
 
 	@Override
-	public void ackHandler() throws Exception {
+	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
-	public void timeoutHandler() throws Exception {
+	protected void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
-
+		controller.nextCmd(this);
 	}
 
 }
