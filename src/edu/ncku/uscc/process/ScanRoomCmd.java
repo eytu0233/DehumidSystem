@@ -1,6 +1,5 @@
 package edu.ncku.uscc.process;
 
-import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.Log;
 import gnu.io.SerialPort;
 
@@ -49,8 +48,12 @@ public class ScanRoomCmd extends Command implements IDehumidProtocal {
 	@Override
 	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
+		// add this scanRoomCommand to scanRoomQueue last
 		controller.addScanRoomQueue(this);
+		
+		// initial commandQueue
 		controller.initCmdQueue();
+		// switch to the commandQueue to run command
 		controller.nextCmd(null);
 	}
 

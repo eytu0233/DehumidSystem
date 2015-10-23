@@ -1,7 +1,5 @@
 package edu.ncku.uscc.process;
 
-import edu.ncku.uscc.io.DehumidRoomControllerEX;
-
 public class SynDehumidifierModeCmd extends SynDehumidifierCmd {
 
 	public SynDehumidifierModeCmd(DehumidRoomControllerEX controller, int did) {

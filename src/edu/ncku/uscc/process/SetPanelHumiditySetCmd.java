@@ -1,6 +1,5 @@
 package edu.ncku.uscc.process;
 
-import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.Log;
 
 public class SetPanelHumiditySetCmd extends SynPanelCommand {
@@ -15,9 +14,8 @@ public class SetPanelHumiditySetCmd extends SynPanelCommand {
 		// TODO Auto-generated method stub
 		Log.info(String.format("Start to change set of humidity of Panel %d",
 				offsetRoomIndex));
-		byte txBuf = (byte) panel.getHumidSet();
 
-		this.setTxBuf(txBuf);
+		this.setTxBuf((byte) panel.getHumidSet());
 	}
 
 	@Override
@@ -31,5 +29,13 @@ public class SetPanelHumiditySetCmd extends SynPanelCommand {
 					offsetRoomIndex, (int) rxBuf));
 		}
 	}
+
+	@Override
+	protected void finishHandler() throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	
 
 }

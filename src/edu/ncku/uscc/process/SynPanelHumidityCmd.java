@@ -1,6 +1,5 @@
 package edu.ncku.uscc.process;
 
-import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.IReferenceable;
 import edu.ncku.uscc.util.Log;
 
@@ -15,6 +14,13 @@ public class SynPanelHumidityCmd extends SynPanelCommand {
 	public SynPanelHumidityCmd(DehumidRoomControllerEX controller) {
 		super(controller);
 		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public void startCommand() throws Exception {
+		// TODO Auto-generated method stub
+		if(!panel.isOn()) return;
+		super.startCommand();
 	}
 
 	@Override

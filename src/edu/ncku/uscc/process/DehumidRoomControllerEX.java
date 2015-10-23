@@ -1,4 +1,4 @@
-package edu.ncku.uscc.io;
+package edu.ncku.uscc.process;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,15 +7,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import edu.ncku.uscc.process.Command;
-import edu.ncku.uscc.process.ScanRoomCmd;
-import edu.ncku.uscc.process.SynDehumidifierModeCmd;
-import edu.ncku.uscc.process.SynDehumidifierPowerCmd;
-import edu.ncku.uscc.process.SynDehumidifierhumidSetCmd;
-import edu.ncku.uscc.process.SynPanelHumidityCmd;
-import edu.ncku.uscc.process.SynPanelHumiditySetCmd;
-import edu.ncku.uscc.process.SynPanelModeCmd;
-import edu.ncku.uscc.process.SynPanelPowerCmd;
+import edu.ncku.uscc.io.SerialPortDisconnectListener;
 import edu.ncku.uscc.util.DataStoreManager;
 import edu.ncku.uscc.util.Log;
 import gnu.io.SerialPort;
@@ -32,9 +24,9 @@ public class DehumidRoomControllerEX extends Thread implements
 
 	/** A synchronization lock */
 	private final Object lock = new Object();
-	
+	/** The command queue which store commands */
 	private final LinkedList<Command> cmdQueue = new LinkedList<Command>();
-	
+	/** The ScanRoomCommand queue which is used to scan roomIndex */	
 	private final LinkedList<ScanRoomCmd> scanRoomQueue = new LinkedList<ScanRoomCmd>();
 
 	/** The instance of SerialPort class */
@@ -47,7 +39,7 @@ public class DehumidRoomControllerEX extends Thread implements
 	private InputStream input;
 	/** The output stream to the port */
 	private OutputStream output;
-	
+	/** The command is running */
 	private Command currentCmd;
 
 	/** The index of the room after room index scan */
@@ -66,7 +58,7 @@ public class DehumidRoomControllerEX extends Thread implements
 	/**
 	 * Constructor
 	 * 
-	 * @param slave
+	 * @param dataStoreManager
 	 * @param serialPort
 	 */
 	public DehumidRoomControllerEX(DataStoreManager dataStoreManager,
@@ -96,6 +88,14 @@ public class DehumidRoomControllerEX extends Thread implements
 		return ops;
 	}
 	
+	public InputStream getInputStream(){
+		InputStream is;
+		synchronized (lock) {
+			is = input;
+		}
+		return is;
+	}
+	
 	public void setRoomIndex(int roomIndex){
 		this.roomIndex = roomIndex;
 	}
@@ -116,6 +116,12 @@ public class DehumidRoomControllerEX extends Thread implements
 		cmdQueue.addFirst(cmd);
 	}
 	
+	/**
+	 * Set the first command in queue to current command
+	 * 
+	 * @param cmd Add this command to the queue last
+	 * @throws Exception
+	 */
 	public void nextCmd(Command cmd) throws Exception{
 		if(cmd != null) cmdQueue.add(cmd);
 		
@@ -124,6 +130,12 @@ public class DehumidRoomControllerEX extends Thread implements
 		if(currentCmd == null) throw new Exception();
 	}
 	
+	/**
+	 * Set the first command in scanRoomQueue to current command
+	 * 
+	 * @param cmd Add this command to the scanRoomQueue last
+	 * @throws Exception
+	 */
 	public void nextScanRoomCmd(ScanRoomCmd cmd) throws Exception{
 		if(cmd != null) scanRoomQueue.add(cmd);
 		
@@ -138,14 +150,15 @@ public class DehumidRoomControllerEX extends Thread implements
 		addCmdQueue(new SynPanelPowerCmd(this));
 		addCmdQueue(new SynPanelModeCmd(this));
 		addCmdQueue(new SynPanelHumiditySetCmd(this));
-//		addQueue(new SYNPanelTimerSetCmd(this));		
-//		addQueue(new SYNPanelAbnormalCmd(this));
-//		addQueue(new SYNPanelHumidityCmd(this));
+//		addCmdQueue(new SynPanelTimerSetCmd(this));		
+		addCmdQueue(new SynPanelAbnormalCmd(this));
+		addCmdQueue(new SynPanelHumidityCmd(this));
 		
 		for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; did++) {
 			addCmdQueue(new SynDehumidifierPowerCmd(this, did));
 			addCmdQueue(new SynDehumidifierModeCmd(this, did));
 			addCmdQueue(new SynDehumidifierhumidSetCmd(this, did));
+			addCmdQueue(new AskDehumidifierHumidityCmd(this, did));
 		}
 	}
 
@@ -166,6 +179,7 @@ public class DehumidRoomControllerEX extends Thread implements
 		for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; checkRates[did++] = INITIAL_RATE)
 			;
 
+		// initial scanRoomQueue
 		for (int roomScanIndex = ROOM_ID_MIN; roomScanIndex <= ROOM_ID_MAX; roomScanIndex++) {
 			for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; did++) {				
 				addScanRoomQueue(new ScanRoomCmd(this, roomScanIndex, did, 1));
@@ -255,7 +269,7 @@ public class DehumidRoomControllerEX extends Thread implements
 				int available = input.available();
 				byte chunk[] = new byte[available];
 
-				if (input == null)
+				if (getInputStream() == null)
 					return;
 				input.read(chunk, 0, available);
 

@@ -3,7 +3,6 @@ package edu.ncku.uscc.process;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.DataStoreManager;
 
 public abstract class Command {
@@ -70,6 +69,9 @@ public abstract class Command {
 		this.rxBuf = rxBuf;
 	}
 
+	/*
+	 * This method makes that this command skips txBuf emitting and rxBuf receiving, but it still call finishHandler method  
+	 */
 	public void skipCommand() {
 		this.skip = true;
 	}
