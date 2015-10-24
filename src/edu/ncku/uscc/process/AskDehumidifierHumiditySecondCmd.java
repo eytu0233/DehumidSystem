@@ -1,5 +1,7 @@
 package edu.ncku.uscc.process;
 
+import edu.ncku.uscc.io.DehumidRoomControllerEX;
+
 public class AskDehumidifierHumiditySecondCmd extends SynDehumidifierCmd {
 
 	private int digitOnes;
@@ -11,9 +13,9 @@ public class AskDehumidifierHumiditySecondCmd extends SynDehumidifierCmd {
 	}
 
 	@Override
-	protected void requestHandler() throws Exception {
+	protected byte requestHandler() throws Exception {
 		// TODO Auto-generated method stub
-		this.setTxBuf((byte) DEHUMID_REQ_DEHUMIDITY_DIGIT_TENS);
+		return (byte) DEHUMID_REQ_DEHUMIDITY_DIGIT_TENS;
 	}
 
 	@Override
@@ -25,7 +27,7 @@ public class AskDehumidifierHumiditySecondCmd extends SynDehumidifierCmd {
 	}
 
 	@Override
-	protected void finishHandler() throws Exception {
+	protected void finishCommandHandler() throws Exception {
 		// TODO Auto-generated method stub
 		// avoid to call twice nextCmd method
 	}	

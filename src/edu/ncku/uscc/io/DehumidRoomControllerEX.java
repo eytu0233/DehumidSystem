@@ -1,4 +1,4 @@
-package edu.ncku.uscc.process;
+package edu.ncku.uscc.io;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,7 +7,17 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import edu.ncku.uscc.io.SerialPortDisconnectListener;
+import edu.ncku.uscc.process.AskDehumidifierHumidityCmd;
+import edu.ncku.uscc.process.Command;
+import edu.ncku.uscc.process.ScanRoomCmd;
+import edu.ncku.uscc.process.SynDehumidifierModeCmd;
+import edu.ncku.uscc.process.SynDehumidifierPowerCmd;
+import edu.ncku.uscc.process.SynDehumidifierhumidSetCmd;
+import edu.ncku.uscc.process.SynPanelAbnormalCmd;
+import edu.ncku.uscc.process.SynPanelHumidityCmd;
+import edu.ncku.uscc.process.SynPanelHumiditySetCmd;
+import edu.ncku.uscc.process.SynPanelModeCmd;
+import edu.ncku.uscc.process.SynPanelPowerCmd;
 import edu.ncku.uscc.util.DataStoreManager;
 import edu.ncku.uscc.util.Log;
 import gnu.io.SerialPort;
@@ -154,12 +164,12 @@ public class DehumidRoomControllerEX extends Thread implements
 		addCmdQueue(new SynPanelAbnormalCmd(this));
 		addCmdQueue(new SynPanelHumidityCmd(this));
 		
-		for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; did++) {
-			addCmdQueue(new SynDehumidifierPowerCmd(this, did));
-			addCmdQueue(new SynDehumidifierModeCmd(this, did));
-			addCmdQueue(new SynDehumidifierhumidSetCmd(this, did));
-			addCmdQueue(new AskDehumidifierHumidityCmd(this, did));
-		}
+//		for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; did++) {
+//			addCmdQueue(new SynDehumidifierPowerCmd(this, did));
+//			addCmdQueue(new SynDehumidifierModeCmd(this, did));
+//			addCmdQueue(new SynDehumidifierhumidSetCmd(this, did));
+//			addCmdQueue(new AskDehumidifierHumidityCmd(this, did));
+//		}
 	}
 
 	/**
@@ -220,6 +230,7 @@ public class DehumidRoomControllerEX extends Thread implements
 			while(currentCmd != null){
 				currentCmd.startCommand();
 			}
+			Log.error("Command null!!!");
 		} catch (Exception e) {
 			Log.error(e, e);
 			for (SerialPortDisconnectListener listener : listeners) {

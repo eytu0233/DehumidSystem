@@ -1,5 +1,7 @@
 package edu.ncku.uscc.process;
 
+import edu.ncku.uscc.io.DehumidRoomControllerEX;
+
 public class SetDehumidifierHumidSetCmd extends SynDehumidifierCmd {
 
 	public SetDehumidifierHumidSetCmd(DehumidRoomControllerEX controller, int did) {
@@ -10,9 +12,9 @@ public class SetDehumidifierHumidSetCmd extends SynDehumidifierCmd {
 	}
 
 	@Override
-	protected void requestHandler() throws Exception {
+	protected byte requestHandler() throws Exception {
 		// TODO Auto-generated method stub
-		this.setTxBuf((byte) panel.getHumidSet());
+		return (byte) panel.getHumidSet();
 	}
 
 	@Override
@@ -26,7 +28,7 @@ public class SetDehumidifierHumidSetCmd extends SynDehumidifierCmd {
 	}
 	
 	@Override
-	protected void finishHandler() throws Exception {
+	protected void finishCommandHandler() throws Exception {
 		// TODO Auto-generated method stub
 		
 	}

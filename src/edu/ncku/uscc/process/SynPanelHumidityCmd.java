@@ -1,5 +1,6 @@
 package edu.ncku.uscc.process;
 
+import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.IReferenceable;
 import edu.ncku.uscc.util.Log;
 
@@ -17,16 +18,11 @@ public class SynPanelHumidityCmd extends SynPanelCommand {
 	}
 
 	@Override
-	public void startCommand() throws Exception {
-		// TODO Auto-generated method stub
-		if(!panel.isOn()) return;
-		super.startCommand();
-	}
-
-	@Override
-	protected void requestHandler() throws Exception {
-		// TODO Auto-generated method stub
-		byte txBuf;
+	protected byte requestHandler() throws Exception {
+		// TODO Auto-generated method stub				
+		if (!panel.isOn()) {
+			return SKIP;
+		}
 		
 		int humidity = 0, count = 0;
 		
@@ -44,10 +40,10 @@ public class SynPanelHumidityCmd extends SynPanelCommand {
 		} 
 		
 		if(count == 0 || avgHumidity < MIN_HUMIDITY || avgHumidity > MAX_HUMIDITY){
-			this.skipCommand();
+			Log.debug("Humidity for panel is not in range : " + avgHumidity);
+			return SKIP;
 		} else {
-			txBuf = (byte) (PANEL_CMD_HUMID + avgHumidity);
-			this.setTxBuf(txBuf);
+			return (byte) (PANEL_CMD_HUMID + avgHumidity);
 		}
 	}
 

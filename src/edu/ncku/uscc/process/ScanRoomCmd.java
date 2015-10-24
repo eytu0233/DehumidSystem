@@ -1,5 +1,6 @@
 package edu.ncku.uscc.process;
 
+import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.Log;
 import gnu.io.SerialPort;
 
@@ -20,7 +21,7 @@ public class ScanRoomCmd extends Command implements IDehumidProtocal {
 	}
 
 	@Override
-	protected void requestHandler() throws Exception {
+	protected byte requestHandler() throws Exception {
 		// TODO Auto-generated method stub
 		for (int usbIndex = 0; usbIndex < 4; usbIndex++) {
 			Runtime.getRuntime().exec(LCK_REMOVE_CMD + usbIndex);
@@ -28,10 +29,10 @@ public class ScanRoomCmd extends Command implements IDehumidProtocal {
 
 		byte txBuf;
 		txBuf = (byte) ((roomScanIndex << 3) + did);
-		this.setTxBuf(txBuf);
 
 		Log.info(String.format("Scan roomIndex : %x in %s",
 				((int) txBuf & 0xff), serialPort.getName()));
+		return txBuf;
 	}
 
 	@Override
@@ -42,12 +43,16 @@ public class ScanRoomCmd extends Command implements IDehumidProtocal {
 				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL) {
 			Log.info("Scan room index : " + roomScanIndex);
 			controller.setRoomIndex(roomScanIndex);
+			this.setAck(true);
+		}else{
+			this.setAck(false);
 		}
 	}
 
 	@Override
-	protected void finishHandler() throws Exception {
+	protected void finishCommandHandler() throws Exception {
 		// TODO Auto-generated method stub
+		
 		// add this scanRoomCommand to scanRoomQueue last
 		controller.addScanRoomQueue(this);
 		

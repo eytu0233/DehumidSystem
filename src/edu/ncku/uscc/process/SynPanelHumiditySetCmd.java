@@ -1,5 +1,6 @@
 package edu.ncku.uscc.process;
 
+import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.Log;
 
 public class SynPanelHumiditySetCmd extends SynPanelCommand {
@@ -10,18 +11,17 @@ public class SynPanelHumiditySetCmd extends SynPanelCommand {
 	}
 
 	@Override
-	protected void requestHandler() throws Exception {
+	protected byte requestHandler() throws Exception {
 		// TODO Auto-generated method stub
 
 		if (!panel.isOn()) {
-			this.skipCommand();
-			return;
+			return SKIP;
 		}
-		
+
 		if (dataStoreManager.isPanelDehumiditySetChange(offsetRoomIndex)) {
-			this.setTxBuf((byte) PANEL_REQ_SETTING_HUMID_Set);
+			return (byte) PANEL_REQ_SETTING_HUMID_Set;
 		} else {
-			this.setTxBuf((byte) PANEL_REQ_HUMID_SET);
+			return (byte) PANEL_REQ_HUMID_SET;
 		}
 	}
 
@@ -30,13 +30,17 @@ public class SynPanelHumiditySetCmd extends SynPanelCommand {
 		// TODO Auto-generated method stub
 		if (rxBuf == PANEL_REP_OK) {
 			this.setSubCommand(new SetPanelHumiditySetCmd(controller));
+			panel.setLive(true);
+			this.setAck(true);
 		} else if (rxBuf >= 0) {
 			panel.setHumidSetValue((int) rxBuf);
+			panel.setLive(true);
+			this.setAck(true);
 			Log.info(String.format("The humidity set of Panel %d is %d.",
 					offsetRoomIndex, (int) rxBuf));
-		} 
-		panel.setLive(true);
+		} else {
+			this.setAck(false);
+		}
 	}
-
 
 }

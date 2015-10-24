@@ -9,9 +9,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import edu.ncku.uscc.io.DehumidRoomController;
+import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.io.ModbusTCPSlave;
 import edu.ncku.uscc.io.SerialPortDisconnectListener;
-import edu.ncku.uscc.process.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.DataStoreManager;
 import edu.ncku.uscc.util.Log;
 import gnu.io.CommPortIdentifier;

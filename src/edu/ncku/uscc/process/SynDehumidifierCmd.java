@@ -1,6 +1,8 @@
 package edu.ncku.uscc.process;
 
+import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.IReferenceable;
+import edu.ncku.uscc.util.Log;
 
 public abstract class SynDehumidifierCmd extends Command implements IDehumidProtocal{
 
@@ -21,7 +23,7 @@ public abstract class SynDehumidifierCmd extends Command implements IDehumidProt
 	}
 
 	@Override
-	protected void finishHandler() throws Exception {
+	protected void finishCommandHandler() throws Exception {
 		// TODO Auto-generated method stub
 		controller.nextCmd(this);
 	}
@@ -29,6 +31,7 @@ public abstract class SynDehumidifierCmd extends Command implements IDehumidProt
 	@Override
 	protected void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
+		Log.debug(String.format("Dehumidifier %d in room %d timeout.", did, offsetRoomIndex));
 		dehumidifier.setLive(false);
 		controller.nextCmd(this);
 	}

@@ -1,4 +1,5 @@
 package edu.ncku.uscc.process;
+import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.IReferenceable;
 import edu.ncku.uscc.util.Log;
 
@@ -16,7 +17,7 @@ public abstract class SynPanelCommand extends Command implements IPanelProtocal{
 	}
 
 	@Override
-	protected void finishHandler() throws Exception {
+	protected void finishCommandHandler() throws Exception {
 		// TODO Auto-generated method stub
 		controller.nextCmd(this);
 	}
