@@ -22,7 +22,7 @@ public class DehumidRoomController extends Thread implements
 
 	private static final int PANEL_CMD_ONOFF = 0x80;
 	private static final int PANEL_CMD_MODE = 0x81;
-	private static final int PANEL_CMD_SET = 0x82;
+//	private static final int PANEL_CMD_SET = 0x82;
 	private static final int PANEL_CMD_HUMID_SET = 0x83;
 	private static final int PANEL_CMD_TIMER_SET = 0x84;
 	private static final int PANEL_CMD_START = 0x85;
@@ -44,9 +44,9 @@ public class DehumidRoomController extends Thread implements
 	private static final int PANEL_REP_OFF = 0x31;
 	private static final int PANEL_REP_DEHUMID = 0x32;
 	private static final int PANEL_REP_DRY_CLOTHES = 0x33;
-	private static final int PANEL_REP_NO_SET = 0x34;
-	private static final int PANEL_REP_HUMID_SET = 0x35;
-	private static final int PANEL_REP_TIMER_SET = 0x36;
+//	private static final int PANEL_REP_NO_SET = 0x34;
+//	private static final int PANEL_REP_HUMID_SET = 0x35;
+//	private static final int PANEL_REP_TIMER_SET = 0x36;
 	private static final int PANEL_REP_OK = 0x55;
 
 	private static final int DEHUMID_CMD_ON = 0x30;
@@ -54,7 +54,7 @@ public class DehumidRoomController extends Thread implements
 	private static final int DEHUMID_CMD_DEHUMID_MODE = 0x32;
 	private static final int DEHUMID_CMD_DRY_CLOTHES_MODE = 0x33;
 	private static final int DEHUMID_CMD_DEHUMIDITY_SET = 0x34;
-	private static final int DEHUMID_CMD_TIMER_SET = 0x35;
+//	private static final int DEHUMID_CMD_TIMER_SET = 0x35;
 	private static final int DEHUMID_CMD_DEHUMIDITY_DIGIT_ONES = 0x38;
 	private static final int DEHUMID_CMD_DEHUMIDITY_DIGIT_TENS = 0x39;
 
@@ -398,34 +398,26 @@ public class DehumidRoomController extends Thread implements
 			}
 
 			if (rxBuf == PANEL_REP_DEHUMID) {
-
 				panel.setModeDehumid(true);
 				panel.setModeDry(false);
-				panel.setLive(true);
 				Log.info(String.format("Panel %d is dehumid mode.",
 						offsetRoomIndex));
 				break;
 			} else if (rxBuf == PANEL_REP_DRY_CLOTHES) {
 				panel.setModeDehumid(false);
 				panel.setModeDry(true);
-				panel.setLive(true);
 				Log.info(String.format("Panel %d is dry clothes mode.",
 						offsetRoomIndex));
 				break;
 			} else if (rxBuf == PANEL_REP_OK) {
-
 				boolean dehumid_mode = (txBuf[0] == (byte) PANEL_CMD_DEHUMID_MODE);
 				panel.setModeDehumid(dehumid_mode);
 				panel.setModeDry(!dehumid_mode);
-				panel.setLive(true);
 				Log.info(String.format("Panel %d changes mode.",
 						offsetRoomIndex));
 				break;
 			} else {
 				if (--err <= 0) {
-					panel.setLive(false);
-					Log.warn(String.format("Panel %d is not live.",
-							offsetRoomIndex));
 					return;
 				}
 			}
@@ -448,12 +440,9 @@ public class DehumidRoomController extends Thread implements
 			}
 
 			if (rxBuf == PANEL_REP_OK) {
-
 				Log.info(String.format(
 						"Start to change set of humidity of Panel %d",
 						offsetRoomIndex, (int) rxBuf));
-
-				panel.setLive(true);
 				int humidSet = panel.getHumidSet();
 				txBuf[0] = (byte) humidSet;
 				rxBuf = -1;
@@ -465,7 +454,6 @@ public class DehumidRoomController extends Thread implements
 				}
 
 				if (rxBuf == PANEL_REP_OK) {
-					panel.setLive(true);
 					panel.setHumidSet(true);
 					panel.setHumidSetValue(humidSet);
 					Log.info(String.format(
@@ -482,13 +470,9 @@ public class DehumidRoomController extends Thread implements
 				}else{
 					panel.setHumidSet(false);
 				}
-				panel.setLive(true);
 				break;
 			} else {
 				if (--err <= 0) {
-					panel.setLive(false);
-					Log.warn(String.format("Panel %d is not live.",
-							offsetRoomIndex));
 					return;
 				}
 			}
@@ -514,7 +498,6 @@ public class DehumidRoomController extends Thread implements
 				Log.info(String.format(
 						"Start to change set of timer of Panel %d",
 						offsetRoomIndex, (int) rxBuf));
-				panel.setLive(true);
 				int timeSet = panel.getTimerSet();
 				txBuf[0] = (byte) timeSet;
 				rxBuf = -1;
@@ -526,7 +509,6 @@ public class DehumidRoomController extends Thread implements
 				}
 
 				if (rxBuf == PANEL_REP_OK) {
-					panel.setLive(true);
 					panel.setTimerSetValue(timeSet);
 					Log.info(String.format(
 							"Change set of timer of Panel %d success",
@@ -535,15 +517,11 @@ public class DehumidRoomController extends Thread implements
 				}
 			} else if (rxBuf >= 0) {
 				panel.setTimerSetValue(rxBuf);
-				panel.setLive(true);
 				Log.info(String.format("The timer set of Panel %d is %d.",
 						offsetRoomIndex, rxBuf));
 				break;
 			} else {
 				if (--err <= 0) {
-					panel.setLive(false);
-					Log.warn(String.format("Panel %d is not live.",
-							offsetRoomIndex));
 					return;
 				}
 			}
@@ -575,9 +553,6 @@ public class DehumidRoomController extends Thread implements
 						break;
 					} else {
 						if (--err <= 0) {
-							panel.setLive(false);
-							Log.warn(String.format("Panel %d is not live.",
-									offsetRoomIndex));
 							return;
 						}
 					}
@@ -603,9 +578,6 @@ public class DehumidRoomController extends Thread implements
 							break;
 						} else {							
 							if (--err <= 0) {
-								panel.setLive(false);
-								Log.warn(String.format("Panel %d is not live.",
-										offsetRoomIndex));
 								return;
 							}
 						}
@@ -684,13 +656,9 @@ public class DehumidRoomController extends Thread implements
 					Log.debug(String.format("Panel %d is multiple abnormal.",
 							offsetRoomIndex));
 				}
-				panel.setLive(true);
 				break;
 			} else {
 				if (--err <= 0) {
-					panel.setLive(false);
-					Log.warn(String
-							.format("Panel %d is not live.", offsetRoomIndex));
 					return;
 				}
 			}
@@ -754,9 +722,6 @@ public class DehumidRoomController extends Thread implements
 				break;
 			} else {
 				if (--err <= 0) {
-					panel.setLive(false);
-					Log.warn(String
-							.format("Panel %d is not live.", offsetRoomIndex));
 					return;
 				}
 			}
@@ -845,6 +810,7 @@ public class DehumidRoomController extends Thread implements
 			return true;
 		default:
 			checkRates[did] = drop(checkRates[did]);
+			dehumidifier.setLive(false);
 			return false;
 		}
 	}
@@ -875,7 +841,6 @@ public class DehumidRoomController extends Thread implements
 
 			if (!notifyDeviceID(roomIndex, did)) {
 				if (--err <= 0) {
-					dehumidifier.setLive(false);
 					return;
 				}
 				continue;
@@ -900,7 +865,6 @@ public class DehumidRoomController extends Thread implements
 			} else {				
 				checkRates[did] = drop(checkRates[did]);
 				if (--err <= 0) {
-					dehumidifier.setLive(false);
 					return;
 				}
 			}
@@ -940,7 +904,6 @@ public class DehumidRoomController extends Thread implements
 			} else {
 				checkRates[did] = drop(checkRates[did]);
 				if (--err <= 0) {
-					dehumidifier.setLive(false);
 					return;
 				}
 			}
@@ -951,7 +914,6 @@ public class DehumidRoomController extends Thread implements
 
 			if (!notifyDeviceID(roomIndex, did)) {
 				if (--err <= 0) {
-					Log.info("Timeout or data is not expected.");
 					return;
 				}
 				continue;
@@ -981,7 +943,6 @@ public class DehumidRoomController extends Thread implements
 			} else {
 				checkRates[did] = drop(checkRates[did]);
 				if (--err <= 0) {
-					dehumidifier.setLive(false);
 					return;
 				}
 			}
@@ -1027,14 +988,12 @@ public class DehumidRoomController extends Thread implements
 				} else {
 					checkRates[did] = drop(checkRates[did]);
 					if (--err <= 0) {
-						dehumidifier.setLive(false);
 						return;
 					}
 				}
 			} else {
 				checkRates[did] = drop(checkRates[did]);
 				if (--err <= 0) {
-					dehumidifier.setLive(false);
 					return;
 				}
 			}
@@ -1044,8 +1003,7 @@ public class DehumidRoomController extends Thread implements
 		while (true) {
 
 			if (!notifyDeviceID(roomIndex, did)) {
-				if (--err <= 0) {
-					dehumidifier.setLive(false);
+				if (--err <= 0) {					
 					return;
 				}
 				continue;
@@ -1076,7 +1034,6 @@ public class DehumidRoomController extends Thread implements
 
 			if (!notifyDeviceID(roomIndex, did)) {
 				if (--err <= 0) {
-					dehumidifier.setLive(false);
 					return;
 				}
 				continue;
@@ -1097,7 +1054,6 @@ public class DehumidRoomController extends Thread implements
 			} else {
 				checkRates[did] = drop(checkRates[did]);
 				if (--err <= 0) {
-					dehumidifier.setLive(false);
 					return;
 				}
 			}
