@@ -629,33 +629,8 @@ public class DehumidRoomController extends Thread implements
 			}
 
 			if (rxBuf == PANEL_REP_OK) {
-				if (txBuf[0] == (byte) PANEL_CMD_TEMP_ABNORMAL) {
-					panel.setHighTempWarn(true);
-					Log.debug(String.format(
-							"Panel %d is high temperature abnormal.",
-							offsetRoomIndex));
-				} else if (txBuf[0] == (byte) PANEL_CMD_DEFROST_TEMP_ABNORMAL) {
-					panel.setTempWarn(true);
-					Log.debug(String.format(
-							"Panel %d is defrost temperature abnormal.",
-							offsetRoomIndex));
-				} else if (txBuf[0] == (byte) PANEL_CMD_HUMID_ABNORMAL) {
-					panel.setHumidWarn(true);
-					Log.debug(String.format("Panel %d is humid abnormal.",
-							offsetRoomIndex));
-				} else if (txBuf[0] == (byte) PANEL_CMD_FAN_ABNORMAL) {
-					panel.setFanWarn(true);
-					Log.debug(String.format("Panel %d is fan abnormal.",
-							offsetRoomIndex));
-				} else if (txBuf[0] == (byte) PANEL_CMD_COMPRESSOR_ABNORMAL) {
-					panel.setCompressorWarn(true);
-					Log.debug(String.format("Panel %d is compressor abnormal.",
-							offsetRoomIndex));
-				} else if (txBuf[0] == (byte) PANEL_CMD_MULTIPLE_ABNORMAL) {
-					// panel.setMultipleWarn(true);
-					Log.debug(String.format("Panel %d is multiple abnormal.",
-							offsetRoomIndex));
-				}
+				Log.debug(String.format("Panel %d is abnormal.",
+						offsetRoomIndex));
 				break;
 			} else {
 				if (--err <= 0) {
@@ -856,9 +831,7 @@ public class DehumidRoomController extends Thread implements
 				lock.wait(TIME_OUT);
 			}
 
-			if (rxBuf == DEHUMID_REP_OK
-					|| rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
-					|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL) {
+			if (dehumidifierEcho(rxBuf)) {
 				dehumidifier.setOn(on);
 				checkRates[did] = INITIAL_RATE;
 				break;
@@ -894,9 +867,7 @@ public class DehumidRoomController extends Thread implements
 				lock.wait(TIME_OUT);
 			}
 
-			if (rxBuf == DEHUMID_REP_OK
-					|| rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
-					|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL) {
+			if (dehumidifierEcho(rxBuf)) {
 				dehumidifier.setModeDehumid(true);
 				dehumidifier.setModeDry(false);
 				checkRates[did] = INITIAL_RATE;
@@ -933,9 +904,7 @@ public class DehumidRoomController extends Thread implements
 				lock.wait(TIME_OUT);
 			}
 
-			if (rxBuf == DEHUMID_REP_OK
-					|| rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
-					|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL) {
+			if (dehumidifierEcho(rxBuf)) {
 				dehumidifier.setModeDry(true);
 				dehumidifier.setModeDehumid(false);
 				checkRates[did] = INITIAL_RATE;
@@ -967,9 +936,7 @@ public class DehumidRoomController extends Thread implements
 				lock.wait(TIME_OUT);
 			}
 
-			if (rxBuf == DEHUMID_REP_OK
-					|| rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
-					|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL) {
+			if (dehumidifierEcho(rxBuf)) {
 				checkRates[did] = INITIAL_RATE;
 				rxBuf = -1;
 				txBuf[0] = (byte) panel.getHumidSet();
@@ -980,9 +947,7 @@ public class DehumidRoomController extends Thread implements
 					lock.wait(TIME_OUT);
 				}
 
-				if (rxBuf == DEHUMID_REP_OK
-						|| rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
-						|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL) {
+				if (dehumidifierEcho(rxBuf)) {
 					dehumidifier.setHumidSetValue(panel.getHumidSet());
 					break;
 				} else {
@@ -1055,6 +1020,19 @@ public class DehumidRoomController extends Thread implements
 					return;
 				}
 			}
+		}
+	}
+	
+	private boolean dehumidifierEcho(byte rxBuf){
+		if (rxBuf == DEHUMID_REP_OK
+				|| rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
+				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL
+				|| rxBuf == DEHUMID_REP_DEHUMID_ABNORMAL
+				|| rxBuf == DEHUMID_REP_FAN_ABNORMAL
+				|| rxBuf == DEHUMID_REP_COMPRESSOR_ABNORMAL)
+			return true;
+		else{
+			return false;
 		}
 	}
 }
