@@ -1019,14 +1019,12 @@ public class DehumidRoomController extends Thread implements
 				lock.wait(TIME_OUT);
 			}
 
-			if (rxBuf >= 0) {
+			if (rxBuf >= 0 && rxBuf <= 9) {
 				humidity += rxBuf;
 				checkRates[did] = INITIAL_RATE;
 			} else {
-				dehumidifier.setLive(false);
 				checkRates[did] = drop(checkRates[did]);
 				if (--err <= 0) {
-					dehumidifier.setLive(false);
 					return;
 				}
 				continue;
@@ -1046,7 +1044,7 @@ public class DehumidRoomController extends Thread implements
 				lock.wait(TIME_OUT);
 			}
 
-			if (rxBuf >= 0) {
+			if (rxBuf >= 0 && rxBuf <= 9) {
 				humidity += rxBuf * 10;
 				dehumidifier.setHumid(humidity);
 				checkRates[did] = INITIAL_RATE;
