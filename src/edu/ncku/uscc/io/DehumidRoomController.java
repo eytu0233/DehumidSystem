@@ -72,7 +72,7 @@ public class DehumidRoomController extends Thread implements
 
 	/** Milliseconds to block while waiting for port open */
 	private static final int TIME_OUT = 400;
-	private static final int ERR = 2;
+	private static final int ERR = 3;
 
 	private static final int INITIAL_RATE = 100;
 	private static final int RATE_CONSTANT = 3;
@@ -835,7 +835,7 @@ public class DehumidRoomController extends Thread implements
 				dehumidifier.setOn(on);
 				checkRates[did] = INITIAL_RATE;
 				break;
-			} else {				
+			} else {
 				checkRates[did] = drop(checkRates[did]);
 				if (--err <= 0) {
 					return;
