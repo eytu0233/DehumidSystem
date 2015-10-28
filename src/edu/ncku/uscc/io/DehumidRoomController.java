@@ -410,9 +410,8 @@ public class DehumidRoomController extends Thread implements
 						offsetRoomIndex));
 				break;
 			} else if (rxBuf == PANEL_REP_OK) {
-				boolean dehumid_mode = (txBuf[0] == (byte) PANEL_CMD_DEHUMID_MODE);
-				panel.setModeDehumid(dehumid_mode);
-				panel.setModeDry(!dehumid_mode);
+				panel.setModeDehumid((txBuf[0] == (byte) PANEL_CMD_DEHUMID_MODE));
+				panel.setModeDry((txBuf[0] == (byte) PANEL_CMD_DRYCLOTHES_MODE));
 				Log.info(String.format("Panel %d changes mode.",
 						offsetRoomIndex));
 				break;
