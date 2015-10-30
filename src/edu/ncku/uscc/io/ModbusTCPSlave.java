@@ -34,7 +34,6 @@ public class ModbusTCPSlave {
 		return this.dataStore.getRegister(addr).toUnsignedShort();
 	}	
 
-	@SuppressWarnings("deprecation")
 	public void initialize() throws Exception {
 		// 2. Prepare a process image
 		dataStore = new SimpleProcessImage();
@@ -59,7 +58,7 @@ public class ModbusTCPSlave {
 		}
 		slaveListener = new ModbusTCPListener(3);
 		slaveListener.setPort(port);
-		slaveListener.start();
+		slaveListener.listen();
 	}
 
 }

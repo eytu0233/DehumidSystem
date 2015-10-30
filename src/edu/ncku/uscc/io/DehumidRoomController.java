@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import edu.ncku.uscc.util.DataStoreManager;
+import edu.ncku.uscc.util.DataStoreManager.Device;
 import edu.ncku.uscc.util.IReferenceable;
 import edu.ncku.uscc.util.Log;
 import edu.ncku.uscc.util.panelTimerThread;
@@ -337,7 +338,7 @@ public class DehumidRoomController extends Thread implements
 		byte[] txBuf = new byte[1];
 		byte err = ERR + 1;
 		int offsetRoomIndex = roomIndex - ROOM_ID_MIN;
-		IReferenceable panel = dataStoreManager.getPanel(offsetRoomIndex);
+		Device panel = dataStoreManager.getPanel(offsetRoomIndex);
 
 		while (true) {
 			if (!init && dataStoreManager.isPanelONOFFChange(offsetRoomIndex)) {
@@ -597,7 +598,7 @@ public class DehumidRoomController extends Thread implements
 				if (dehumidifier.isHighTempWarning()) {
 					txBuf[0] = (byte) PANEL_CMD_TEMP_ABNORMAL;
 					countAbnormal++;
-				} else if (dehumidifier.isTempWarning()) {
+				} else if (dehumidifier.isDeforstTempWarning()) {
 					txBuf[0] = (byte) PANEL_CMD_DEFROST_TEMP_ABNORMAL;
 					countAbnormal++;
 				} else if (dehumidifier.isHumidWarning()) {
@@ -735,7 +736,7 @@ public class DehumidRoomController extends Thread implements
 		switch (rxBuf) {
 		case DEHUMID_REP_OK:
 			dehumidifier.setHighTempWarn(false);
-			dehumidifier.setTempWarn(false);
+			dehumidifier.setDeforstTempWarn(false);
 			dehumidifier.setHumidWarn(false);
 			dehumidifier.setFanWarn(false);
 			dehumidifier.setCompressorWarn(false);
@@ -751,7 +752,7 @@ public class DehumidRoomController extends Thread implements
 					did, offsetRoomIndex));
 			return true;
 		case DEHUMID_REP_DEFROST_TEMP_ABNORMAL:
-			dehumidifier.setTempWarn(true);
+			dehumidifier.setDeforstTempWarn(true);
 			dehumidifier.setLive(true);
 			checkRates[did] = INITIAL_RATE;
 			Log.warn(String
@@ -806,9 +807,9 @@ public class DehumidRoomController extends Thread implements
 		byte[] txBuf = new byte[1];
 		int err = ERR;
 		int offsetRoomIndex = roomIndex - ROOM_ID_MIN;
-		IReferenceable dehumidifier = dataStoreManager.getDehumidifier(
+		Device dehumidifier = dataStoreManager.getDehumidifier(
 				offsetRoomIndex, did);
-		IReferenceable panel = dataStoreManager.getPanel(offsetRoomIndex);
+		Device panel = dataStoreManager.getPanel(offsetRoomIndex);
 
 		// synchronize onoff status between panel and dehumidifier
 		while (true) {

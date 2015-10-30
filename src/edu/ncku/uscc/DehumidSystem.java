@@ -47,7 +47,7 @@ public class DehumidSystem {
 				portRoomAvailable.put(portName, false);
 			}
 			
-			ModbusTCPSlave slave = new ModbusTCPSlave(NUM_ROOMS * DEVICES_A_ROOM * REGISTERS_A_DEVICE);
+			ModbusTCPSlave slave = new ModbusTCPSlave(NUM_ROOMS * DEVICES_A_ROOM * REGISTERS_A_DEVICE * 2);
 			slave.initialize();
 			Log.info("Modbus TCP Slave Started...");
 			
