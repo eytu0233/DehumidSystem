@@ -29,7 +29,7 @@ public class SynDehumidifierModeCmd extends SynDehumidifierCmd {
 	}
 
 	@Override
-	protected void replyHandler(Byte rxBuf) throws Exception {
+	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if (rxBuf == DEHUMID_REP_OK
 				|| rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
@@ -37,6 +37,9 @@ public class SynDehumidifierModeCmd extends SynDehumidifierCmd {
 			dehumidifier.setModeDehumid(panel.isModeDehumid());
 			dehumidifier.setModeDry(panel.isModeDry());
 //			checkRates[did] = INITIAL_RATE;
+			return true;
+		}else{
+			return false;
 		}
 	}
 

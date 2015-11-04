@@ -13,7 +13,6 @@ public class SynPanelHumiditySetCmd extends SynPanelCommand {
 	@Override
 	protected byte requestHandler() throws Exception {
 		// TODO Auto-generated method stub
-
 		if (!panel.isOn()) {
 			return SKIP;
 		}
@@ -26,20 +25,20 @@ public class SynPanelHumiditySetCmd extends SynPanelCommand {
 	}
 
 	@Override
-	protected void replyHandler(Byte rxBuf) throws Exception {
+	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if (rxBuf == PANEL_REP_OK) {
 			this.setSubCommand(new SetPanelHumiditySetCmd(controller));
 			panel.setLive(true);
-			this.setAck(true);
+			return true;
 		} else if (rxBuf >= 0) {
 			panel.setHumidSetValue((int) rxBuf);
 			panel.setLive(true);
-			this.setAck(true);
 			Log.info(String.format("The humidity set of Panel %d is %d.",
 					offsetRoomIndex, (int) rxBuf));
+			return true;
 		} else {
-			this.setAck(false);
+			return false;
 		}
 	}
 

@@ -48,12 +48,15 @@ public class SynPanelHumidityCmd extends SynPanelCommand {
 	}
 
 	@Override
-	protected void replyHandler(Byte rxBuf) throws Exception {
+	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub		
 		if (rxBuf == PANEL_REP_OK) {
 			Log.info(String.format("The humidity of Panel %d is %d.",
 					offsetRoomIndex, avgHumidity));
 			panel.setHumid(avgHumidity);
+			return true;
+		}else{
+			return false;
 		}
 	}
 

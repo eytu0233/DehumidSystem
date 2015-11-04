@@ -36,21 +36,21 @@ public class ScanRoomCmd extends Command implements IDehumidProtocal {
 	}
 
 	@Override
-	protected void replyHandler(Byte rxBuf) throws Exception {
+	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if (rxBuf == DEHUMID_REP_OK
 				|| rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
 				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL) {
 			Log.info("Scan room index : " + roomScanIndex);
 			controller.setRoomIndex(roomScanIndex);
-			this.setAck(true);
+			return true;
 		}else{
-			this.setAck(false);
+			return false;
 		}
 	}
 
 	@Override
-	protected void finishCommandHandler() throws Exception {
+	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
 		
 		// add this scanRoomCommand to scanRoomQueue last

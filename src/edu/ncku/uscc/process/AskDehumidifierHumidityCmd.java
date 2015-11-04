@@ -17,11 +17,14 @@ public class AskDehumidifierHumidityCmd extends SynDehumidifierCmd {
 	}
 
 	@Override
-	protected void replyHandler(Byte rxBuf) throws Exception {
+	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if (rxBuf >= 0) {
 			this.setSubCommand(new AskDehumidifierHumiditySecondCmd(controller, did, rxBuf));		
-		} 
+			return true;
+		} else{
+			return false;
+		}
 	}
 
 }

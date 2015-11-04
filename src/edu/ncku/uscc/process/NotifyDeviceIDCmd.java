@@ -23,7 +23,7 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 	}
 
 	@Override
-	protected void replyHandler(Byte rxBuf) throws Exception {
+	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		int offsetRoomIndex = controller.getRoomIndex()
 				- DehumidRoomControllerEX.ROOM_ID_MIN;
@@ -41,7 +41,7 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 			Log.debug(String.format("The dehumidifier %d in room %d OK", did,
 					offsetRoomIndex));
 			// checkRates[did] = INITIAL_RATE;
-			break;
+			return true;
 		case DEHUMID_REP_HIGH_TEMP_ABNORMAL:
 			dehumidifier.setHighTempWarn(true);
 			dehumidifier.setLive(true);
@@ -49,7 +49,7 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 			Log.warn(String.format(
 					"The dehumidifier %d in room %d acks high temp abnormal.",
 					did, offsetRoomIndex));
-			break;
+			return true;
 		case DEHUMID_REP_DEFROST_TEMP_ABNORMAL:
 			dehumidifier.setTempWarn(true);
 			dehumidifier.setLive(true);
@@ -57,7 +57,7 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 			Log.warn(String
 					.format("The dehumidifier %d in room %d acks defrost temp abnormal.",
 							did, offsetRoomIndex));
-			break;
+			return true;
 		case DEHUMID_REP_DEHUMID_ABNORMAL:
 			dehumidifier.setHumidWarn(true);
 			dehumidifier.setLive(true);
@@ -65,6 +65,7 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 			Log.warn(String.format(
 					"The dehumidifier %d in room %d acks dehumid abnormal.",
 					did, offsetRoomIndex));
+			return true;
 		case DEHUMID_REP_FAN_ABNORMAL:
 			dehumidifier.setFanWarn(true);
 			dehumidifier.setLive(true);
@@ -72,7 +73,7 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 			Log.warn(String.format(
 					"The dehumidifier %d in room %d acks fan abnormal.", did,
 					offsetRoomIndex));
-			break;
+			return true;
 		case DEHUMID_REP_COMPRESSOR_ABNORMAL:
 			dehumidifier.setCompressorWarn(true);
 			dehumidifier.setLive(true);
@@ -80,16 +81,16 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 			Log.warn(String.format(
 					"The dehumidifier %d in room %d acks compressor abnormal.",
 					did, offsetRoomIndex));
-			break;
+			return true;
 		default:
 			dehumidifier.setLive(false);
 			// checkRates[did] = drop(checkRates[did]);
-			break;
+			return false;
 		}
 	}
 
 	@Override
-	protected void finishCommandHandler() throws Exception {
+	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
 
 	}

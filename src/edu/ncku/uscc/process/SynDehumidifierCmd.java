@@ -23,7 +23,7 @@ public abstract class SynDehumidifierCmd extends Command implements IDehumidProt
 	}
 
 	@Override
-	protected void finishCommandHandler() throws Exception {
+	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
 		controller.nextCmd(this);
 	}

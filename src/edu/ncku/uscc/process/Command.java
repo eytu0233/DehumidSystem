@@ -1,11 +1,9 @@
 package edu.ncku.uscc.process;
 
-import java.io.IOException;
 import java.io.OutputStream;
 
 import edu.ncku.uscc.io.DehumidRoomControllerEX;
 import edu.ncku.uscc.util.DataStoreManager;
-import edu.ncku.uscc.util.Log;
 
 public abstract class Command {
 
@@ -25,17 +23,28 @@ public abstract class Command {
 	private int err_tolerance = init_tolerance;
 	private byte txBuf;
 	private byte rxBuf;
-	private boolean skip = false;
 
 	private boolean ack;
 
+	/**
+	 * Base constructor
+	 * 
+	 * @param controller
+	 */
 	public Command(DehumidRoomControllerEX controller) {
 		super();
 		this.controller = controller;
 		this.referenceLock = controller.getLock();
 		this.dataStoreManager = controller.getDataStoreManager();
+		this.init();
 	}
 
+	/**
+	 * Advance constructor which can set tolerance initial value
+	 * 
+	 * @param controller
+	 * @param tolerance the initial value for err_tolerance field
+	 */
 	public Command(DehumidRoomControllerEX controller, int tolerance) {
 		super();
 		this.controller = controller;
@@ -45,6 +54,12 @@ public abstract class Command {
 		this.init();
 	}
 
+	/**
+	 * Advance constructor which can set preCommand  field
+	 * 
+	 * @param controller
+	 * @param preCommand the command that would start before this command
+	 */
 	public Command(DehumidRoomControllerEX controller, Command preCommand) {
 		super();
 		this.controller = controller;
@@ -54,12 +69,9 @@ public abstract class Command {
 		this.init();
 	}
 
-	public void init() {
-		this.skip = false;
-		this.err_tolerance = init_tolerance;
-		this.subCommand = null;
-	}
-
+	/*
+	 * Setter and getter
+	 * */
 	public void setPreCommand(Command preCommand) {
 		this.preCommand = preCommand;
 	}
@@ -72,43 +84,28 @@ public abstract class Command {
 		return txBuf;
 	}
 
-	public void setTxBuf(byte txBuf) {
-		this.txBuf = txBuf;
-	}
-
 	public void setRxBuf(byte rxBuf) {
 		this.rxBuf = rxBuf;
 	}
 
-	/*
-	 * This method makes that this command skips txBuf emiting and rxBuf
-	 * receiving, but it still call finishHandler method
-	 */
-	public void setAck(boolean ack) {
-		this.ack = ack;
-	}
-
 	public boolean isAck() {
 		return ack;
-	}
+	}	
 
-	public void cmdTimeout() {
-		--err_tolerance;
-	}
+	/**
+	 * Starts this command
+	 * 
+	 * @throws Exception
+	 */
+	public final void start() throws Exception {
 
-	public boolean overTolerance() {
-		return err_tolerance <= 0;
-	}
-
-	public final void startCommand() throws Exception {
-
-		// run the command first before this command
+		/* run the command first before this command */
 		if (preCommand != null) {
-			preCommand.startCommand();
+			preCommand.start();
 
 			if (!preCommand.isAck() && preCommand.getTxBuf() != SKIP) {
 				if (preCommand.overTolerance()) {
-					finishCommandHandler();
+					finishHandler();
 				}
 				return;
 			}
@@ -117,53 +114,117 @@ public abstract class Command {
 		rxBuf = UNACK;
 		txBuf = requestHandler();
 
-		// when skip flag is true, it won't emit data and handle reply
+		/* when skip flag is true, it won't emit data and handle reply */
 		if (txBuf != SKIP) {
-			synchronized (referenceLock) {
-				requestEmit();
-				referenceLock.wait(TIME_OUT);
-			}
-			// the hook method which handles reply
-			replyHandler(rxBuf);
-			if (!isAck()) {
-				cmdTimeout();
+
+			/* emit the txBuf data */
+			emit();
+
+			/* the hook method which handles reply */
+			ack = replyHandler(rxBuf);
+
+			/* when unack, it means timeout */
+			if (!ack) {
+				timeout();
 				if (overTolerance()) {
 					init();
 					timeoutHandler();
 				}
 				return;
 			}
-		}else{
-//			Log.debug(this.toString() + " : Skip");
 		}
 
-		if (isAck() || txBuf == SKIP) {	
+		/*
+		 * if this command acks or skip flag is true, it will start subCommand(if exists) and
+		 * finishCommandHandler hook method
+		 */
+		if (ack || txBuf == SKIP) {
 			init();
 			if (subCommand != null) {
-				subCommand.startCommand();
+				subCommand.start();
 				if (!subCommand.isAck() && subCommand.getTxBuf() != SKIP) {
+					if (subCommand.overTolerance()) {
+						finishHandler();
+					}
 					return;
 				}
 			}
-			finishCommandHandler();
+			finishHandler();
 		}
 	}
 
-	private void requestEmit() throws IOException {
-		OutputStream output = controller.getOutputStream();
-		if (output != null) {
-			output.write(txBuf);
-		} else {
-			// throw new NullOutputSreamException();
-		}
+	/**
+	 * Initial method
+	 */
+	private void init() {
+		this.ack = false;
+		this.err_tolerance = init_tolerance;
+		this.subCommand = null;
 	}
 
+	/**
+	 * Handles the process that transmits data to the outputStream, and it would
+	 * wait until timeout
+	 * 
+	 * @throws Exception
+	 */
+	private void emit() throws Exception {
+		synchronized (referenceLock) {
+			OutputStream output = controller.getOutputStream();
+			if (output != null) {
+				output.write(txBuf);
+			} else {
+				// throw new NullOutputSreamException();
+			}
+			referenceLock.wait(TIME_OUT);
+		}
+	}
+	
+	/**
+	 * Set this command timeout
+	 */
+	private void timeout() {
+		--err_tolerance;
+	}
+
+	/**
+	 * 
+	 * @return does this command over timeout tolerance
+	 */
+	private boolean overTolerance() {
+		return err_tolerance <= 0;
+	}
+
+	/**
+	 * Sets the request command
+	 * 
+	 * @return the command data of the protocol
+	 * @throws Exception
+	 */
 	abstract protected byte requestHandler() throws Exception;
 
-	abstract protected void replyHandler(Byte rxBuf) throws Exception;
+	/**
+	 * Handles the result of this command
+	 * 
+	 * @param rxBuf
+	 *            the result of this command
+	 * @return whether this command acked or not
+	 * @throws Exception
+	 */
+	abstract protected boolean replyHandler(byte rxBuf) throws Exception;
 
-	abstract protected void finishCommandHandler() throws Exception;
+	/**
+	 * Handles how this command finishes
+	 * 
+	 * @throws Exception
+	 */
+	abstract protected void finishHandler() throws Exception;
 
+	/**
+	 * Handles how this command
+	 * 
+	 * @throws Exception
+	 */
 	abstract protected void timeoutHandler() throws Exception;
 
 }

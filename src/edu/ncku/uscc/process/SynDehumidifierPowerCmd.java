@@ -16,15 +16,17 @@ public class SynDehumidifierPowerCmd extends SynDehumidifierCmd {
 	}
 
 	@Override
-	protected void replyHandler(Byte rxBuf) throws Exception {
+	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if (rxBuf == DEHUMID_REP_OK
 				|| rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
 				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL) {
 			dehumidifier.setOn(panel.isOn());
 //			checkRates[did] = INITIAL_RATE;
+			return true;
 		} else {			
 //			checkRates[did] = drop(checkRates[did]);
+			return false;
 		}
 	}
 

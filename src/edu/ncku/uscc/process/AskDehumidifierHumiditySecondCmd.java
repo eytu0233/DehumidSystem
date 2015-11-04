@@ -19,15 +19,18 @@ public class AskDehumidifierHumiditySecondCmd extends SynDehumidifierCmd {
 	}
 
 	@Override
-	protected void replyHandler(Byte rxBuf) throws Exception {
+	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if (rxBuf >= 0) {
 			dehumidifier.setHumid(rxBuf * 10 + digitOnes);
+			return true;
+		}else{
+			return false;
 		}
 	}
 
 	@Override
-	protected void finishCommandHandler() throws Exception {
+	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
 		// avoid to call twice nextCmd method
 	}	

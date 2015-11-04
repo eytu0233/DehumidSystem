@@ -228,7 +228,7 @@ public class DehumidRoomControllerEX extends Thread implements
 		try {		
 			nextScanRoomCmd(null);
 			while(currentCmd != null){
-				currentCmd.startCommand();
+				currentCmd.start();
 			}
 			Log.error("Command null!!!");
 		} catch (Exception e) {

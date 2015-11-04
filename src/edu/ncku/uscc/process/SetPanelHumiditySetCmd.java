@@ -20,7 +20,7 @@ public class SetPanelHumiditySetCmd extends SynPanelCommand {
 	}
 
 	@Override
-	protected void replyHandler(Byte rxBuf) throws Exception {
+	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if (rxBuf == PANEL_REP_OK) {
 			panel.setLive(true);
@@ -28,11 +28,14 @@ public class SetPanelHumiditySetCmd extends SynPanelCommand {
 			Log.info(String.format(
 					"Change set of humidity of Panel %d success",
 					offsetRoomIndex, (int) rxBuf));
+			return true;
+		}else{
+			return false;
 		}
 	}
 
 	@Override
-	protected void finishCommandHandler() throws Exception {
+	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
 		
 	}

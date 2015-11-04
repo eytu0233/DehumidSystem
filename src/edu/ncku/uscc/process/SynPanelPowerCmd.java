@@ -29,20 +29,20 @@ public class SynPanelPowerCmd extends SynPanelCommand {
 	}
 
 	@Override
-	protected void replyHandler(Byte rxBuf) throws Exception {
+	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if (rxBuf == PANEL_REP_ON) {
 			panel.setOn(true);
 			panel.setLive(true);
-			this.setAck(true);
 			Log.info(String.format("Panel %d is ON.", offsetRoomIndex));
+			return true;
 		} else if (rxBuf == PANEL_REP_OFF) {
 			panel.setOn(false);
 			panel.setLive(true);
-			this.setAck(true);
 			Log.info(String.format("Panel %d is OFF.", offsetRoomIndex));
+			return true;
 		} else {
-			this.setAck(false);
+			return false;
 		}
 	}
 

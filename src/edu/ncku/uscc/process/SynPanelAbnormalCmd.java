@@ -50,7 +50,7 @@ public class SynPanelAbnormalCmd extends SynPanelCommand {
 	}
 
 	@Override
-	protected void replyHandler(Byte rxBuf) throws Exception {
+	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if (rxBuf == PANEL_REP_OK) {
 			switch (getTxBuf()) {
@@ -86,8 +86,9 @@ public class SynPanelAbnormalCmd extends SynPanelCommand {
 						offsetRoomIndex));
 				break;
 			}
+			return true;
 		} else {
-			this.setAck(false);
+			return false;
 		}
 	}
 
