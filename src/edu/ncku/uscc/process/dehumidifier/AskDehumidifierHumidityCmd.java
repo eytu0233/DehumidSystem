@@ -1,11 +1,11 @@
-package edu.ncku.uscc.process;
+package edu.ncku.uscc.process.dehumidifier;
 
-import edu.ncku.uscc.io.DehumidRoomControllerEX;
+import edu.ncku.uscc.io.DehumidRoomController;
 
 public class AskDehumidifierHumidityCmd extends SynDehumidifierCmd {
 	
 
-	public AskDehumidifierHumidityCmd(DehumidRoomControllerEX controller, int did) {
+	public AskDehumidifierHumidityCmd(DehumidRoomController controller, int did) {
 		super(controller, did);
 		// TODO Auto-generated constructor stub
 	}
@@ -21,8 +21,10 @@ public class AskDehumidifierHumidityCmd extends SynDehumidifierCmd {
 		// TODO Auto-generated method stub
 		if (rxBuf >= 0) {
 			this.setSubCommand(new AskDehumidifierHumiditySecondCmd(controller, did, rxBuf));		
+			controller.initCheckRate(did);
 			return true;
 		} else{
+			controller.dropRate(did);
 			return false;
 		}
 	}

@@ -1,11 +1,11 @@
-package edu.ncku.uscc.process;
+package edu.ncku.uscc.process.panel;
 
-import edu.ncku.uscc.io.DehumidRoomControllerEX;
+import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.util.Log;
 
 public class SynPanelPowerCmd extends SynPanelCommand {
 
-	public SynPanelPowerCmd(DehumidRoomControllerEX controller) {
+	public SynPanelPowerCmd(DehumidRoomController controller) {
 		super(controller);
 		// TODO Auto-generated constructor stub
 	}

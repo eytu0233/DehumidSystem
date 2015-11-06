@@ -2,7 +2,7 @@ package edu.ncku.uscc.process;
 
 import java.io.OutputStream;
 
-import edu.ncku.uscc.io.DehumidRoomControllerEX;
+import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.util.DataStoreManager;
 
 public abstract class Command {
@@ -14,7 +14,7 @@ public abstract class Command {
 
 	private Object referenceLock;
 
-	protected DehumidRoomControllerEX controller;
+	protected DehumidRoomController controller;
 	protected DataStoreManager dataStoreManager;
 	private Command preCommand;
 	private Command subCommand;
@@ -31,7 +31,7 @@ public abstract class Command {
 	 * 
 	 * @param controller
 	 */
-	public Command(DehumidRoomControllerEX controller) {
+	public Command(DehumidRoomController controller) {
 		super();
 		this.controller = controller;
 		this.referenceLock = controller.getLock();
@@ -45,7 +45,7 @@ public abstract class Command {
 	 * @param controller
 	 * @param tolerance the initial value for err_tolerance field
 	 */
-	public Command(DehumidRoomControllerEX controller, int tolerance) {
+	public Command(DehumidRoomController controller, int tolerance) {
 		super();
 		this.controller = controller;
 		this.referenceLock = controller.getLock();
@@ -60,7 +60,7 @@ public abstract class Command {
 	 * @param controller
 	 * @param preCommand the command that would start before this command
 	 */
-	public Command(DehumidRoomControllerEX controller, Command preCommand) {
+	public Command(DehumidRoomController controller, Command preCommand) {
 		super();
 		this.controller = controller;
 		this.referenceLock = controller.getLock();

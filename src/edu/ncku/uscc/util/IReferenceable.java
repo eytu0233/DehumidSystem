@@ -14,8 +14,8 @@ public interface IReferenceable {
 	public void setHumidSet(boolean humidSet);
 	public boolean isHighTempWarning();
 	public void setHighTempWarn(boolean highTempWarn);
-	public boolean isTempWarning();
-	public void setTempWarn(boolean tempWarn);
+	public boolean isDeforstTempWarning();
+	public void setDeforstTempWarn(boolean tempWarn);
 	
 	public boolean isHumidWarning();
 	public void setHumidWarn(boolean HumidWarn);

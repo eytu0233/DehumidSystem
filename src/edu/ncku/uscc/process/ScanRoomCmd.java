@@ -1,6 +1,7 @@
 package edu.ncku.uscc.process;
 
-import edu.ncku.uscc.io.DehumidRoomControllerEX;
+import edu.ncku.uscc.io.DehumidRoomController;
+import edu.ncku.uscc.process.dehumidifier.IDehumidProtocal;
 import edu.ncku.uscc.util.Log;
 import gnu.io.SerialPort;
 
@@ -11,7 +12,7 @@ public class ScanRoomCmd extends Command implements IDehumidProtocal {
 	private int roomScanIndex;
 	private int did;
 
-	public ScanRoomCmd(DehumidRoomControllerEX controller, int roomScanIndex,
+	public ScanRoomCmd(DehumidRoomController controller, int roomScanIndex,
 			int did, int tolerance) {
 		// TODO Auto-generated constructor stub
 		super(controller, tolerance);

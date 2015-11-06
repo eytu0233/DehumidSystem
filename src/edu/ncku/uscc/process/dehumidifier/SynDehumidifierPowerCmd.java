@@ -1,10 +1,10 @@
-package edu.ncku.uscc.process;
+package edu.ncku.uscc.process.dehumidifier;
 
-import edu.ncku.uscc.io.DehumidRoomControllerEX;
+import edu.ncku.uscc.io.DehumidRoomController;
 
 public class SynDehumidifierPowerCmd extends SynDehumidifierCmd {
 
-	public SynDehumidifierPowerCmd(DehumidRoomControllerEX controller, int did) {
+	public SynDehumidifierPowerCmd(DehumidRoomController controller, int did) {
 		super(controller, did);
 		// TODO Auto-generated constructor stub
 	}
@@ -22,10 +22,10 @@ public class SynDehumidifierPowerCmd extends SynDehumidifierCmd {
 				|| rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
 				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL) {
 			dehumidifier.setOn(panel.isOn());
-//			checkRates[did] = INITIAL_RATE;
+			controller.initCheckRate(did);
 			return true;
 		} else {			
-//			checkRates[did] = drop(checkRates[did]);
+			controller.dropRate(did);
 			return false;
 		}
 	}

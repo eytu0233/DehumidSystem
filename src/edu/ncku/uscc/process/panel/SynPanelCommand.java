@@ -1,5 +1,6 @@
-package edu.ncku.uscc.process;
-import edu.ncku.uscc.io.DehumidRoomControllerEX;
+package edu.ncku.uscc.process.panel;
+import edu.ncku.uscc.io.DehumidRoomController;
+import edu.ncku.uscc.process.Command;
 import edu.ncku.uscc.util.IReferenceable;
 import edu.ncku.uscc.util.Log;
 
@@ -9,10 +10,10 @@ public abstract class SynPanelCommand extends Command implements IPanelProtocal{
 	protected int offsetRoomIndex;
 	protected IReferenceable panel;
 
-	public SynPanelCommand(DehumidRoomControllerEX controller) {
+	public SynPanelCommand(DehumidRoomController controller) {
 		super(controller);
 		// TODO Auto-generated constructor stub
-		this.offsetRoomIndex = controller.getRoomIndex() - DehumidRoomControllerEX.ROOM_ID_MIN;
+		this.offsetRoomIndex = controller.getRoomIndex() - DehumidRoomController.ROOM_ID_MIN;
 		this.panel = dataStoreManager.getPanel(offsetRoomIndex);
 	}
 

@@ -1,10 +1,10 @@
-package edu.ncku.uscc.process;
+package edu.ncku.uscc.process.dehumidifier;
 
-import edu.ncku.uscc.io.DehumidRoomControllerEX;
+import edu.ncku.uscc.io.DehumidRoomController;
 
 public class SetDehumidifierHumidSetCmd extends SynDehumidifierCmd {
 
-	public SetDehumidifierHumidSetCmd(DehumidRoomControllerEX controller, int did) {
+	public SetDehumidifierHumidSetCmd(DehumidRoomController controller, int did) {
 		super(controller, did);
 		// TODO Auto-generated constructor stub
 		// cancel the preCommand which is notifyDeviceIDCmd
@@ -24,8 +24,10 @@ public class SetDehumidifierHumidSetCmd extends SynDehumidifierCmd {
 				|| rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
 				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL) {
 			dehumidifier.setHumidSetValue(panel.getHumidSet());
+			controller.initCheckRate(did);
 			return true;
 		}else{
+			controller.dropRate(did);
 			return false;
 		}
 	}

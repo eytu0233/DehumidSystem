@@ -1,4 +1,4 @@
-package edu.ncku.uscc.process;
+package edu.ncku.uscc.process.panel;
 
 public interface IPanelProtocal {
 

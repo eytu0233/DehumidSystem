@@ -1,12 +1,12 @@
-package edu.ncku.uscc.process;
+package edu.ncku.uscc.process.panel;
 
-import edu.ncku.uscc.io.DehumidRoomControllerEX;
+import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.util.IReferenceable;
 import edu.ncku.uscc.util.Log;
 
 public class SynPanelAbnormalCmd extends SynPanelCommand {
 
-	public SynPanelAbnormalCmd(DehumidRoomControllerEX controller) {
+	public SynPanelAbnormalCmd(DehumidRoomController controller) {
 		super(controller);
 		// TODO Auto-generated constructor stub
 	}
@@ -19,13 +19,13 @@ public class SynPanelAbnormalCmd extends SynPanelCommand {
 		}
 
 		byte countAbnormal = 0, tmpTxBuf = 0;
-		for (int did = 0; did < DehumidRoomControllerEX.DEHUMIDIFIERS_A_ROOM; did++) {
+		for (int did = 0; did < DehumidRoomController.DEHUMIDIFIERS_A_ROOM; did++) {
 			IReferenceable dehumidifier = dataStoreManager.getDehumidifier(
 					offsetRoomIndex, did);
 			if (dehumidifier.isHighTempWarning()) {
 				tmpTxBuf = (byte) PANEL_REQ_TEMP_ABNORMAL;
 				countAbnormal++;
-			} else if (dehumidifier.isTempWarning()) {
+			} else if (dehumidifier.isDeforstTempWarning()) {
 				tmpTxBuf = (byte) PANEL_REQ_DEFROST_TEMP_ABNORMAL;
 				countAbnormal++;
 			} else if (dehumidifier.isHumidWarning()) {
@@ -61,7 +61,7 @@ public class SynPanelAbnormalCmd extends SynPanelCommand {
 						offsetRoomIndex));
 				break;
 			case (byte) PANEL_REQ_DEFROST_TEMP_ABNORMAL:
-				panel.setTempWarn(true);
+				panel.setDeforstTempWarn(true);
 				Log.debug(String.format(
 						"Panel %d is defrost temperature abnormal.",
 						offsetRoomIndex));

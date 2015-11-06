@@ -1,6 +1,7 @@
-package edu.ncku.uscc.process;
+package edu.ncku.uscc.process.dehumidifier;
 
-import edu.ncku.uscc.io.DehumidRoomControllerEX;
+import edu.ncku.uscc.io.DehumidRoomController;
+import edu.ncku.uscc.process.Command;
 import edu.ncku.uscc.util.IReferenceable;
 import edu.ncku.uscc.util.Log;
 
@@ -8,7 +9,7 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 
 	private int did;
 
-	public NotifyDeviceIDCmd(DehumidRoomControllerEX controller, int did) {
+	public NotifyDeviceIDCmd(DehumidRoomController controller, int did) {
 		super(controller);
 		// TODO Auto-generated constructor stub
 		this.did = did;
@@ -26,14 +27,14 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		int offsetRoomIndex = controller.getRoomIndex()
-				- DehumidRoomControllerEX.ROOM_ID_MIN;
+				- DehumidRoomController.ROOM_ID_MIN;
 		IReferenceable dehumidifier = dataStoreManager.getDehumidifier(
 				offsetRoomIndex, did);
 
 		switch (rxBuf) {
 		case DEHUMID_REP_OK:
 			dehumidifier.setHighTempWarn(false);
-			dehumidifier.setTempWarn(false);
+			dehumidifier.setDeforstTempWarn(false);
 			dehumidifier.setHumidWarn(false);
 			dehumidifier.setFanWarn(false);
 			dehumidifier.setCompressorWarn(false);
@@ -51,7 +52,7 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 					did, offsetRoomIndex));
 			return true;
 		case DEHUMID_REP_DEFROST_TEMP_ABNORMAL:
-			dehumidifier.setTempWarn(true);
+			dehumidifier.setDeforstTempWarn(true);
 			dehumidifier.setLive(true);
 			// checkRates[did] = INITIAL_RATE;
 			Log.warn(String
