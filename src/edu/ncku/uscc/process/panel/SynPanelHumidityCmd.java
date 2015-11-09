@@ -71,7 +71,8 @@ public class SynPanelHumidityCmd extends SynPanelCommand {
 	private void dehumidifierFate() {
 
 		for (int did = DEHUMIDIFIERS_A_ROOM - 1; did >= 0; did--) {
-			if (controller.getCheckRate(did) > (int) (Math.random() * 100)) {
+			if (controller.getCheckRate(did) >= (int) (Math.random() * 100)) {
+				Log.debug("Add dehumidifier " + did + " commands.");
 				controller.jumpCmdQueue(new AskDehumidifierHumidityCmd(controller, did));
 				controller.jumpCmdQueue(new SynDehumidifierhumidSetCmd(controller, did));
 				controller.jumpCmdQueue(new SynDehumidifierModeCmd(controller, did));

@@ -21,8 +21,7 @@ import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
-public class DehumidRoomController extends Thread implements
-		SerialPortEventListener {	
+public class DehumidRoomController extends Thread implements SerialPortEventListener {
 
 	/** Constant */
 	public static final int DEHUMIDIFIERS_A_ROOM = 8;
@@ -39,7 +38,7 @@ public class DehumidRoomController extends Thread implements
 	private final Object lock = new Object();
 	/** The command queue which store commands */
 	private final LinkedList<Command> cmdQueue = new LinkedList<Command>();
-	/** The ScanRoomCommand queue which is used to scan roomIndex */	
+	/** The ScanRoomCommand queue which is used to scan roomIndex */
 	private final LinkedList<ScanRoomCmd> scanRoomQueue = new LinkedList<ScanRoomCmd>();
 
 	/** The instance of SerialPort class */
@@ -67,14 +66,13 @@ public class DehumidRoomController extends Thread implements
 	 * @param dataStoreManager
 	 * @param serialPort
 	 */
-	public DehumidRoomController(DataStoreManager dataStoreManager,
-			SerialPort serialPort) {
+	public DehumidRoomController(DataStoreManager dataStoreManager, SerialPort serialPort) {
 		super();
 		this.dataStoreManager = dataStoreManager;
 		this.serialPort = serialPort;
 	}
-	
-	public SerialPort getSerialPort(){
+
+	public SerialPort getSerialPort() {
 		SerialPort sp;
 		synchronized (lock) {
 			sp = serialPort;
@@ -85,113 +83,121 @@ public class DehumidRoomController extends Thread implements
 	public DataStoreManager getDataStoreManager() {
 		return dataStoreManager;
 	}
-	
-	public OutputStream getOutputStream(){
+
+	public OutputStream getOutputStream() {
 		OutputStream ops;
 		synchronized (lock) {
 			ops = output;
 		}
 		return ops;
 	}
-	
-	public InputStream getInputStream(){
+
+	public InputStream getInputStream() {
 		InputStream is;
 		synchronized (lock) {
 			is = input;
 		}
 		return is;
 	}
-	
-	public void setRoomIndex(int roomIndex){
+
+	public void setRoomIndex(int roomIndex) {
 		this.roomIndex = roomIndex;
 	}
-	
-	public int getRoomIndex(){
+
+	public int getRoomIndex() {
 		return this.roomIndex;
 	}
 
 	public Object getLock() {
 		return lock;
 	}
-	
-	public int getCheckRate(int did){
+
+	public int getCheckRate(int did) {
 		return checkRates[did];
 	}
-	
+
 	/**
 	 * Initializes the check rate
 	 * 
-	 * @param did Device ID
+	 * @param did
+	 *            Device ID
 	 */
-	public void initCheckRate(int did){
+	public void initCheckRate(int did) {
 		checkRates[did] = INITIAL_RATE;
 	}
-	
+
 	/**
 	 * Drops the check rate for one of the dehumidifiers.
 	 * 
-	 * @param did Device ID
+	 * @param did
+	 *            Device ID
 	 */
 	public void dropRate(int did) {
 		checkRates[did] = (int) (checkRates[did] * DROP_RATIO + RATE_CONSTANT);
 	}
-	
+
 	/**
 	 * Adds scan room command to scan room command queue
 	 * 
 	 * @param cmd
 	 */
-	public void addScanRoomQueue(ScanRoomCmd cmd){
+	public void addScanRoomQueue(ScanRoomCmd cmd) {
 		scanRoomQueue.add(cmd);
 	}
-	
+
 	/**
 	 * Jump the command which you choice to command queue
 	 * 
 	 * @param cmd
 	 */
-	public void jumpCmdQueue(Command cmd){
+	public void jumpCmdQueue(Command cmd) {
 		cmdQueue.addFirst(cmd);
 	}
-	
+
 	/**
 	 * Sets the first command in command queue and current command
 	 * 
-	 * @param cmd Add this command to the queue last
+	 * @param cmd
+	 *            Add this command to the queue last
 	 * @throws Exception
 	 */
-	public void nextCmd(Command cmd) throws Exception{
-		if(cmd != null) cmdQueue.add(cmd);
-		
-		currentCmd = (cmdQueue != null)?cmdQueue.pollFirst():null;
-		
-		if(currentCmd == null) throw new Exception();
+	public void nextCmd(Command cmd) throws Exception {
+		if (cmd != null)
+			cmdQueue.add(cmd);
+
+		currentCmd = (cmdQueue != null) ? cmdQueue.pollFirst() : null;
+
+		if (currentCmd == null)
+			throw new Exception();
 	}
-	
+
 	/**
 	 * Sets the first command to scanRoomQueue and current command
 	 * 
-	 * @param cmd Add this command to the scanRoomQueue last
+	 * @param cmd
+	 *            Add this command to the scanRoomQueue last
 	 * @throws Exception
 	 */
-	public void nextScanRoomCmd(ScanRoomCmd cmd) throws Exception{
-		if(cmd != null) scanRoomQueue.add(cmd);
-		
-		currentCmd = (scanRoomQueue != null)?scanRoomQueue.pollFirst():null;
-		
-		if(currentCmd == null) throw new Exception();
+	public void nextScanRoomCmd(ScanRoomCmd cmd) throws Exception {
+		if (cmd != null)
+			scanRoomQueue.add(cmd);
+
+		currentCmd = (scanRoomQueue != null) ? scanRoomQueue.pollFirst() : null;
+
+		if (currentCmd == null)
+			throw new Exception();
 	}
-	
+
 	/**
 	 * Initializes the command queue field
 	 */
-	public void initCmdQueue(){
+	public void initCmdQueue() {
 		clearQueue();
-		
+
 		addCmdQueue(new SynPanelPowerCmd(this));
 		addCmdQueue(new SynPanelModeCmd(this));
 		addCmdQueue(new SynPanelHumiditySetCmd(this));
-		addCmdQueue(new SynPanelTimerSetCmd(this));	
+		addCmdQueue(new SynPanelTimerSetCmd(this));
 		addCmdQueue(new SynPanelAbnormalCmd(this));
 		addCmdQueue(new SynPanelHumidityCmd(this));
 	}
@@ -210,12 +216,12 @@ public class DehumidRoomController extends Thread implements
 		serialPort.addEventListener(this);
 		serialPort.notifyOnDataAvailable(true);
 
-		for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; checkRates[did++] = INITIAL_RATE)
+		for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; initCheckRate(did++))
 			;
 
 		// initial scanRoomQueue
 		for (int roomScanIndex = ROOM_ID_MIN; roomScanIndex <= ROOM_ID_MAX; roomScanIndex++) {
-			for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; did++) {				
+			for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; did++) {
 				addScanRoomQueue(new ScanRoomCmd(this, roomScanIndex, did, 1));
 			}
 		}
@@ -230,8 +236,7 @@ public class DehumidRoomController extends Thread implements
 	 * @param listener
 	 * @throws Exception
 	 */
-	public void addDisconnectListener(SerialPortDisconnectListener listener)
-			throws Exception {
+	public void addDisconnectListener(SerialPortDisconnectListener listener) throws Exception {
 		listeners.add(listener);
 	}
 
@@ -241,17 +246,16 @@ public class DehumidRoomController extends Thread implements
 	 * @param listener
 	 * @throws Exception
 	 */
-	public void removeDisconnectListener(SerialPortDisconnectListener listener)
-			throws Exception {
+	public void removeDisconnectListener(SerialPortDisconnectListener listener) throws Exception {
 		listeners.remove(listener);
 	}
 
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		try {		
+		try {
 			nextScanRoomCmd(null);
-			while(currentCmd != null){
+			while (currentCmd != null) {
 				currentCmd.start();
 			}
 			Log.error("Current command is null!!");
@@ -296,7 +300,7 @@ public class DehumidRoomController extends Thread implements
 	}
 
 	/**
-	 * Receives the events about serial 
+	 * Receives the events about serial
 	 */
 	@Override
 	public void serialEvent(SerialPortEvent oEvent) {
@@ -338,21 +342,20 @@ public class DehumidRoomController extends Thread implements
 
 		}
 	}
-	
+
 	/**
 	 * Clears command queue
 	 */
-	private void clearQueue(){
+	private void clearQueue() {
 		cmdQueue.clear();
 	}
-	
-	
+
 	/**
 	 * Adds command to command queue
 	 * 
 	 * @param cmd
 	 */
-	private void addCmdQueue(Command cmd){
+	private void addCmdQueue(Command cmd) {
 		cmdQueue.add(cmd);
 	}
 

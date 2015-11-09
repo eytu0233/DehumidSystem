@@ -14,7 +14,7 @@ public class DataStoreManager {
 	private static final int DEHUMIDIFIER_A_ROOM = 8;
 	private static final int NUM_ROOMS = 4;
 	/* This constant is used to avoid modbus slave bug */
-	private static final int TRICKY_OFFSET = DEVICES_A_ROOM * NUM_ROOMS * OFFSET_A_DEVICE;
+	//private static final int TRICKY_OFFSET = DEVICES_A_ROOM * NUM_ROOMS * OFFSET_A_DEVICE;
 
 	private int[] backupPanel;
 
@@ -76,19 +76,19 @@ public class DataStoreManager {
 	}
 
 	private int getPanelStatus(int room) {
-		return modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM + TRICKY_OFFSET);
+		return modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
 	}
 
 	private int getPanelHumid(int room) {
-		return modbusSlave.getResgister(ADDR_HUMID + room * OFFSET_A_DEVICE * DEVICES_A_ROOM + TRICKY_OFFSET);
+		return modbusSlave.getResgister(ADDR_HUMID + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
 	}
 
 	private int getPanelHumidSet(int room) {
-		return modbusSlave.getResgister(ADDR_HUMID_SET + room * OFFSET_A_DEVICE * DEVICES_A_ROOM + TRICKY_OFFSET);
+		return modbusSlave.getResgister(ADDR_HUMID_SET + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
 	}
 
 	private int getPanelTimerSet(int room) {
-		return modbusSlave.getResgister(ADDR_TIMER_SET + room * OFFSET_A_DEVICE * DEVICES_A_ROOM + TRICKY_OFFSET);
+		return modbusSlave.getResgister(ADDR_TIMER_SET + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
 	}
 
 	private int getPanelBackupStatus(int room) {
@@ -146,7 +146,7 @@ public class DataStoreManager {
 				tempRegister &= ~mask;
 				tempBackRegister &= ~mask;
 			}
-			modbusSlave.setRegister(ADDR_STATUS + offset + TRICKY_OFFSET, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 			setPanelBackup(tempBackRegister, room, ADDR_STATUS);
 		}
 
@@ -314,21 +314,21 @@ public class DataStoreManager {
 		@Override
 		public void setHumid(int humid) {
 			// TODO Auto-generated method stub
-			modbusSlave.setRegister(ADDR_HUMID + offset + TRICKY_OFFSET, humid);
+			modbusSlave.setRegister(ADDR_HUMID + offset, humid);
 			setPanelBackup(humid, room, ADDR_HUMID);
 		}
 
 		@Override
 		public void setHumidSetValue(int humidSet) {
 			// TODO Auto-generated method stub
-			modbusSlave.setRegister(ADDR_HUMID_SET + offset + TRICKY_OFFSET, humidSet);
+			modbusSlave.setRegister(ADDR_HUMID_SET + offset, humidSet);
 			setPanelBackup(humidSet, room, ADDR_HUMID_SET);
 		}
 
 		@Override
 		public void setTimerSetValue(int timerSet) {
 			// TODO Auto-generated method stub
-			modbusSlave.setRegister(ADDR_TIMER_SET + offset + TRICKY_OFFSET, timerSet);
+			modbusSlave.setRegister(ADDR_TIMER_SET + offset, timerSet);
 			setPanelBackup(timerSet, room, ADDR_TIMER_SET);
 		}
 
@@ -421,19 +421,19 @@ public class DataStoreManager {
 		@Override
 		public int getHumid() {
 			// TODO Auto-generated method stub
-			return modbusSlave.getResgister(ADDR_HUMID + offset + TRICKY_OFFSET);
+			return modbusSlave.getResgister(ADDR_HUMID + offset);
 		}
 
 		@Override
 		public int getHumidSet() {
 			// TODO Auto-generated method stub
-			return modbusSlave.getResgister(ADDR_HUMID_SET + offset + TRICKY_OFFSET);
+			return modbusSlave.getResgister(ADDR_HUMID_SET + offset);
 		}
 
 		@Override
 		public int getTimerSet() {
 			// TODO Auto-generated method stub
-			return modbusSlave.getResgister(ADDR_TIMER_SET + offset + TRICKY_OFFSET);
+			return modbusSlave.getResgister(ADDR_TIMER_SET + offset);
 		}
 
 		@Override
@@ -505,19 +505,19 @@ public class DataStoreManager {
 		@Override
 		public void setHumid(int humid) {
 			// TODO Auto-generated method stub
-			modbusSlave.setRegister(ADDR_HUMID + offset + TRICKY_OFFSET, humid);
+			modbusSlave.setRegister(ADDR_HUMID + offset, humid);
 		}
 
 		@Override
 		public void setHumidSetValue(int humidSet) {
 			// TODO Auto-generated method stub
-			modbusSlave.setRegister(ADDR_HUMID_SET + offset + TRICKY_OFFSET, humidSet);
+			modbusSlave.setRegister(ADDR_HUMID_SET + offset, humidSet);
 		}
 
 		@Override
 		public void setTimerSetValue(int timerSet) {
 			// TODO Auto-generated method stub
-			modbusSlave.setRegister(ADDR_TIMER_SET + offset + TRICKY_OFFSET, timerSet);
+			modbusSlave.setRegister(ADDR_TIMER_SET + offset, timerSet);
 		}
 
 		@Override
@@ -529,11 +529,11 @@ public class DataStoreManager {
 			} else {
 				tempRegister &= ~mask;
 			}
-			modbusSlave.setRegister(ADDR_STATUS + offset + TRICKY_OFFSET, tempRegister);
+			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
 		}
 		
 		private int getDehumidifierStatus() {
-			return modbusSlave.getResgister(ADDR_STATUS + offset + TRICKY_OFFSET);
+			return modbusSlave.getResgister(ADDR_STATUS + offset);
 		}
 	}
 
