@@ -1,6 +1,7 @@
 package edu.ncku.uscc.process.dehumidifier;
 
 import edu.ncku.uscc.io.DehumidRoomController;
+import edu.ncku.uscc.util.Log;
 
 public class AskDehumidifierHumiditySecondCmd extends SynDehumidifierCmd {
 
@@ -22,11 +23,10 @@ public class AskDehumidifierHumiditySecondCmd extends SynDehumidifierCmd {
 	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if (rxBuf >= 0) {
+			Log.debug("Digit ten : " + rxBuf);
 			dehumidifier.setHumid(rxBuf * 10 + digitOnes);
-			controller.initCheckRate(did);
 			return true;
 		}else{
-			controller.dropRate(did);
 			return false;
 		}
 	}

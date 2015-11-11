@@ -44,26 +44,32 @@ public class DataStoreManager {
 	}
 
 	public boolean isPanelONOFFChange(int room) {
+		waitIFix();
 		return (getPanelStatus(room) & Device.POWER_MASK) != (getPanelBackupStatus(room) & Device.POWER_MASK);
 	}
 
 	public boolean isPanelModeChange(int room) {
+		waitIFix();
 		return (getPanelStatus(room) & Device.MODE_DEHUMID_MASK) != (getPanelBackupStatus(room) & Device.MODE_DEHUMID_MASK);
 	}
 
 	public boolean isPanelTimerSetFlagChange(int room) {
+		waitIFix();
 		return (getPanelStatus(room) & Device.TIMER_SET_MASK) != (getPanelBackupStatus(room) & Device.TIMER_SET_MASK);
 	}
 
 	public boolean isPanelHumiditySetFlagChange(int room) {
+		waitIFix();
 		return (getPanelStatus(room) & Device.HUMID_SET_MASK) != (getPanelBackupStatus(room) & Device.HUMID_SET_MASK);
 	}
 
 	public boolean isPanelDehumiditySetChange(int room) {
+		waitIFix();
 		return getPanelHumidSet(room) != getPanelBackupHumidSet(room);
 	}
 
 	public boolean isPanelTimerSetChange(int room) {
+		waitIFix();
 		return getPanelTimerSet(room) != getPanelBackupTimerSet(room);
 	}
 
@@ -106,6 +112,15 @@ public class DataStoreManager {
 	private void setPanelBackup(int value, int room, int offset) {
 		backupPanel[room * OFFSET_A_DEVICE + offset] = value;
 	}	
+	
+	private void waitIFix(){
+		try {
+			Thread.sleep(150);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	public abstract class Device implements IReferenceable {
 

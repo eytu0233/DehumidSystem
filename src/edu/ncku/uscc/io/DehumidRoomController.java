@@ -31,8 +31,8 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 
 	/** These constants are used to accelerate this process */
 	private static final int INITIAL_RATE = 100;
-	private static final int RATE_CONSTANT = 3;
-	private static final double DROP_RATIO = 0.77;
+	private static final int RATE_CONSTANT = 4;
+	private static final double DROP_RATIO = 0.5;
 
 	/** A synchronization lock */
 	private final Object lock = new Object();
@@ -53,6 +53,8 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	private OutputStream output;
 	/** The command is running */
 	private Command currentCmd;
+	
+	private byte rxBuf;
 
 	/** The index of the room after room index scan */
 	private int roomIndex = 0;
@@ -111,6 +113,14 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	public Object getLock() {
 		return lock;
 	}
+	
+	public synchronized void setRxBuf(byte rxBuf) {
+		this.rxBuf = rxBuf;
+	}
+	
+	public synchronized byte getRxBuf() {
+		return rxBuf;
+	}
 
 	public int getCheckRate(int did) {
 		return checkRates[did];
@@ -151,7 +161,8 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	 * @param cmd
 	 */
 	public void jumpCmdQueue(Command cmd) {
-		cmdQueue.addFirst(cmd);
+		if (cmd != null)
+			cmdQueue.addFirst(cmd);
 	}
 
 	/**
@@ -314,12 +325,10 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 				if (getInputStream() == null)
 					return;
 				input.read(chunk, 0, available);
-
-				byte rxBuf = -1;
+				
 				for (byte b : chunk) {
-					rxBuf = b;
+					setRxBuf(b);
 				}
-				currentCmd.setRxBuf(rxBuf);
 
 				synchronized (lock) {
 					lock.notifyAll();

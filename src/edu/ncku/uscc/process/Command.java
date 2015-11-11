@@ -22,7 +22,6 @@ public abstract class Command {
 	private int init_tolerance = 2;
 	private int err_tolerance = init_tolerance;
 	private byte txBuf;
-	private byte rxBuf;
 
 	private boolean ack;
 
@@ -43,7 +42,8 @@ public abstract class Command {
 	 * Advance constructor which can set tolerance initial value
 	 * 
 	 * @param controller
-	 * @param tolerance the initial value for err_tolerance field
+	 * @param tolerance
+	 *            the initial value for err_tolerance field
 	 */
 	public Command(DehumidRoomController controller, int tolerance) {
 		super();
@@ -55,10 +55,11 @@ public abstract class Command {
 	}
 
 	/**
-	 * Advance constructor which can set preCommand  field
+	 * Advance constructor which can set preCommand field
 	 * 
 	 * @param controller
-	 * @param preCommand the command that would start before this command
+	 * @param preCommand
+	 *            the command that would start before this command
 	 */
 	public Command(DehumidRoomController controller, Command preCommand) {
 		super();
@@ -71,7 +72,7 @@ public abstract class Command {
 
 	/*
 	 * Setter and getter
-	 * */
+	 */
 	public void setPreCommand(Command preCommand) {
 		this.preCommand = preCommand;
 	}
@@ -84,13 +85,9 @@ public abstract class Command {
 		return txBuf;
 	}
 
-	public void setRxBuf(byte rxBuf) {
-		this.rxBuf = rxBuf;
-	}
-
 	public boolean isAck() {
 		return ack;
-	}	
+	}
 
 	/**
 	 * Starts this command
@@ -103,15 +100,12 @@ public abstract class Command {
 		if (preCommand != null) {
 			preCommand.start();
 
-			if (!preCommand.isAck() && preCommand.getTxBuf() != SKIP) {
-				if (preCommand.overTolerance()) {
-					finishHandler();
-				}
+			if (controller.getRxBuf() == UNACK && preCommand.getTxBuf() != SKIP) {
 				return;
 			}
 		}
-
-		rxBuf = UNACK;
+		
+		controller.setRxBuf((byte)UNACK);
 		txBuf = requestHandler();
 
 		/* when skip flag is true, it won't emit data and handle reply */
@@ -121,7 +115,7 @@ public abstract class Command {
 			emit();
 
 			/* the hook method which handles reply */
-			ack = replyHandler(rxBuf);
+			ack = replyHandler(controller.getRxBuf());
 
 			/* when unack, it means timeout */
 			if (!ack) {
@@ -135,17 +129,14 @@ public abstract class Command {
 		}
 
 		/*
-		 * if this command acks or skip flag is true, it will start subCommand(if exists) and
-		 * finishCommandHandler hook method
+		 * if this command acks or skip flag is true, it will start
+		 * subCommand(if exists) and finishCommandHandler hook method
 		 */
 		if (ack || txBuf == SKIP) {
 			init();
 			if (subCommand != null) {
 				subCommand.start();
-				if (!subCommand.isAck() && subCommand.getTxBuf() != SKIP) {
-					if (subCommand.overTolerance()) {
-						finishHandler();
-					}
+				if (controller.getRxBuf() == UNACK && subCommand.getTxBuf() != SKIP) {
 					return;
 				}
 			}
@@ -174,12 +165,12 @@ public abstract class Command {
 			if (output != null) {
 				output.write(txBuf);
 			} else {
-				// throw new NullOutputSreamException();
+				 throw new NullPointerException("OutputSream is null");				
 			}
 			referenceLock.wait(TIME_OUT);
 		}
 	}
-	
+
 	/**
 	 * Set this command timeout
 	 */
