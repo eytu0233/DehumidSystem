@@ -1,10 +1,7 @@
 package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
-import edu.ncku.uscc.process.dehumidifier.AskDehumidifierHumidityCmd;
-import edu.ncku.uscc.process.dehumidifier.SynDehumidifierModeCmd;
 import edu.ncku.uscc.process.dehumidifier.SynDehumidifierPowerCmd;
-import edu.ncku.uscc.process.dehumidifier.SynDehumidifierhumidSetCmd;
 import edu.ncku.uscc.util.IReferenceable;
 import edu.ncku.uscc.util.Log;
 
@@ -12,7 +9,7 @@ public class SynPanelHumidityCmd extends SynPanelCommand {
 
 	private static final int MIN_HUMIDITY = 40;
 	private static final int MAX_HUMIDITY = 90;
-	private static final int PANEL_CMD_HUMID = 68;
+	private static final int PANEL_CMD_HUMID = 0x68;
 	private static final int DEHUMIDIFIERS_A_ROOM = 8;
 
 	private int avgHumidity;

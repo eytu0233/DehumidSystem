@@ -30,10 +30,4 @@ public class SetDehumidifierHumidSetCmd extends SynDehumidifierCmd {
 		}
 	}
 
-	@Override
-	protected void finishHandler() throws Exception {
-		// TODO Auto-generated method stub
-
-	}
-
 }
