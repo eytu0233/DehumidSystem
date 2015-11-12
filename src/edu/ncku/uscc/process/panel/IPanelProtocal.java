@@ -23,7 +23,7 @@ public interface IPanelProtocal {
 	public static final int PANEL_REQ_MINUS_TIMER = 0x89;
 	public static final int PANEL_REQ_DEHUMID_MODE = 0x8A;
 	public static final int PANEL_REQ_DRYCLOTHES_MODE = 0x8B;
-	public static final int PANEL_CMD_MULTIPLE_ABNORMAL= 0x8C;
+	public static final int PANEL_REQ_MULTIPLE_ABNORMAL= 0x8C;
 	public static final int PANEL_REQ_HUMID_ABNORMAL = 0x8D;
 	public static final int PANEL_REQ_FAN_ABNORMAL = 0x8E;
 	public static final int PANEL_REQ_COMPRESSOR_ABNORMAL = 0x8F;

@@ -2,47 +2,48 @@ package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.util.Log;
-import edu.ncku.uscc.util.PanelTimer;
+import edu.ncku.uscc.util.PanelTimerScheduler;
 
 public class SynPanelTimerSetCmd extends SynPanelCommand {
-	
-	private PanelTimer panelTimer;
 
 	public SynPanelTimerSetCmd(DehumidRoomController controller) {
 		super(controller);
 		// TODO Auto-generated constructor stub
-		panelTimer = PanelTimer.getInstance(controller);
 	}
 
 	@Override
 	protected byte requestHandler() throws Exception {
 		// TODO Auto-generated method stub
-		if (!panel.isOn() || panel.getTimerSet() <= 0) {
+		if (!panel.isOn()) {
 			return SKIP;
 		}
 		
-		if (panelTimer.getBackupTimerSet() != panel.getTimerSet()) {
-			panelTimer.newScheduleThread(panel.getTimerSet());
-		} else if (panelTimer.getTimerMinusOneFlag()) {
-			return (byte) PANEL_REQ_MINUS_TIMER;
+		if (dataStoreManager.isPanelTimerSetChange(offsetRoomIndex)) {
+			return (byte) PANEL_REQ_SETTING_TIMER;
+		} else {
+			return (byte) PANEL_REQ_TIMER_SET;
 		}
-		
-		return SKIP;
 	}
 
 	@Override
 	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
-		if (rxBuf == PANEL_REP_OK) {
-			panelTimer.backpuTimerMinusOne();
-			panel.setTimerSetValue(panelTimer
-					.getBackupTimerSet());
-			panelTimer.setTimerMinusOneFlag(false);
-			Log.info(String
-					.format("The timer set of Panel %d minus one hour. : %d",
-							offsetRoomIndex, panel.getTimerSet()));
+		if (rxBuf >= 0 && rxBuf <= 12) {
+			panel.setTimerSetValue(rxBuf);
+			Log.info(String.format("The timer set of Panel %d is %d.",
+					offsetRoomIndex, rxBuf));
+			
+			PanelTimerScheduler pts = PanelTimerScheduler.getInstance(controller);
+			if(rxBuf > 0 && pts.getBackupTimerSet() != panel.getTimerSet()){				
+				pts.newScheduleThread(rxBuf);
+			}
+			
 			return true;
-		} else {
+		} else if(rxBuf == PANEL_REP_OK) {
+			Log.info(String.format("Add change command set of timer of Panel %d", offsetRoomIndex));
+			this.setSubCommand(new SetPanelTimerSetCmd(controller));
+			return true;
+		}else {
 			return false;
 		}
 	}

@@ -2,10 +2,11 @@ package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.util.Log;
+import edu.ncku.uscc.util.PanelTimerScheduler;
 
-public class SynPanelTimerCountDownFinishCmd extends SynPanelCommand {
+public class SynPanelTimerCountDownCmd extends SynPanelCommand {
 
-	public SynPanelTimerCountDownFinishCmd(DehumidRoomController controller) {
+	public SynPanelTimerCountDownCmd(DehumidRoomController controller) {
 		super(controller);
 		// TODO Auto-generated constructor stub
 	}
@@ -16,23 +17,24 @@ public class SynPanelTimerCountDownFinishCmd extends SynPanelCommand {
 		if (!panel.isOn()) {
 			return SKIP;
 		}
-		
-		return (byte) PANEL_REQ_SHUTDOWM;
+
+		return (byte) PANEL_REQ_MINUS_TIMER;
 	}
 
 	@Override
 	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
-		if (rxBuf == PANEL_REP_OFF) {
-			panel.setOn(false);
-			Log.info(String.format("Panel %d if OFF.",
-					offsetRoomIndex));
+		if (rxBuf == PANEL_REP_OK) {
+			PanelTimerScheduler pts = PanelTimerScheduler.getInstance(controller);
+			pts.backpuTimerMinusOne();
+			panel.setTimerSetValue(pts.getBackupTimerSet());
+			Log.info(String.format("The timer set of Panel %d minus one hour. : %d", offsetRoomIndex, panel.getTimerSet()));
 			return true;
 		} else {
 			return false;
 		}
 	}
-	
+
 	@Override
 	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
@@ -45,5 +47,4 @@ public class SynPanelTimerCountDownFinishCmd extends SynPanelCommand {
 		Log.warn(String.format("Panel %d is not live.", offsetRoomIndex));
 		controller.nextCmd(null);
 	}
-
 }

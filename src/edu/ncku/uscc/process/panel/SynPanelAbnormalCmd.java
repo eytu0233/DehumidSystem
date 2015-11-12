@@ -43,7 +43,7 @@ public class SynPanelAbnormalCmd extends SynPanelCommand {
 		if (countAbnormal == 0) {
 			return SKIP;
 		} else if (countAbnormal > 1) {
-			tmpTxBuf = (byte) PANEL_CMD_MULTIPLE_ABNORMAL;
+			tmpTxBuf = (byte) PANEL_REQ_MULTIPLE_ABNORMAL;
 		}
 		
 		return tmpTxBuf;
@@ -81,7 +81,7 @@ public class SynPanelAbnormalCmd extends SynPanelCommand {
 				Log.debug(String.format("Panel %d is compressor abnormal.",
 						offsetRoomIndex));
 				break;
-			case (byte) PANEL_CMD_MULTIPLE_ABNORMAL:
+			case (byte) PANEL_REQ_MULTIPLE_ABNORMAL:
 				Log.debug(String.format("Panel %d is multiple abnormal.",
 						offsetRoomIndex));
 				break;

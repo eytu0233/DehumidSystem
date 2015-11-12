@@ -151,7 +151,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	 * 
 	 * @param cmd
 	 */
-	public void addScanRoomQueue(ScanRoomCmd cmd) {
+	public synchronized void addScanRoomQueue(ScanRoomCmd cmd) {
 		scanRoomQueue.add(cmd);
 	}
 
@@ -160,7 +160,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	 * 
 	 * @param cmd
 	 */
-	public void jumpCmdQueue(Command cmd) {
+	public synchronized void jumpCmdQueue(Command cmd) {
 		if (cmd != null)
 			cmdQueue.addFirst(cmd);
 	}
@@ -172,7 +172,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	 *            Add this command to the queue last
 	 * @throws Exception
 	 */
-	public void nextCmd(Command cmd) throws Exception {
+	public synchronized void nextCmd(Command cmd) throws Exception {
 		if (cmd != null)
 			cmdQueue.add(cmd);
 
@@ -189,7 +189,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	 *            Add this command to the scanRoomQueue last
 	 * @throws Exception
 	 */
-	public void nextScanRoomCmd(ScanRoomCmd cmd) throws Exception {
+	public synchronized void nextScanRoomCmd(ScanRoomCmd cmd) throws Exception {
 		if (cmd != null)
 			scanRoomQueue.add(cmd);
 

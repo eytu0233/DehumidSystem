@@ -13,8 +13,9 @@ public class SetPanelHumiditySetCmd extends SynPanelCommand {
 	@Override
 	protected byte requestHandler() throws Exception {
 		// TODO Auto-generated method stub
-		Log.info(String.format("Start to change set of humidity of Panel %d",
-				offsetRoomIndex));
+		if (!panel.isOn())
+			return SKIP;
+		Log.info(String.format("Start to change set of humidity of Panel %d", offsetRoomIndex));
 
 		return (byte) panel.getHumidSet();
 	}
@@ -25,11 +26,9 @@ public class SetPanelHumiditySetCmd extends SynPanelCommand {
 		if (rxBuf == PANEL_REP_OK) {
 			panel.setLive(true);
 			panel.setHumidSetValue(panel.getHumidSet());
-			Log.info(String.format(
-					"Change set of humidity of Panel %d success",
-					offsetRoomIndex, (int) rxBuf));
+			Log.info(String.format("Change set of humidity of Panel %d success", offsetRoomIndex));
 			return true;
-		}else{
+		} else {
 			return false;
 		}
 	}
@@ -37,9 +36,7 @@ public class SetPanelHumiditySetCmd extends SynPanelCommand {
 	@Override
 	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
-	
 
 }
