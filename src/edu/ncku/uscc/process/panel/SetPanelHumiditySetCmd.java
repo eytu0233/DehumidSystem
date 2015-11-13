@@ -32,11 +32,17 @@ public class SetPanelHumiditySetCmd extends SynPanelCommand {
 			return false;
 		}
 	}
-
+	
 	@Override
 	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
+		controller.nextCmd(null);
+	}
 
+	@Override
+	protected void timeoutHandler() throws Exception {
+		// TODO Auto-generated method stub
+		controller.nextCmd(null);
 	}
 
 }

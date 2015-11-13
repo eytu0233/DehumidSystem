@@ -17,13 +17,13 @@ public abstract class Command {
 	protected DehumidRoomController controller;
 	protected DataStoreManager dataStoreManager;
 	private Command preCommand;
-	private Command subCommand;
 
 	private int init_tolerance = 2;
 	private int err_tolerance = init_tolerance;
 	private byte txBuf;
 
 	private boolean ack;
+	private boolean follow;
 
 	/**
 	 * Base constructor
@@ -77,10 +77,6 @@ public abstract class Command {
 		this.preCommand = preCommand;
 	}
 
-	public void setSubCommand(Command subCommand) {
-		this.subCommand = subCommand;
-	}
-
 	public byte getTxBuf() {
 		return txBuf;
 	}
@@ -115,7 +111,12 @@ public abstract class Command {
 			emit();
 
 			/* the hook method which handles reply */
-			ack = replyHandler(controller.getRxBuf());
+			ack = replyHandler(controller.getRxBuf());			
+
+			if(follow) {
+				init();
+				return;
+			}
 
 			/* when unack, it means timeout */
 			if (!ack) {
@@ -134,14 +135,13 @@ public abstract class Command {
 		 */
 		if (ack || txBuf == SKIP) {
 			init();
-			if (subCommand != null) {
-				subCommand.start();
-				if (controller.getRxBuf() == UNACK && subCommand.getTxBuf() != SKIP) {
-					return;
-				}
-			}
 			finishHandler();
 		}
+	}
+	
+	protected final void followCmd(Command flwCmd, Command cmd){
+		follow = true;
+		controller.followCmd(flwCmd, cmd);
 	}
 
 	/**
@@ -149,8 +149,8 @@ public abstract class Command {
 	 */
 	private void init() {
 		this.ack = false;
+		this.follow = false;
 		this.err_tolerance = init_tolerance;
-		this.subCommand = null;
 	}
 
 	/**

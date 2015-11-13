@@ -41,7 +41,7 @@ public class SynPanelTimerSetCmd extends SynPanelCommand {
 			return true;
 		} else if(rxBuf == PANEL_REP_OK) {
 			Log.info(String.format("Add change command set of timer of Panel %d", offsetRoomIndex));
-			this.setSubCommand(new SetPanelTimerSetCmd(controller));
+			followCmd(new SetPanelTimerSetCmd(controller), this);
 			return true;
 		}else {
 			return false;

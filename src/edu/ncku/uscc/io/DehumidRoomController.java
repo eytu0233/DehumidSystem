@@ -53,7 +53,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	private OutputStream output;
 	/** The command is running */
 	private Command currentCmd;
-	
+
 	private byte rxBuf;
 
 	/** The index of the room after room index scan */
@@ -113,11 +113,11 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	public Object getLock() {
 		return lock;
 	}
-	
+
 	public synchronized void setRxBuf(byte rxBuf) {
 		this.rxBuf = rxBuf;
 	}
-	
+
 	public synchronized byte getRxBuf() {
 		return rxBuf;
 	}
@@ -163,6 +163,23 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	public synchronized void jumpCmdQueue(Command cmd) {
 		if (cmd != null)
 			cmdQueue.addFirst(cmd);
+	}
+
+	/**
+	 * Pointers the currentCmd to flwCmd directly instead of jumping to command queue
+	 * 
+	 * @param flwCmd
+	 * @param cmd
+	 * @throws NullPointerException
+	 */
+	public synchronized void followCmd(Command flwCmd, Command cmd) throws NullPointerException{
+		if (cmd != null)
+			cmdQueue.add(cmd);
+
+		if (flwCmd != null)
+			currentCmd = flwCmd;
+		else
+			throw new NullPointerException();
 	}
 
 	/**
@@ -325,7 +342,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 				if (getInputStream() == null)
 					return;
 				input.read(chunk, 0, available);
-				
+
 				for (byte b : chunk) {
 					setRxBuf(b);
 				}

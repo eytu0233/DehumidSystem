@@ -28,10 +28,10 @@ public class SynPanelHumiditySetCmd extends SynPanelCommand {
 	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if (rxBuf == PANEL_REP_OK) {
-			this.setSubCommand(new SetPanelHumiditySetCmd(controller));
+			followCmd(new SetPanelHumiditySetCmd(controller), this);
 			panel.setLive(true);
 			return true;
-		} else if (rxBuf >= 0) {
+		} else if (rxBuf >= 0 && rxBuf <= 12) {
 			panel.setHumidSetValue((int) rxBuf);
 			panel.setLive(true);
 			Log.info(String.format("The humidity set of Panel %d is %d.",

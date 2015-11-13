@@ -83,6 +83,7 @@ public class PanelTimerScheduler{
 			} else {
 				panelTimerScheduleRef.shutdownNow();
 				controllerRef.jumpCmdQueue(new SynPanelTimerCountDownFinishCmd(controllerRef));
+				controllerRef.jumpCmdQueue(new SynPanelTimerCountDownCmd(controllerRef));
 			}
 		}
 		
