@@ -6,9 +6,12 @@ import edu.ncku.uscc.util.PanelTimerScheduler;
 
 public class SynPanelTimerSetCmd extends SynPanelCommand {
 
+	private DehumidRoomController controller;
+	
 	public SynPanelTimerSetCmd(DehumidRoomController controller) {
 		super(controller);
 		// TODO Auto-generated constructor stub
+		this.controller = controller;
 	}
 
 	@Override
@@ -34,8 +37,8 @@ public class SynPanelTimerSetCmd extends SynPanelCommand {
 					offsetRoomIndex, rxBuf));
 			
 			PanelTimerScheduler pts = PanelTimerScheduler.getInstance(controller);
-			if(rxBuf > 0 && pts.getBackupTimerSet() != panel.getTimerSet()){				
-				pts.newScheduleThread(rxBuf);
+			if(rxBuf > 0 && pts.getBackupTimerSet(controller.getRoomIndex()) != panel.getTimerSet()){				
+				pts.newScheduleThread(rxBuf, controller.getRoomIndex());
 			}
 			
 			return true;

@@ -3,12 +3,12 @@ package edu.ncku.uscc.process;
 import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.process.dehumidifier.IDehumidProtocal;
 import edu.ncku.uscc.util.Log;
-import gnu.io.SerialPort;
+//import gnu.io.SerialPort;
 
 public class ScanRoomCmd extends Command implements IDehumidProtocal {
 	
 	private static final String LCK_REMOVE_CMD = "sudo rm -f /var/lock/LCK..ttyUSB";
-	private SerialPort serialPort;
+//	private SerialPort serialPort;
 	private int roomScanIndex;
 	private int did;
 
@@ -16,7 +16,7 @@ public class ScanRoomCmd extends Command implements IDehumidProtocal {
 			int did, int tolerance) {
 		// TODO Auto-generated constructor stub
 		super(controller, tolerance);
-		this.serialPort = controller.getSerialPort();
+//		this.serialPort = controller.getSerialPort();
 		this.roomScanIndex = roomScanIndex;
 		this.did = did;
 	}
@@ -31,8 +31,8 @@ public class ScanRoomCmd extends Command implements IDehumidProtocal {
 		byte txBuf;
 		txBuf = (byte) ((roomScanIndex << 3) + did);
 
-		Log.info(String.format("Scan roomIndex : %x in %s",
-				((int) txBuf & 0xff), serialPort.getName()));
+//		Log.info(String.format("Scan roomIndex : %x in %s",
+//				((int) txBuf & 0xff), serialPort.getName()));
 		return txBuf;
 	}
 
@@ -59,6 +59,7 @@ public class ScanRoomCmd extends Command implements IDehumidProtocal {
 		
 		// initial commandQueue
 		controller.initCmdQueue();
+		
 		// switch to the commandQueue to run command
 		controller.nextCmd(null);
 	}

@@ -1,7 +1,6 @@
 package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
-import edu.ncku.uscc.util.Log;
 
 public class SynPanelModeCmd extends SynPanelCommand {
 
@@ -37,23 +36,23 @@ public class SynPanelModeCmd extends SynPanelCommand {
 			panel.setModeDehumid(true);
 			panel.setModeDry(false);
 			panel.setLive(true);
-			Log.info(String.format("Panel %d is dehumid mode.",
-					offsetRoomIndex));
+//			Log.info(String.format("Panel %d is dehumid mode.",
+//					offsetRoomIndex));
 			return true;
 		} else if (rxBuf == PANEL_REP_DRY_CLOTHES) {
 			panel.setModeDehumid(false);
 			panel.setModeDry(true);
 			panel.setLive(true);
-			Log.info(String.format("Panel %d is dry clothes mode.",
-					offsetRoomIndex));
+//			Log.info(String.format("Panel %d is dry clothes mode.",
+//					offsetRoomIndex));
 			return true;
 		} else if (rxBuf == PANEL_REP_OK) {
 			boolean dehumid_mode = ((getTxBuf() == (byte) PANEL_REQ_DEHUMID_MODE));
 			panel.setModeDehumid(dehumid_mode);
 			panel.setModeDry(!dehumid_mode);
 			panel.setLive(true);
-			Log.info(String.format("Panel %d changes mode.",
-					offsetRoomIndex));
+//			Log.info(String.format("Panel %d changes mode.",
+//					offsetRoomIndex));
 			return true;
 		} else {
 			return false;

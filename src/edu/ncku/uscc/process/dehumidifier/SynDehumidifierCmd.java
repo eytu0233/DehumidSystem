@@ -3,7 +3,6 @@ package edu.ncku.uscc.process.dehumidifier;
 import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.process.Command;
 import edu.ncku.uscc.util.IReferenceable;
-import edu.ncku.uscc.util.Log;
 
 public abstract class SynDehumidifierCmd extends Command implements IDehumidProtocal{
 
@@ -32,7 +31,7 @@ public abstract class SynDehumidifierCmd extends Command implements IDehumidProt
 	@Override
 	protected void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
-		Log.warn(String.format("Dehumidifier %d in room %d timeout.", did, offsetRoomIndex));
+//		Log.warn(String.format("Dehumidifier %d in room %d timeout.", did, offsetRoomIndex));
 		controller.nextCmd(null);
 	}
 

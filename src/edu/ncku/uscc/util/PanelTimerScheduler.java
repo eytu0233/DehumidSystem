@@ -1,5 +1,6 @@
 package edu.ncku.uscc.util;
 
+import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -12,18 +13,21 @@ public class PanelTimerScheduler{
 	
 	private static final TimeUnit UNIT = TimeUnit.MINUTES;
 	private static final int DELAY = 1;
+	private static final int ROOMS = 4;
 
 	private static PanelTimerScheduler panelTimerScheduler;
 	
 	private static DehumidRoomController controllerRef;	
 	
-
-	private int backupTimerSet = 0;
-
-	private ScheduledExecutorService panelTimerScheduledThread;
+	private HashMap<Integer, Integer> backupTimerSettings = new HashMap<Integer, Integer>();
+	private HashMap<Integer, ScheduledExecutorService> panelTimerThreadPools = new HashMap<Integer, ScheduledExecutorService>();
 
 	private PanelTimerScheduler() {
 		super();
+		for(int roomIndex = 0; roomIndex < ROOMS; roomIndex++){
+			backupTimerSettings.put(roomIndex, 0);
+			panelTimerThreadPools.put(roomIndex, Executors.newScheduledThreadPool(1));
+		}
 	}
 
 	public static PanelTimerScheduler getInstance(DehumidRoomController controller) {
@@ -38,23 +42,25 @@ public class PanelTimerScheduler{
 		return panelTimerScheduler;
 	}
 
-	public void newScheduleThread(int timerSet) {
+	public void newScheduleThread(int timerSet, int roomIndex) {
 		
-		if (panelTimerScheduledThread != null && !panelTimerScheduledThread.isShutdown()) {
-			panelTimerScheduledThread.shutdownNow();
+		ScheduledExecutorService executor = panelTimerThreadPools.get(roomIndex);
+		if (!executor.isShutdown()) {
+			executor.shutdownNow();
 		}
 
-		panelTimerScheduledThread = Executors.newScheduledThreadPool(1);
-		panelTimerScheduledThread.schedule(new PanelTimer(timerSet, panelTimerScheduledThread), DELAY, UNIT);
-		backupTimerSet = timerSet;
+		executor = Executors.newScheduledThreadPool(1);
+		executor.schedule(new PanelTimer(timerSet, executor), DELAY, UNIT);
+		panelTimerThreadPools.put(roomIndex, executor);
+		backupTimerSettings.put(roomIndex, timerSet);
 	}
 
-	public int getBackupTimerSet() {
-		return backupTimerSet;
+	public int getBackupTimerSet(int roomIndex) {
+		return backupTimerSettings.get(roomIndex);
 	}
 
-	public void backpuTimerMinusOne() {
-		backupTimerSet--;
+	public void backpuTimerMinusOne(int roomIndex) {
+		backupTimerSettings.put(roomIndex, backupTimerSettings.get(roomIndex) - 1);
 	}
 
 	

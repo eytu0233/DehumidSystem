@@ -15,7 +15,7 @@ public class SetPanelTimerSetCmd extends SynPanelCommand {
 		// TODO Auto-generated method stub
 		if (!panel.isOn())
 			return SKIP;
-		Log.info(String.format("Start to change set of timer of Panel %d", offsetRoomIndex));
+//		Log.info(String.format("Start to change set of timer of Panel %d", offsetRoomIndex));
 		return (byte) panel.getTimerSet();
 	}
 

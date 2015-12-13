@@ -1,7 +1,6 @@
 package edu.ncku.uscc.process.dehumidifier;
 
 import edu.ncku.uscc.io.DehumidRoomController;
-import edu.ncku.uscc.util.Log;
 
 public class AskDehumidifierHumidityCmd extends SynDehumidifierCmd {
 	
@@ -24,7 +23,6 @@ public class AskDehumidifierHumidityCmd extends SynDehumidifierCmd {
 			controller.jumpCmdQueue(new AskDehumidifierHumiditySecondCmd(controller, did, rxBuf));
 			return true;
 		} else{
-			Log.warn(rxBuf);
 			return false;
 		}
 	}

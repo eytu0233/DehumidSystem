@@ -72,6 +72,7 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 			Log.warn(String.format("The dehumidifier %d in room %d acks compressor abnormal.", did, offsetRoomIndex));
 			return true;
 		default:
+			Log.warn(String.format("The dehumidifier %d in room %d time out.", did, offsetRoomIndex));
 			return false;
 		}
 	}

@@ -7,6 +7,7 @@ public class SetDehumidifierHumidSetCmd extends SynDehumidifierCmd {
 	public SetDehumidifierHumidSetCmd(DehumidRoomController controller, int did) {
 		super(controller, did);
 		// TODO Auto-generated constructor stub
+		
 		// cancel the preCommand which is notifyDeviceIDCmd
 		this.setPreCommand(null);
 	}

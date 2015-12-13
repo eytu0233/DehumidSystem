@@ -43,7 +43,7 @@ public class SynPanelHumidityCmd extends SynPanelCommand {
 		}
 
 		if (count == 0 || avgHumidity < MIN_HUMIDITY || avgHumidity > MAX_HUMIDITY) {
-			Log.debug("Humidity for panel is not in range : " + avgHumidity);
+			Log.warn("Humidity for panel is not in range : " + avgHumidity);
 			return SKIP;
 		} else {
 			return (byte) (PANEL_CMD_HUMID + avgHumidity);
@@ -54,7 +54,7 @@ public class SynPanelHumidityCmd extends SynPanelCommand {
 	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if (rxBuf == PANEL_REP_OK) {
-			Log.info(String.format("The humidity of Panel %d is %d.", offsetRoomIndex, avgHumidity));
+//			Log.info(String.format("The humidity of Panel %d is %d.", offsetRoomIndex, avgHumidity));
 			panel.setHumid(avgHumidity);
 			return true;
 		} else {

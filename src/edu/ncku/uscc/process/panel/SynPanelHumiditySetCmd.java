@@ -1,7 +1,6 @@
 package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
-import edu.ncku.uscc.util.Log;
 
 public class SynPanelHumiditySetCmd extends SynPanelCommand {
 
@@ -34,8 +33,8 @@ public class SynPanelHumiditySetCmd extends SynPanelCommand {
 		} else if (rxBuf >= 0 && rxBuf <= 12) {
 			panel.setHumidSetValue((int) rxBuf);
 			panel.setLive(true);
-			Log.info(String.format("The humidity set of Panel %d is %d.",
-					offsetRoomIndex, (int) rxBuf));
+//			Log.info(String.format("The humidity set of Panel %d is %d.",
+//					offsetRoomIndex, (int) rxBuf));
 			return true;
 		} else {
 			return false;

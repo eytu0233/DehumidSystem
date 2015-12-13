@@ -41,6 +41,11 @@ public class SynPanelAbnormalCmd extends SynPanelCommand {
 		}
 
 		if (countAbnormal == 0) {
+			panel.setHighTempWarn(false);
+			panel.setDeforstTempWarn(false);
+			panel.setHumidWarn(false);
+			panel.setFanWarn(false);
+			panel.setCompressorWarn(false);
 			return SKIP;
 		} else if (countAbnormal > 1) {
 			tmpTxBuf = (byte) PANEL_REQ_MULTIPLE_ABNORMAL;

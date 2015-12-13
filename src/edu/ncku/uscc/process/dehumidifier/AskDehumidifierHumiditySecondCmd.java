@@ -1,7 +1,6 @@
 package edu.ncku.uscc.process.dehumidifier;
 
 import edu.ncku.uscc.io.DehumidRoomController;
-import edu.ncku.uscc.util.Log;
 
 public class AskDehumidifierHumiditySecondCmd extends SynDehumidifierCmd {
 
@@ -26,7 +25,6 @@ public class AskDehumidifierHumiditySecondCmd extends SynDehumidifierCmd {
 			dehumidifier.setHumid(rxBuf * 10 + digitOnes);
 			return true;
 		}else{
-			Log.warn(rxBuf);
 			return false;
 		}
 	}	

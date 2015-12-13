@@ -5,10 +5,13 @@ import edu.ncku.uscc.util.Log;
 import edu.ncku.uscc.util.PanelTimerScheduler;
 
 public class SynPanelTimerCountDownCmd extends SynPanelCommand {
+	
+	private DehumidRoomController controller;
 
 	public SynPanelTimerCountDownCmd(DehumidRoomController controller) {
 		super(controller);
 		// TODO Auto-generated constructor stub
+		this.controller = controller;
 	}
 
 	@Override
@@ -26,8 +29,8 @@ public class SynPanelTimerCountDownCmd extends SynPanelCommand {
 		// TODO Auto-generated method stub
 		if (rxBuf == PANEL_REP_OK) {
 			PanelTimerScheduler pts = PanelTimerScheduler.getInstance(controller);
-			pts.backpuTimerMinusOne();
-			panel.setTimerSetValue(pts.getBackupTimerSet());
+			pts.backpuTimerMinusOne(controller.getRoomIndex());
+			panel.setTimerSetValue(pts.getBackupTimerSet(controller.getRoomIndex()));
 			Log.info(String.format("The timer set of Panel %d minus one hour. : %d", offsetRoomIndex, panel.getTimerSet()));
 			return true;
 		} else {
