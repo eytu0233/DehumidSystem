@@ -17,26 +17,22 @@ public class PanelTimerScheduler{
 
 	private static PanelTimerScheduler panelTimerScheduler;
 	
-	private static DehumidRoomController controllerRef;	
-	
+	private DehumidRoomController controllerRef;
 	private HashMap<Integer, Integer> backupTimerSettings = new HashMap<Integer, Integer>();
 	private HashMap<Integer, ScheduledExecutorService> panelTimerThreadPools = new HashMap<Integer, ScheduledExecutorService>();
 
-	private PanelTimerScheduler() {
+	private PanelTimerScheduler(DehumidRoomController controllerRef) {
 		super();
+		this.controllerRef = controllerRef;
 		for(int roomIndex = 0; roomIndex < ROOMS; roomIndex++){
 			backupTimerSettings.put(roomIndex, 0);
 			panelTimerThreadPools.put(roomIndex, Executors.newScheduledThreadPool(1));
 		}
 	}
 
-	public static PanelTimerScheduler getInstance(DehumidRoomController controller) {
-		if(controllerRef == null){
-			controllerRef = controller;
-		}
-		
+	public static PanelTimerScheduler getInstance(DehumidRoomController controller) {		
 		if (panelTimerScheduler == null) {
-			panelTimerScheduler = new PanelTimerScheduler();
+			panelTimerScheduler = new PanelTimerScheduler(controller);
 		}
 		
 		return panelTimerScheduler;
