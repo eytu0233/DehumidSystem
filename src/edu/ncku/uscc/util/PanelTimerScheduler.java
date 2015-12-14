@@ -16,15 +16,14 @@ public class PanelTimerScheduler{
 	private static final int ROOMS = 4;
 
 	private static PanelTimerScheduler panelTimerScheduler;
+	private static HashMap<Integer, DehumidRoomController> controllers = new HashMap<Integer, DehumidRoomController>();
 	
-	private DehumidRoomController controllerRef;
 	private HashMap<Integer, Integer> backupTimerSettings = new HashMap<Integer, Integer>();
 	private HashMap<Integer, ScheduledExecutorService> panelTimerThreadPools = new HashMap<Integer, ScheduledExecutorService>();
 
-	private PanelTimerScheduler(DehumidRoomController controllerRef) {
+	private PanelTimerScheduler() {
 		super();
-		this.controllerRef = controllerRef;
-		for(int roomIndex = 0; roomIndex < ROOMS; roomIndex++){
+		for(int roomIndex = 2; roomIndex < 2 + ROOMS; roomIndex++){
 			backupTimerSettings.put(roomIndex, 0);
 			panelTimerThreadPools.put(roomIndex, Executors.newScheduledThreadPool(1));
 		}
@@ -32,8 +31,10 @@ public class PanelTimerScheduler{
 
 	public static PanelTimerScheduler getInstance(DehumidRoomController controller) {		
 		if (panelTimerScheduler == null) {
-			panelTimerScheduler = new PanelTimerScheduler(controller);
+			panelTimerScheduler = new PanelTimerScheduler();
 		}
+		
+		controllers.put(controller.getRoomIndex(), controller);
 		
 		return panelTimerScheduler;
 	}
@@ -46,7 +47,7 @@ public class PanelTimerScheduler{
 		}
 
 		executor = Executors.newScheduledThreadPool(1);
-		executor.schedule(new PanelTimer(timerSet, executor), DELAY, UNIT);
+		executor.schedule(new PanelTimer(roomIndex, timerSet, executor), DELAY, UNIT);
 		panelTimerThreadPools.put(roomIndex, executor);
 		backupTimerSettings.put(roomIndex, timerSet);
 	}
@@ -63,11 +64,14 @@ public class PanelTimerScheduler{
 	private class PanelTimer implements Runnable{
 		
 		private ScheduledExecutorService panelTimerScheduleRef;
+		private DehumidRoomController controllerRef;
 		
-		private int currentTimer;			
+		private int currentTimer;
+		private int roomIndex;
 
-		public PanelTimer(int currentTimer, ScheduledExecutorService panelTimerScheduleRef) {
+		public PanelTimer(int roomIndex, int currentTimer, ScheduledExecutorService panelTimerScheduleRef) {
 			super();
+			this.roomIndex = roomIndex;
 			this.currentTimer = currentTimer;
 			this.panelTimerScheduleRef = panelTimerScheduleRef;
 		}
@@ -78,6 +82,8 @@ public class PanelTimerScheduler{
 			if(panelTimerScheduleRef.isShutdown()) return;
 			
 			currentTimer--;
+			
+			controllerRef = controllers.get(roomIndex);
 			
 			if (currentTimer > 0) {
 				panelTimerScheduleRef.schedule(this, DELAY, UNIT);
