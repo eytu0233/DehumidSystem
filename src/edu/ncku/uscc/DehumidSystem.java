@@ -13,6 +13,7 @@ import edu.ncku.uscc.io.ModbusTCPSlave;
 import edu.ncku.uscc.io.SerialPortDisconnectListener;
 import edu.ncku.uscc.util.DataStoreManager;
 import edu.ncku.uscc.util.Log;
+import edu.ncku.uscc.util.PanelBackupSet;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 
@@ -42,6 +43,7 @@ public class DehumidSystem {
 		
 		try{
 			Log.init();
+			PanelBackupSet.init();
 
 			for(String portName : PORT_NAMES){
 				portRoomAvailable.put(portName, false);

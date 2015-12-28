@@ -2,6 +2,7 @@ package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.util.Log;
+import edu.ncku.uscc.util.PanelBackupSet;
 import edu.ncku.uscc.util.PanelTimerScheduler;
 
 public class SynPanelTimerSetCmd extends SynPanelCommand {
@@ -12,6 +13,11 @@ public class SynPanelTimerSetCmd extends SynPanelCommand {
 		super(controller);
 		// TODO Auto-generated constructor stub
 		this.controller = controller;
+	}
+	
+	private void setBackupTimerSet() {
+		PanelBackupSet.setProp(panel.getTimerSet(), 
+				this.getClass().getSimpleName(), offsetRoomIndex);
 	}
 
 	@Override
@@ -33,6 +39,9 @@ public class SynPanelTimerSetCmd extends SynPanelCommand {
 		// TODO Auto-generated method stub
 		if (rxBuf >= 0 && rxBuf <= 12) {
 			panel.setTimerSetValue(rxBuf);
+			
+			setBackupTimerSet();
+			
 			Log.info(String.format("The timer set of Panel %d is %d.",
 					offsetRoomIndex, rxBuf));
 			

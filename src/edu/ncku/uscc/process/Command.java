@@ -11,6 +11,7 @@ public abstract class Command {
 
 	public static final int UNACK = -1;
 	public static final int SKIP = -1;
+	public static final int PROPERTY_CMD = -2;
 
 	private Object referenceLock;
 
@@ -103,6 +104,12 @@ public abstract class Command {
 		
 		controller.setRxBuf((byte)UNACK);
 		txBuf = requestHandler();
+		
+		if (txBuf == PROPERTY_CMD) {
+			init();
+			finishHandler();
+			return;
+		}
 
 		/* when skip flag is true, it won't emit data and handle reply */
 		if (txBuf != SKIP) {

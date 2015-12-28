@@ -9,6 +9,7 @@ import java.util.List;
 
 import edu.ncku.uscc.process.Command;
 import edu.ncku.uscc.process.ScanRoomCmd;
+import edu.ncku.uscc.process.panel.SetPanelBackupSetCmd;
 import edu.ncku.uscc.process.panel.SynPanelAbnormalCmd;
 import edu.ncku.uscc.process.panel.SynPanelHumidityCmd;
 import edu.ncku.uscc.process.panel.SynPanelHumiditySetCmd;
@@ -222,6 +223,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	public void initCmdQueue() {
 		clearQueue();
 
+		addCmdQueue(new SetPanelBackupSetCmd(this));
 		addCmdQueue(new SynPanelPowerCmd(this));
 		addCmdQueue(new SynPanelModeCmd(this));
 		addCmdQueue(new SynPanelHumiditySetCmd(this));
