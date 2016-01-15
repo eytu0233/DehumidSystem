@@ -13,13 +13,22 @@ import edu.ncku.uscc.process.panel.SynPanelHumiditySetCmd;
 import edu.ncku.uscc.process.panel.SynPanelTimerSetCmd;
 
 public class PanelBackupSet {
+
+	private static final String PROPERTY_FILE_NAME = "./backupSet4panel.properties";
+
+	private static final String TRUE = "true";
+	private static final String FALSE = "false";
 	
-	private static final String PROPERTY_FILE_NAME = "workspace/backupSet4panel.properties";
-	
+	private static final String DEFALUT = FALSE;
+	private static final String DEFALUT_DEHUMID_VALUE = "4";
+	private static final String DEFALUT_VALUE = "0";
+
+	private static final Object lock = new Object();
+
 	private static Properties checkpoint;
 	private static InputStream inputProp;
 	private static OutputStream outputProp;
-	
+
 	public static void init() {
 		checkpoint = new Properties();
 		inputProp = null;
@@ -27,28 +36,107 @@ public class PanelBackupSet {
 		try {
 			inputProp = new FileInputStream(PROPERTY_FILE_NAME);
 			checkpoint.load(inputProp);
+			if(checkpoint.keySet().size() == 0){
+				inputProp.close();
+				inputProp = null;
+				newProp();
+			}
 		} catch (IOException io) {
 			newProp();
 		} finally {
 			if (inputProp != null) {
 				try {
 					inputProp.close();
+					inputProp = null;
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 		}
 	}
+
+	public static boolean getOnCheckpoint(int roomIndex) {
+		String value = checkpoint.getProperty(roomIndex + SynPanelPowerCmd.class.getSimpleName(), DEFALUT);
+		return strToBool(value);
+	}
+
+	public static boolean getModeDehumidCP(int roomIndex) {
+		String value = checkpoint.getProperty(roomIndex + SynPanelModeCmd.class.getSimpleName(), DEFALUT);
+		return strToBool(value);
+	}
+
+	public static boolean getModeDryCP(int roomIndex) {
+		String value = checkpoint.getProperty(roomIndex + SynPanelModeCmd.class.getSimpleName(), DEFALUT);
+		return !strToBool(value);
+	}
+
+	public static int getHumidSetValueCP(int roomIndex) {
+		String value = checkpoint.getProperty(roomIndex + SynPanelHumiditySetCmd.class.getSimpleName(), DEFALUT_DEHUMID_VALUE);
+		return Integer.valueOf(value);
+	}
 	
+	public static int getTimerSetValueCP(int roomIndex) {
+		String value = checkpoint.getProperty(roomIndex + SynPanelTimerSetCmd.class.getSimpleName(), DEFALUT_VALUE);
+		return Integer.valueOf(value);
+	}
+
+	public static void setProp(boolean b, String name, int room) {
+		synchronized (lock) {
+			try {
+				outputProp = new FileOutputStream(PROPERTY_FILE_NAME);
+				checkpoint.setProperty(new String(room + name), String.valueOf(b));
+				checkpoint.store(outputProp, null);
+			} catch (IOException io) {
+				io.printStackTrace();
+			} finally {
+				if (outputProp != null) {
+					try {
+						outputProp.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	}
+
+	public static void setProp(int n, String name, int room) {
+		synchronized (lock) {
+			try {
+				outputProp = new FileOutputStream(PROPERTY_FILE_NAME);
+				checkpoint.setProperty(new String(room + name), String.valueOf(n));
+				checkpoint.store(outputProp, null);
+			} catch (IOException io) {
+				io.printStackTrace();
+			} finally {
+				if (outputProp != null) {
+					try {
+						outputProp.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	}
+
+	private static boolean strToBool(String s) {
+		if (TRUE.equals(s))
+			return true;
+		else if (FALSE.equals(s))
+			return false;
+		return false;
+	}
+
 	private static void newProp() {
 		try {
 			outputProp = new FileOutputStream(PROPERTY_FILE_NAME);
 
 			for (int room = 0; room < 3; room++) {
-				checkpoint.setProperty(new String(room + SynPanelPowerCmd.class.getSimpleName()), "false");
-				checkpoint.setProperty(new String(room + SynPanelModeCmd.class.getSimpleName()), "true");
-				checkpoint.setProperty(new String(room + SynPanelHumiditySetCmd.class.getSimpleName()), "4");
-				checkpoint.setProperty(new String(room + SynPanelTimerSetCmd.class.getSimpleName()), "0");
+				checkpoint.setProperty(new String(room + SynPanelPowerCmd.class.getSimpleName()), FALSE);
+				checkpoint.setProperty(new String(room + SynPanelModeCmd.class.getSimpleName()), TRUE);
+				checkpoint.setProperty(new String(room + SynPanelHumiditySetCmd.class.getSimpleName()), DEFALUT_DEHUMID_VALUE);
+				checkpoint.setProperty(new String(room + SynPanelTimerSetCmd.class.getSimpleName()), DEFALUT_VALUE);
 			}
 
 			checkpoint.store(outputProp, null);
@@ -65,67 +153,5 @@ public class PanelBackupSet {
 
 		}
 	}
-	
-	public static Properties getProp() {
-		try {
-			inputProp = new FileInputStream(PROPERTY_FILE_NAME);
-			checkpoint.load(inputProp);
-		} catch (IOException io) {
-			io.printStackTrace();
-		} finally {
-			if (inputProp != null) {
-				try {
-					inputProp.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return checkpoint;
-	}
-	
-	public static void setProp(boolean b, String name, int room) {
-		try {
-			outputProp = new FileOutputStream(PROPERTY_FILE_NAME);
-			checkpoint.setProperty(new String(room + name), String.valueOf(b));
-			checkpoint.store(outputProp, null);
-		} catch (IOException io) {
-			io.printStackTrace();
-		} finally {
-			if (outputProp != null) {
-				try {
-					outputProp.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-	
-	public static void setProp(int n, String name, int room) {
-		try {
-			outputProp = new FileOutputStream(PROPERTY_FILE_NAME);
-			checkpoint.setProperty(new String(room + name), String.valueOf(n));
-			checkpoint.store(outputProp, null);
-		} catch (IOException io) {
-			io.printStackTrace();
-		} finally {
-			if (outputProp != null) {
-				try {
-					outputProp.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-	
-	public static boolean strToBool(String s) {
-		if (s.equals("true"))
-			return true;
-		else if (s.equals("false"))
-			return false;
-		return false;
-	}
-	
+
 }

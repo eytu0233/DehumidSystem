@@ -9,11 +9,6 @@ public class SynPanelPowerCmd extends SynPanelCommand {
 		super(controller);
 		// TODO Auto-generated constructor stub
 	}
-	
-	private void setBackupOn() {
-		PanelBackupSet.setProp(panel.isOn(), 
-				this.getClass().getSimpleName(), offsetRoomIndex);
-	}
 
 	@Override
 	protected byte requestHandler() throws Exception {
@@ -51,6 +46,11 @@ public class SynPanelPowerCmd extends SynPanelCommand {
 		} else {
 			return false;
 		}
+	}
+	
+	private void setBackupOn() {
+		PanelBackupSet.setProp(panel.isOn(), 
+				this.getClass().getSimpleName(), offsetRoomIndex);
 	}
 
 }

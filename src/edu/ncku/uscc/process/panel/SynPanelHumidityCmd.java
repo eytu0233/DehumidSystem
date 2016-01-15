@@ -40,9 +40,12 @@ public class SynPanelHumidityCmd extends SynPanelCommand {
 
 		if (count > 0) {
 			avgHumidity = humidity / count;
+		}else{
+			Log.warn("There is no dehumidifiers in this room.");
+			return SKIP;
 		}
-
-		if (count == 0 || avgHumidity < MIN_HUMIDITY || avgHumidity > MAX_HUMIDITY) {
+		
+		if (avgHumidity < MIN_HUMIDITY || avgHumidity > MAX_HUMIDITY) {
 			Log.warn("Humidity for panel is not in range : " + avgHumidity);
 			return SKIP;
 		} else {

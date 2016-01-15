@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import edu.ncku.uscc.io.DehumidRoomController;
@@ -17,6 +16,16 @@ import edu.ncku.uscc.util.PanelBackupSet;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 
+/**
+ * 
+ * This class is used to be as the entrance of this system.
+ * This class has two main feature. One is to start modbus slave thread.
+ * Another is to start usb port scanning thread. This thread is to implement the feature of hot usb which
+ * lets the usb ports on raspberry pi be inserted and pulled arbitrarily.
+ * 
+ * @author steve chen
+ *
+ */
 public class DehumidSystem {
 
 	private static final int NUM_ROOMS = 4;
@@ -49,14 +58,15 @@ public class DehumidSystem {
 				portRoomAvailable.put(portName, false);
 			}
 			
+			// start the modbus tcp slave thread
 			ModbusTCPSlave slave = new ModbusTCPSlave(NUM_ROOMS * DEVICES_A_ROOM * REGISTERS_A_DEVICE);
 			slave.initialize();
 			Log.info("Modbus TCP Slave Started...");
 			
+			// the data store manager is used by all DehumidRoomController thread
 			dataStoreManager = new DataStoreManager(slave);
 			
-			ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(1);
-			scheduledThreadPool.scheduleAtFixedRate(new PortScanTask(), 0, 1, TimeUnit.SECONDS);
+			Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new PortScanTask(), 0, 1, TimeUnit.SECONDS);
 			Log.info("PortScanTask Started...");
 			LATCH.await();
 			

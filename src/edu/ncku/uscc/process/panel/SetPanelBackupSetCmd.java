@@ -1,13 +1,9 @@
 package edu.ncku.uscc.process.panel;
 
-import java.util.Properties;
-
 import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.util.PanelBackupSet;
 
 public class SetPanelBackupSetCmd extends SynPanelCommand {
-	
-	private static Properties prop;
 
 	public SetPanelBackupSetCmd(DehumidRoomController controller) {
 		super(controller);
@@ -17,22 +13,16 @@ public class SetPanelBackupSetCmd extends SynPanelCommand {
 	@Override
 	protected byte requestHandler() throws Exception {
 		// TODO Auto-generated method stub
-		prop = PanelBackupSet.getProp();
 		
-		panel.setOn(PanelBackupSet.strToBool(prop.getProperty(
-				new String(offsetRoomIndex + SynPanelPowerCmd.class.getSimpleName()))));
+		panel.setOn(PanelBackupSet.getOnCheckpoint(offsetRoomIndex));
 		
-		panel.setModeDehumid(PanelBackupSet.strToBool(prop.getProperty(
-				new String(offsetRoomIndex + SynPanelModeCmd.class.getSimpleName()))));
+		panel.setModeDehumid(PanelBackupSet.getModeDehumidCP(offsetRoomIndex));
 		
-		panel.setModeDry(!PanelBackupSet.strToBool(prop.getProperty(
-				new String(offsetRoomIndex + SynPanelModeCmd.class.getSimpleName()))));
+		panel.setModeDry(PanelBackupSet.getModeDryCP(offsetRoomIndex));
 		
-		panel.setHumidSetValue(Integer.valueOf(prop.getProperty(
-				new String(offsetRoomIndex + SynPanelHumiditySetCmd.class.getSimpleName()))));
+		panel.setHumidSetValue(PanelBackupSet.getHumidSetValueCP(offsetRoomIndex));
 		
-		panel.setTimerSetValue(Integer.valueOf(prop.getProperty(
-				new String(offsetRoomIndex + SynPanelTimerSetCmd.class.getSimpleName()))));
+		panel.setTimerSetValue(PanelBackupSet.getTimerSetValueCP(offsetRoomIndex));
 		
 		controller.jumpCmdQueue(new SetPanelBackupTimerSetCmd(controller));
 		controller.jumpCmdQueue(new SetPanelBackupHumiditySetCmd(controller));
