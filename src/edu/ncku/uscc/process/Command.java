@@ -4,6 +4,7 @@ import java.io.OutputStream;
 
 import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.util.DataStoreManager;
+import edu.ncku.uscc.util.Log;
 
 public abstract class Command {
 
@@ -93,11 +94,12 @@ public abstract class Command {
 	 */
 	public final void start() throws Exception {
 
-		/* run the command first before this command */
+		// Run the command first before this command 
 		if (preCommand != null) {
 			preCommand.start();
 
-			if (controller.getRxBuf() == UNACK && preCommand.getTxBuf() != SKIP) {
+			// If preCommand(like NotifyDeviceIDCmd) is not ack, main command is over.
+			if (!preCommand.isAck()) {				
 				return;
 			}
 		}
@@ -105,19 +107,20 @@ public abstract class Command {
 		controller.setRxBuf((byte)UNACK);
 		txBuf = requestHandler();
 		
+		// If txBuf is set as PROPERTY_CMD, it means that the command won't be run. 
 		if (txBuf == PROPERTY_CMD) {
 			init();
 			finishHandler();
 			return;
 		}
 
-		/* when skip flag is true, it won't emit data and handle reply */
+		// When skip flag is true, it won't emit data and handle reply 
 		if (txBuf != SKIP) {
 
-			/* emit the txBuf data */
+			/* Emit the txBuf data */
 			emit();
 
-			/* the hook method which handles reply */
+			/* The hook method which handles reply */
 			ack = replyHandler(controller.getRxBuf());			
 
 			if(follow) {
@@ -125,7 +128,7 @@ public abstract class Command {
 				return;
 			}
 
-			/* when unack, it means timeout */
+			/* When unack, it means timeout */
 			if (!ack) {
 				timeout();
 				if (overTolerance()) {
@@ -137,8 +140,8 @@ public abstract class Command {
 		}
 
 		/*
-		 * if this command acks or skip flag is true, it will start
-		 * subCommand(if exists) and finishCommandHandler hook method
+		 * If this command acks or skip flag is true, it will start
+		 * subCommand(if exists) and finishHandler hook method
 		 */
 		if (ack || txBuf == SKIP) {
 			init();

@@ -192,7 +192,9 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	 */
 	public synchronized void nextCmd(Command cmd) throws Exception {
 		if (cmd != null)
-			cmdQueue.add(cmd);
+			cmdQueue.add(cmd);		
+
+//		Log.debug("cmdQueue : " + cmdQueue.size());
 
 		currentCmd = (cmdQueue != null) ? cmdQueue.pollFirst() : null;
 
@@ -246,6 +248,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 		serialPort.addEventListener(this);
 		serialPort.notifyOnDataAvailable(true);
 
+		// initial check rate
 		for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; initCheckRate(did++))
 			;
 

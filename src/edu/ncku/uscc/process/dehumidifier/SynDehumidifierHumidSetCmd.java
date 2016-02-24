@@ -2,9 +2,9 @@ package edu.ncku.uscc.process.dehumidifier;
 
 import edu.ncku.uscc.io.DehumidRoomController;
 
-public class SynDehumidifierhumidSetCmd extends SynDehumidifierCmd {
+public class SynDehumidifierHumidSetCmd extends SynDehumidifierCmd {
 
-	public SynDehumidifierhumidSetCmd(DehumidRoomController controller, int did) {
+	public SynDehumidifierHumidSetCmd(DehumidRoomController controller, int did) {
 		super(controller, did);
 		// TODO Auto-generated constructor stub
 	}

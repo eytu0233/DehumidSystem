@@ -47,6 +47,8 @@ public class SynPanelHumidityCmd extends SynPanelCommand {
 		
 		if (avgHumidity < MIN_HUMIDITY || avgHumidity > MAX_HUMIDITY) {
 			Log.warn("Humidity for panel is not in range : " + avgHumidity);
+			Log.warn("Total Humidity : " + humidity);
+			Log.warn("Dehumidifier : " + count);
 			return SKIP;
 		} else {
 			return (byte) (PANEL_CMD_HUMID + avgHumidity);

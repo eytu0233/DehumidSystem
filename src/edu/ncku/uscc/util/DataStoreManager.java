@@ -35,11 +35,16 @@ public class DataStoreManager {
 		this.panels = new Panel[NUM_ROOMS];
 		this.backupPanel = new int[NUM_ROOMS * 4];
 		this.dehumidifiers = new Dehumidifier[NUM_ROOMS][DEHUMIDIFIER_A_ROOM];
+		
 		for (int room = 0; room < NUM_ROOMS; room++) {
 			panels[room] = new Panel(room);
+			
 			for (int did = 0; did < DEHUMIDIFIER_A_ROOM; did++) {
+				
 				dehumidifiers[room][did] = new Dehumidifier(room, did);
+				
 			}
+			
 		}
 	}
 

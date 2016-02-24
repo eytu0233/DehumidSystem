@@ -1,6 +1,7 @@
 package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
+import edu.ncku.uscc.util.Log;
 import edu.ncku.uscc.util.PanelBackupSet;
 
 public class SynPanelPowerCmd extends SynPanelCommand {
@@ -35,13 +36,13 @@ public class SynPanelPowerCmd extends SynPanelCommand {
 			panel.setOn(true);
 			panel.setLive(true);
 			setBackupOn();
-//			Log.info(String.format("Panel %d is ON.", offsetRoomIndex));
+			Log.info(String.format("Panel %d is ON.", offsetRoomIndex));
 			return true;
 		} else if (rxBuf == PANEL_REP_OFF) {
 			panel.setOn(false);
 			panel.setLive(true);
 			setBackupOn();
-//			Log.info(String.format("Panel %d is OFF.", offsetRoomIndex));
+			Log.info(String.format("Panel %d is OFF.", offsetRoomIndex));
 			return true;
 		} else {
 			return false;

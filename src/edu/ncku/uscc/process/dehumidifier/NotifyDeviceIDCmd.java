@@ -86,7 +86,7 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 	@Override
 	protected void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
-		Log.debug(String.format("Dehumidifier %d in room %d timeout.", did, offsetRoomIndex));
+		Log.debug(String.format("Dehumidifier %d in room %d timeout in notification.", did, offsetRoomIndex));
 		dehumidifier.setLive(false);
 		controller.dropRate(did);
 		controller.nextCmd(null);
