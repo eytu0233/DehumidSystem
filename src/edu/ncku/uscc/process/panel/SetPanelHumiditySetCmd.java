@@ -15,9 +15,17 @@ public class SetPanelHumiditySetCmd extends SynPanelCommand {
 		// TODO Auto-generated method stub
 		if (!panel.isOn())
 			return SKIP;
-//		Log.info(String.format("Start to change set of humidity of Panel %d", offsetRoomIndex));
-
-		return (byte) panel.getHumidSet();
+		
+		int humidSet = panel.getHumidSet();
+		if (humidSet < 50)
+			humidSet = 50;
+		else if (humidSet > 90)
+			humidSet = 90;
+		humidSet = (humidSet - 45) / 5;
+		
+//		Log.info(String.format("Start to change set of humidity of Panel %d %d", 
+//				offsetRoomIndex, humidSet));
+		return (byte) humidSet;
 	}
 
 	@Override

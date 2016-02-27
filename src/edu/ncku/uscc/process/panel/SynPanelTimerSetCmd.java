@@ -42,8 +42,8 @@ public class SynPanelTimerSetCmd extends SynPanelCommand {
 			
 			setBackupTimerSet();
 			
-			Log.info(String.format("The timer set of Panel %d is %d.",
-					offsetRoomIndex, rxBuf));
+//			Log.info(String.format("The timer set of Panel %d is %d.",
+//					offsetRoomIndex, rxBuf));
 			
 			PanelTimerScheduler pts = PanelTimerScheduler.getInstance(controller);
 			if(rxBuf > 0 && pts.getBackupTimerSet(controller.getRoomIndex()) != panel.getTimerSet()){				

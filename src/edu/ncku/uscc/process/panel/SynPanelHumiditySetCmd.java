@@ -1,6 +1,7 @@
 package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
+import edu.ncku.uscc.util.Log;
 import edu.ncku.uscc.util.PanelBackupSet;
 
 public class SynPanelHumiditySetCmd extends SynPanelCommand {
@@ -36,8 +37,8 @@ public class SynPanelHumiditySetCmd extends SynPanelCommand {
 			followCmd(new SetPanelHumiditySetCmd(controller), this);
 			panel.setLive(true);
 			return true;
-		} else if (rxBuf >= 0 && rxBuf <= 12) {
-			panel.setHumidSetValue((int) rxBuf);
+		} else if (rxBuf >= 1 && rxBuf <= 9) {
+			panel.setHumidSetValue(45 + 5 * (int) rxBuf);
 			panel.setLive(true);
 			
 			setBackupHumiditySet();
