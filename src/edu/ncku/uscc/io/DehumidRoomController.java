@@ -35,6 +35,8 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	private static final int RATE_CONSTANT = 4;
 	private static final double DROP_RATIO = 0.5;
 
+	private static final long DELAY_TIME = 500;
+
 	/** A synchronization lock */
 	private final Object lock = new Object();
 	/** The command queue which store commands */
@@ -290,6 +292,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 			nextScanRoomCmd(null);
 			while (currentCmd != null) {
 				currentCmd.start();
+//				Thread.sleep(DELAY_TIME);
 			}
 			Log.error("Current command is null!!");
 		} catch (Exception e) {

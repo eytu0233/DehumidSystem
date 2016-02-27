@@ -19,7 +19,7 @@ public class AskDehumidifierHumidityCmd extends SynDehumidifierCmd {
 	@Override
 	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
-		if (rxBuf >= 0) {	
+		if (rxBuf >= 0 && rxBuf <= 9) {	
 			controller.jumpCmdQueue(new AskDehumidifierHumiditySecondCmd(controller, did, rxBuf));
 			return true;
 		} else{

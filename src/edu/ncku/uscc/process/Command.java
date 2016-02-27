@@ -25,7 +25,10 @@ public abstract class Command {
 	private byte txBuf;
 
 	private boolean ack;
+	private boolean preAck;
 	private boolean follow;
+
+	private IPreCMDNotifier notifyListener;
 
 	/**
 	 * Base constructor
@@ -69,6 +72,15 @@ public abstract class Command {
 		this.referenceLock = controller.getLock();
 		this.dataStoreManager = controller.getDataStoreManager();
 		this.preCommand = preCommand;
+		this.preCommand.setNotifyListener(new IPreCMDNotifier(){
+
+			@Override
+			public void notifyMainCMD(boolean ack) {
+				// TODO Auto-generated method stub
+				preAck = ack;
+			}
+			
+		});
 		this.init();
 	}
 
@@ -87,6 +99,11 @@ public abstract class Command {
 		return ack;
 	}
 
+	private void setNotifyListener(IPreCMDNotifier listener) {
+		// TODO Auto-generated method stub
+		this.notifyListener = listener;
+	}
+
 	/**
 	 * Starts this command
 	 * 
@@ -99,7 +116,7 @@ public abstract class Command {
 			preCommand.start();
 
 			// If preCommand(like NotifyDeviceIDCmd) is not ack, main command is over.
-			if (!preCommand.isAck()) {				
+			if (!preAck) {				
 				return;
 			}
 		}
@@ -109,43 +126,43 @@ public abstract class Command {
 		
 		// If txBuf is set as PROPERTY_CMD, it means that the command won't be run. 
 		if (txBuf == PROPERTY_CMD) {
+			if(notifyListener != null) notifyListener.notifyMainCMD(ack);
 			init();
-			finishHandler();
+			finishHandler();			
 			return;
 		}
 
 		// When skip flag is true, it won't emit data and handle reply 
 		if (txBuf != SKIP) {
 
-			/* Emit the txBuf data */
-			emit();
-
-			/* The hook method which handles reply */
-			ack = replyHandler(controller.getRxBuf());			
+			emitAndReceiveData();
 
 			if(follow) {
 				init();
 				return;
 			}
 
-			/* When unack, it means timeout */
+			/* When UNACK, it means timeout */
 			if (!ack) {
 				timeout();
 				if (overTolerance()) {
+					if(notifyListener != null) notifyListener.notifyMainCMD(false);
 					init();
 					timeoutHandler();
+					
 				}
 				return;
 			}
 		}
 
 		/*
-		 * If this command acks or skip flag is true, it will start
+		 * If this command ACK or SKIP flag is true, it will start
 		 * subCommand(if exists) and finishHandler hook method
 		 */
 		if (ack || txBuf == SKIP) {
+			if(notifyListener != null) notifyListener.notifyMainCMD(true);
 			init();
-			finishHandler();
+			finishHandler();			
 		}
 	}
 	
@@ -169,15 +186,19 @@ public abstract class Command {
 	 * 
 	 * @throws Exception
 	 */
-	private void emit() throws Exception {
+	private void emitAndReceiveData() throws Exception {
 		synchronized (referenceLock) {
 			OutputStream output = controller.getOutputStream();
 			if (output != null) {
+//				Log.debug(String.format("txBuf : %x", txBuf));
 				output.write(txBuf);
 			} else {
 				 throw new NullPointerException("OutputSream is null");				
 			}
 			referenceLock.wait(TIME_OUT);
+			
+			/* The hook method which handles reply */
+			ack = replyHandler(controller.getRxBuf());	
 		}
 	}
 
@@ -227,5 +248,17 @@ public abstract class Command {
 	 * @throws Exception
 	 */
 	abstract protected void timeoutHandler() throws Exception;
+	
+	/**
+	 * This interface is used to pass the ACK of preCommand to main command
+	 * 
+	 * @author steve chen
+	 *
+	 */
+	private interface IPreCMDNotifier {
+
+		public void notifyMainCMD(boolean ack);
+		
+	}
 
 }
