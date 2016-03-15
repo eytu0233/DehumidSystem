@@ -1,7 +1,6 @@
 package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
-import edu.ncku.uscc.util.Log;
 
 public class SetPanelHumiditySetCmd extends SynPanelCommand {
 
@@ -23,8 +22,8 @@ public class SetPanelHumiditySetCmd extends SynPanelCommand {
 			humidSet = 90;
 		humidSet = (humidSet - 45) / 5;
 		
-//		Log.info(String.format("Start to change set of humidity of Panel %d %d", 
-//				offsetRoomIndex, humidSet));
+		controller.log_info(String.format("Start to change set of humidity of Panel %d %d", 
+				offsetRoomIndex, humidSet));
 		return (byte) humidSet;
 	}
 
@@ -34,7 +33,9 @@ public class SetPanelHumiditySetCmd extends SynPanelCommand {
 		if (rxBuf == PANEL_REP_OK) {
 			panel.setLive(true);
 			panel.setHumidSetValue(panel.getHumidSet());
-			Log.info(String.format("Change set of humidity of Panel %d success", offsetRoomIndex));
+			
+			controller.log_info(String.format("Change set of humidity of Panel %d success", 
+					offsetRoomIndex));
 			return true;
 		} else {
 			return false;

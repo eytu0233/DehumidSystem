@@ -1,7 +1,6 @@
 package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
-import edu.ncku.uscc.util.Log;
 
 public class SynPanelTimerCountDownFinishCmd extends SynPanelCommand {
 
@@ -25,7 +24,8 @@ public class SynPanelTimerCountDownFinishCmd extends SynPanelCommand {
 		// TODO Auto-generated method stub
 		if (rxBuf == PANEL_REP_OFF) {
 			panel.setOn(false);
-			Log.debug(String.format("Panel %d is turned off by timer.",
+			
+			controller.log_info(String.format("Panel %d is turned off by timer.",
 					offsetRoomIndex));
 			return true;
 		} else {

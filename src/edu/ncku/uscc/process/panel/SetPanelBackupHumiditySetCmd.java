@@ -41,6 +41,7 @@ public class SetPanelBackupHumiditySetCmd extends SynPanelCommand {
 	protected void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
 		controller.nextCmd(null);
+		controller.log_warn(String.format("Panel %d is not live.", offsetRoomIndex));
 	}
 
 }

@@ -2,7 +2,6 @@ package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.util.IReferenceable;
-import edu.ncku.uscc.util.Log;
 
 public class SynPanelAbnormalCmd extends SynPanelCommand {
 
@@ -61,33 +60,33 @@ public class SynPanelAbnormalCmd extends SynPanelCommand {
 			switch (getTxBuf()) {
 			case (byte) PANEL_REQ_TEMP_ABNORMAL:
 				panel.setHighTempWarn(true);
-				Log.debug(String.format(
+				controller.log_debug(String.format(
 						"Panel %d is high temperature abnormal.",
 						offsetRoomIndex));
 				break;
 			case (byte) PANEL_REQ_DEFROST_TEMP_ABNORMAL:
 				panel.setDeforstTempWarn(true);
-				Log.debug(String.format(
+				controller.log_debug(String.format(
 						"Panel %d is defrost temperature abnormal.",
 						offsetRoomIndex));
 				break;
 			case (byte) PANEL_REQ_HUMID_ABNORMAL:
 				panel.setHumidWarn(true);
-				Log.debug(String.format("Panel %d is humid abnormal.",
+				controller.log_debug(String.format("Panel %d is humid abnormal.",
 						offsetRoomIndex));
 				break;
 			case (byte) PANEL_REQ_FAN_ABNORMAL:
 				panel.setFanWarn(true);
-				Log.debug(String.format("Panel %d is fan abnormal.",
+				controller.log_debug(String.format("Panel %d is fan abnormal.",
 						offsetRoomIndex));
 				break;
 			case (byte) PANEL_REQ_COMPRESSOR_ABNORMAL:
 				panel.setCompressorWarn(true);
-				Log.debug(String.format("Panel %d is compressor abnormal.",
+				controller.log_debug(String.format("Panel %d is compressor abnormal.",
 						offsetRoomIndex));
 				break;
 			case (byte) PANEL_REQ_MULTIPLE_ABNORMAL:
-				Log.debug(String.format("Panel %d is multiple abnormal.",
+				controller.log_debug(String.format("Panel %d is multiple abnormal.",
 						offsetRoomIndex));
 				break;
 			}

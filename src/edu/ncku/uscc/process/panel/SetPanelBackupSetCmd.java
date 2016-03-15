@@ -30,7 +30,7 @@ public class SetPanelBackupSetCmd extends SynPanelCommand {
 		controller.jumpCmdQueue(new SetPanelBackupPowerCmd(controller, panel.isOn()));
 
 		// Check the power status whether iFix has changed or not
-		return (byte) PROPERTY_CMD;
+		return (byte) SKIP;
 	}
 
 	@Override
@@ -43,6 +43,7 @@ public class SetPanelBackupSetCmd extends SynPanelCommand {
 	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
 		controller.nextCmd(null);
+		controller.log_warn(String.format("Panel %d is not live.", offsetRoomIndex));
 	}
 
 }

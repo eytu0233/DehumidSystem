@@ -30,8 +30,8 @@ public class ScanRoomCmd extends Command implements IDehumidProtocal {
 		byte txBuf;
 		txBuf = (byte) ((roomScanIndex << 3) + did);
 
-		// Log.info(String.format("Scan roomIndex : %x in %s",
-		// ((int) txBuf & 0xff), serialPort.getName()));
+//		 controller.log_info(String.format("Scan roomIndex : %x in %s", 
+//				 ((int) txBuf & 0xff), serialPort.getName()));
 		return txBuf;
 	}
 
@@ -42,6 +42,7 @@ public class ScanRoomCmd extends Command implements IDehumidProtocal {
 				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL) {
 			Log.info("Scan room index : " + roomScanIndex + " from " + controller.getSerialPort().getName());
 			controller.setRoomIndex(roomScanIndex);
+			controller.detectLogRoomIndex();
 			return true;
 		} else {
 			return false;

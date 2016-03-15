@@ -43,16 +43,18 @@ public class SynPanelModeCmd extends SynPanelCommand {
 			panel.setModeDry(false);
 			panel.setLive(true);
 			setBackupMode();
-//			Log.info(String.format("Panel %d is dehumid mode.",
-//					offsetRoomIndex));
+			
+			controller.log_info(String.format("Panel %d is dehumid mode.",
+					offsetRoomIndex));
 			return true;
 		} else if (rxBuf == PANEL_REP_DRY_CLOTHES) {
 			panel.setModeDehumid(false);
 			panel.setModeDry(true);
 			panel.setLive(true);
 			setBackupMode();
-//			Log.info(String.format("Panel %d is dry clothes mode.",
-//					offsetRoomIndex));
+			
+			controller.log_info(String.format("Panel %d is dry clothes mode.",
+					offsetRoomIndex));
 			return true;
 		} else if (rxBuf == PANEL_REP_OK) {
 			boolean dehumid_mode = ((getTxBuf() == (byte) PANEL_REQ_DEHUMID_MODE));
@@ -60,8 +62,9 @@ public class SynPanelModeCmd extends SynPanelCommand {
 			panel.setModeDry(!dehumid_mode);
 			panel.setLive(true);
 			setBackupMode();
-//			Log.info(String.format("Panel %d changes mode.",
-//					offsetRoomIndex));
+			
+			controller.log_info(String.format("Panel %d changes mode.",
+					offsetRoomIndex));
 			return true;
 		} else {
 			return false;

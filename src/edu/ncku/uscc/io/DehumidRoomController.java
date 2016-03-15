@@ -35,7 +35,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	private static final int RATE_CONSTANT = 4;
 	private static final double DROP_RATIO = 0.5;
 
-	private static final long DELAY_TIME = 500;
+//	private static final long DELAY_TIME = 500;
 
 	/** A synchronization lock */
 	private final Object lock = new Object();
@@ -58,6 +58,8 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	private Command currentCmd;
 
 	private byte rxBuf;
+	private String logCommand;
+	private boolean isLog = false;
 
 	/** The index of the room after room index scan */
 	private int roomIndex = 0;
@@ -71,10 +73,11 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	 * @param dataStoreManager
 	 * @param serialPort
 	 */
-	public DehumidRoomController(DataStoreManager dataStoreManager, SerialPort serialPort) {
+	public DehumidRoomController(DataStoreManager dataStoreManager, SerialPort serialPort, String logCommand) {
 		super();
 		this.dataStoreManager = dataStoreManager;
 		this.serialPort = serialPort;
+		this.logCommand = logCommand;
 	}
 
 	public SerialPort getSerialPort() {
@@ -194,7 +197,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	 */
 	public synchronized void nextCmd(Command cmd) throws Exception {
 		if (cmd != null)
-			cmdQueue.add(cmd);		
+			cmdQueue.add(cmd);
 
 //		Log.debug("cmdQueue : " + cmdQueue.size());
 
@@ -375,6 +378,35 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 			}
 
 		}
+	}
+	
+	public void detectLogRoomIndex() {
+		for (char ch : logCommand.toCharArray()) {
+			if ((char)((roomIndex - 1) + '0') == ch) {
+				isLog = true;
+				break;
+			}
+		}
+	}
+
+	public void log_debug(String message) {
+		if (isLog)
+			Log.debug(message);
+	}
+
+	public void log_error(Object message) {
+		if (isLog)
+			Log.error(message);
+	}
+
+	public void log_warn(Object message) {
+		if (isLog)
+			Log.warn(message);
+	}
+
+	public void log_info(Object message) {
+		if (isLog)
+			Log.info(message);
 	}
 
 	/**

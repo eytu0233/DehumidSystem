@@ -1,7 +1,6 @@
 package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
-import edu.ncku.uscc.util.Log;
 import edu.ncku.uscc.util.PanelTimerScheduler;
 
 public class SynPanelTimerCountDownCmd extends SynPanelCommand {
@@ -31,7 +30,9 @@ public class SynPanelTimerCountDownCmd extends SynPanelCommand {
 			PanelTimerScheduler pts = PanelTimerScheduler.getInstance(controller);
 			pts.backpuTimerMinusOne(controller.getRoomIndex());
 			panel.setTimerSetValue(pts.getBackupTimerSet(controller.getRoomIndex()));
-			Log.info(String.format("The timer set of Panel %d minus one hour. : %d", offsetRoomIndex, panel.getTimerSet()));
+			
+			controller.log_info(String.format("The timer set of Panel %d minus one hour. : %d", 
+					offsetRoomIndex, panel.getTimerSet()));
 			return true;
 		} else {
 			return false;
@@ -47,7 +48,9 @@ public class SynPanelTimerCountDownCmd extends SynPanelCommand {
 	@Override
 	protected void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
-		Log.warn(String.format("Panel %d is not live.", offsetRoomIndex));
+		
+		controller.log_warn(String.format("Panel %d is not live.", offsetRoomIndex));
+		
 		controller.nextCmd(null);
 	}
 }

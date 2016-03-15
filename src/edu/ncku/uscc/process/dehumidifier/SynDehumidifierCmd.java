@@ -31,8 +31,10 @@ public abstract class SynDehumidifierCmd extends Command implements IDehumidProt
 	@Override
 	protected void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
-//		Log.warn(String.format("Dehumidifier %d in room %d timeout.", did, offsetRoomIndex));
 		controller.nextCmd(null);
+		
+		controller.log_warn(String.format("Dehumidifier %d in room %d timeout.",
+				did, offsetRoomIndex));
 	}
 
 }

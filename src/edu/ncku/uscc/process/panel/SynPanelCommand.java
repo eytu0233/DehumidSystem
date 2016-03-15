@@ -2,7 +2,6 @@ package edu.ncku.uscc.process.panel;
 import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.process.Command;
 import edu.ncku.uscc.util.IReferenceable;
-import edu.ncku.uscc.util.Log;
 
 
 public abstract class SynPanelCommand extends Command implements IPanelProtocal{
@@ -26,9 +25,12 @@ public abstract class SynPanelCommand extends Command implements IPanelProtocal{
 	@Override
 	protected void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
-		Log.warn(String.format("Panel %d is not live.", offsetRoomIndex));
+//		Log.warn(String.format("Panel %d is not live.", offsetRoomIndex));
 		panel.setLive(false);
 		controller.nextCmd(this);
+		
+		controller.log_warn(String.format("Panel %d is not live.", 
+				offsetRoomIndex));
 	}
 
 }

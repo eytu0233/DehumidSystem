@@ -1,7 +1,6 @@
 package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
-import edu.ncku.uscc.util.Log;
 
 public class SetPanelBackupTimerSetCmd extends SynPanelCommand {
 
@@ -27,8 +26,10 @@ public class SetPanelBackupTimerSetCmd extends SynPanelCommand {
 	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if(rxBuf == PANEL_REP_OK) {
-			Log.info(String.format("Add change command set of timer of Panel %d", offsetRoomIndex));
 			followCmd(new SetPanelTimerSetCmd(controller), this);
+			
+			controller.log_info(String.format("Add change command set of timer of Panel %d", 
+					offsetRoomIndex));
 			return true;
 		}else {
 			return false;
@@ -45,6 +46,8 @@ public class SetPanelBackupTimerSetCmd extends SynPanelCommand {
 	protected void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
 		controller.nextCmd(null);
+		
+		controller.log_warn(String.format("Panel %d is not live.", offsetRoomIndex));
 	}
 
 }

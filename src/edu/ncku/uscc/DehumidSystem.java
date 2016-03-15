@@ -46,12 +46,21 @@ public class DehumidSystem {
 	private static DataStoreManager dataStoreManager;
 	
 	private final static CountDownLatch LATCH = new CountDownLatch(1);
+	
+	private static final String LOG_COMMAND_DEFAULT = "-Dew1234";
+	private static String logCommand = "";
 		
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
 		try{
-			Log.init();
+			
+			for (String arg : args)
+				logCommand = logCommand.concat(arg);
+			if (!logCommand.matches("-D[deiw]+[1234]*"))
+				logCommand = LOG_COMMAND_DEFAULT;
+			
+			Log.init(logCommand);
 			PanelBackupSet.init();
 
 			for(String portName : PORT_NAMES){
@@ -104,7 +113,7 @@ public class DehumidSystem {
 										SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 								
 								DehumidRoomController dehumid = new DehumidRoomController(dataStoreManager,
-										serialPort);
+										serialPort, logCommand);
 								dehumid.addDisconnectListener(new SerialPortDisconnectListener(){
 
 									@Override

@@ -3,7 +3,6 @@ package edu.ncku.uscc.process.panel;
 import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.process.dehumidifier.SynDehumidifierPowerCmd;
 import edu.ncku.uscc.util.IReferenceable;
-import edu.ncku.uscc.util.Log;
 
 public class SynPanelHumidityCmd extends SynPanelCommand {
 
@@ -41,14 +40,14 @@ public class SynPanelHumidityCmd extends SynPanelCommand {
 		if (count > 0) {
 			avgHumidity = humidity / count;
 		}else{
-			Log.warn("There is no dehumidifiers in this room.");
+			controller.log_warn("There is no dehumidifiers in this room.");
 			return SKIP;
 		}
 		
 		if (avgHumidity < MIN_HUMIDITY || avgHumidity > MAX_HUMIDITY) {
-			Log.warn("Humidity for panel is not in range : " + avgHumidity);
-			Log.warn("Total Humidity : " + humidity);
-			Log.warn("Dehumidifier : " + count);
+			controller.log_warn("Humidity for panel is not in range : " + avgHumidity);
+			controller.log_warn("Total Humidity : " + humidity);
+			controller.log_warn("Dehumidifier : " + count);
 			return SKIP;
 		} else {
 			return (byte) (PANEL_CMD_HUMID + avgHumidity);
@@ -59,8 +58,10 @@ public class SynPanelHumidityCmd extends SynPanelCommand {
 	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if (rxBuf == PANEL_REP_OK) {
-//			Log.info(String.format("The humidity of Panel %d is %d.", offsetRoomIndex, avgHumidity));
 			panel.setHumid(avgHumidity);
+
+			controller.log_info(String.format("The humidity of Panel %d is %d.", 
+					offsetRoomIndex, avgHumidity));
 			return true;
 		} else {
 			return false;

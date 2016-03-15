@@ -25,12 +25,10 @@ public class SetPanelBackupPowerCmd extends SynPanelCommand {
 		if (rxBuf == PANEL_REP_ON) {
 			panel.setOn(true);
 			panel.setLive(true);
-//			Log.info(String.format("Panel %d is ON.", offsetRoomIndex));
 			return true;
 		} else if (rxBuf == PANEL_REP_OFF) {
 			panel.setOn(false);
 			panel.setLive(true);
-//			Log.info(String.format("Panel %d is OFF.", offsetRoomIndex));
 			return true;
 		} else {
 			return false;
@@ -41,12 +39,14 @@ public class SetPanelBackupPowerCmd extends SynPanelCommand {
 	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
 		controller.nextCmd(null);
+		controller.log_info(String.format("Panel %d power is been checked.", offsetRoomIndex));
 	}
 	
 	@Override
 	protected void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
 		controller.nextCmd(null);
+		controller.log_warn(String.format("Panel %d is not live.", offsetRoomIndex));
 	}
 
 }

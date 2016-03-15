@@ -4,7 +4,6 @@ import java.io.OutputStream;
 
 import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.util.DataStoreManager;
-import edu.ncku.uscc.util.Log;
 
 public abstract class Command {
 
@@ -12,7 +11,6 @@ public abstract class Command {
 
 	public static final int UNACK = -1;
 	public static final int SKIP = -1;
-	public static final int PROPERTY_CMD = -2;
 
 	private Object referenceLock;
 
@@ -116,21 +114,13 @@ public abstract class Command {
 			preCommand.start();
 
 			// If preCommand(like NotifyDeviceIDCmd) is not ack, main command is over.
-			if (!preAck) {				
+			if (!preAck) {
 				return;
 			}
 		}
 		
 		controller.setRxBuf((byte)UNACK);
 		txBuf = requestHandler();
-		
-		// If txBuf is set as PROPERTY_CMD, it means that the command won't be run. 
-		if (txBuf == PROPERTY_CMD) {
-			if(notifyListener != null) notifyListener.notifyMainCMD(ack);
-			init();
-			finishHandler();			
-			return;
-		}
 
 		// When skip flag is true, it won't emit data and handle reply 
 		if (txBuf != SKIP) {
@@ -149,7 +139,6 @@ public abstract class Command {
 					if(notifyListener != null) notifyListener.notifyMainCMD(false);
 					init();
 					timeoutHandler();
-					
 				}
 				return;
 			}
@@ -162,7 +151,7 @@ public abstract class Command {
 		if (ack || txBuf == SKIP) {
 			if(notifyListener != null) notifyListener.notifyMainCMD(true);
 			init();
-			finishHandler();			
+			finishHandler();
 		}
 	}
 	
@@ -190,7 +179,7 @@ public abstract class Command {
 		synchronized (referenceLock) {
 			OutputStream output = controller.getOutputStream();
 			if (output != null) {
-//				Log.debug(String.format("txBuf : %x", txBuf));
+				controller.log_debug(String.format("txBuf : %x", txBuf));
 				output.write(txBuf);
 			} else {
 				 throw new NullPointerException("OutputSream is null");				
@@ -198,7 +187,7 @@ public abstract class Command {
 			referenceLock.wait(TIME_OUT);
 			
 			/* The hook method which handles reply */
-			ack = replyHandler(controller.getRxBuf());	
+			ack = replyHandler(controller.getRxBuf());
 		}
 	}
 

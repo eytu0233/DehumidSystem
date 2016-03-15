@@ -1,7 +1,6 @@
 package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
-import edu.ncku.uscc.util.Log;
 
 public class SetPanelTimerSetCmd extends SynPanelCommand {
 
@@ -15,7 +14,8 @@ public class SetPanelTimerSetCmd extends SynPanelCommand {
 		// TODO Auto-generated method stub
 		if (!panel.isOn())
 			return SKIP;
-//		Log.info(String.format("Start to change set of timer of Panel %d", offsetRoomIndex));
+		controller.log_info(String.format("Start to change set of timer of Panel %d", 
+				offsetRoomIndex));
 		return (byte) panel.getTimerSet();
 	}
 
@@ -25,7 +25,9 @@ public class SetPanelTimerSetCmd extends SynPanelCommand {
 		if (rxBuf == PANEL_REP_OK) {
 			panel.setLive(true);
 			panel.setTimerSetValue(panel.getTimerSet());
-			Log.info(String.format("Change set of timer of Panel %d success", offsetRoomIndex));
+			
+			controller.log_info(String.format("Change set of timer of Panel %d success", 
+					offsetRoomIndex));
 			return true;
 		} else {
 			return false;

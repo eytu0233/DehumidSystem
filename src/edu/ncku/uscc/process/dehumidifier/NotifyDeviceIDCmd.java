@@ -3,7 +3,6 @@ package edu.ncku.uscc.process.dehumidifier;
 import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.process.Command;
 import edu.ncku.uscc.util.IReferenceable;
-import edu.ncku.uscc.util.Log;
 
 public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 
@@ -39,41 +38,47 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 			dehumidifier.setCompressorWarn(false);
 			dehumidifier.setLive(true);
 			controller.initCheckRate(did);
-			// Log.debug(String.format("The dehumidifier %d in room %d OK", did,
-			// offsetRoomIndex));
+			controller.log_debug(String.format("The dehumidifier %d in room %d OK", 
+					did, offsetRoomIndex));
 			return true;
 		case DEHUMID_REP_HIGH_TEMP_ABNORMAL:
 			dehumidifier.setHighTempWarn(true);
 			dehumidifier.setLive(true);
 			controller.initCheckRate(did);
-			Log.warn(String.format("The dehumidifier %d in room %d acks high temp abnormal.", did, offsetRoomIndex));
+			controller.log_warn(String.format("The dehumidifier %d in room %d acks high temp abnormal.", 
+					did, offsetRoomIndex));
 			return true;
 		case DEHUMID_REP_DEFROST_TEMP_ABNORMAL:
 			dehumidifier.setDeforstTempWarn(true);
 			dehumidifier.setLive(true);
 			controller.initCheckRate(did);
-			Log.warn(String.format("The dehumidifier %d in room %d acks defrost temp abnormal.", did, offsetRoomIndex));
+			controller.log_warn(String.format("The dehumidifier %d in room %d acks defrost temp abnormal.", 
+					did, offsetRoomIndex));
 			return true;
 		case DEHUMID_REP_DEHUMID_ABNORMAL:
 			dehumidifier.setHumidWarn(true);
 			dehumidifier.setLive(true);
 			controller.initCheckRate(did);
-			Log.warn(String.format("The dehumidifier %d in room %d acks dehumid abnormal.", did, offsetRoomIndex));
+			controller.log_warn(String.format("The dehumidifier %d in room %d acks dehumid abnormal.", 
+					did, offsetRoomIndex));
 			return true;
 		case DEHUMID_REP_FAN_ABNORMAL:
 			dehumidifier.setFanWarn(true);
 			dehumidifier.setLive(true);
 			controller.initCheckRate(did);
-			Log.warn(String.format("The dehumidifier %d in room %d acks fan abnormal.", did, offsetRoomIndex));
+			controller.log_warn(String.format("The dehumidifier %d in room %d acks fan abnormal.", 
+					did, offsetRoomIndex));
 			return true;
 		case DEHUMID_REP_COMPRESSOR_ABNORMAL:
 			dehumidifier.setCompressorWarn(true);
 			dehumidifier.setLive(true);
 			controller.initCheckRate(did);
-			Log.warn(String.format("The dehumidifier %d in room %d acks compressor abnormal.", did, offsetRoomIndex));
+			controller.log_warn(String.format("The dehumidifier %d in room %d acks compressor abnormal.", 
+					did, offsetRoomIndex));
 			return true;
 		default:
-			Log.debug(String.format("The dehumidifier %d in room %d time out.", did, offsetRoomIndex));
+			controller.log_debug(String.format("NThe dehumidifier %d in room %d time out.", 
+					did, offsetRoomIndex));
 			return false;
 		}
 	}
@@ -87,7 +92,10 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 	@Override
 	protected void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
-		Log.warn(String.format("The dehumidifier %d in room %d overs tolerance in notification.", did, offsetRoomIndex));
+		
+		controller.log_warn(String.format("The dehumidifier %d in room %d overs tolerance in notification.", 
+				did, offsetRoomIndex));
+		
 		dehumidifier.setLive(false);
 		controller.dropRate(did);
 		controller.nextCmd(null);
