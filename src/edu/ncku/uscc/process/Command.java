@@ -179,15 +179,22 @@ public abstract class Command {
 		synchronized (referenceLock) {
 			OutputStream output = controller.getOutputStream();
 			if (output != null) {
-				controller.log_debug(String.format("txBuf : %x", txBuf));
+//				if (this.getClass().getSimpleName().equals(NotifyDeviceIDCmd.class.getSimpleName()))
+//					controller.log_debug(String.format("\ntxBuf : %x, %d", txBuf, controller.getRoomIndex()));
+//				else
+//					controller.log_debug(String.format(this.getClass().getSimpleName() + " txBuf : %x", txBuf));
 				output.write(txBuf);
 			} else {
-				 throw new NullPointerException("OutputSream is null");				
+				 throw new NullPointerException("OutputSream is null");
 			}
 			referenceLock.wait(TIME_OUT);
 			
 			/* The hook method which handles reply */
 			ack = replyHandler(controller.getRxBuf());
+//			if (this.getClass().getSimpleName().equals(NotifyDeviceIDCmd.class.getSimpleName()))
+//				controller.log_debug(String.format("rxBuf : %x, %d\n", controller.getRxBuf(), controller.getRoomIndex()));
+//			else
+//				controller.log_debug(String.format(this.getClass().getSimpleName() + " rxBuf : %x", controller.getRxBuf()));
 		}
 	}
 

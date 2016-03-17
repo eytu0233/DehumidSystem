@@ -38,7 +38,7 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 			dehumidifier.setCompressorWarn(false);
 			dehumidifier.setLive(true);
 			controller.initCheckRate(did);
-			controller.log_debug(String.format("The dehumidifier %d in room %d OK", 
+			controller.log_info(String.format("The dehumidifier %d in room %d OK", 
 					did, offsetRoomIndex));
 			return true;
 		case DEHUMID_REP_HIGH_TEMP_ABNORMAL:
@@ -77,7 +77,7 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 					did, offsetRoomIndex));
 			return true;
 		default:
-			controller.log_debug(String.format("NThe dehumidifier %d in room %d time out.", 
+			controller.log_debug(String.format("The dehumidifier %d in room %d time out.", 
 					did, offsetRoomIndex));
 			return false;
 		}

@@ -36,7 +36,7 @@ public class SynPanelHumiditySetCmd extends SynPanelCommand {
 			followCmd(new SetPanelHumiditySetCmd(controller), this);
 			panel.setLive(true);
 			return true;
-		} else if (rxBuf >= 1 && rxBuf <= 9) {
+		} else if (rxBuf > 0 && rxBuf < 10) {
 			panel.setHumidSetValue(45 + 5 * (int) rxBuf);
 			panel.setLive(true);
 			
