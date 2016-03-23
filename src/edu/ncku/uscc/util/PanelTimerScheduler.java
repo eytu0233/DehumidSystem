@@ -11,7 +11,7 @@ import edu.ncku.uscc.process.panel.SynPanelTimerCountDownFinishCmd;
 
 public class PanelTimerScheduler{
 	
-	private static final TimeUnit UNIT = TimeUnit.MINUTES;
+	private static final TimeUnit UNIT = TimeUnit.HOURS;
 	private static final int DELAY = 1;
 	private static final int ROOMS = 4;
 

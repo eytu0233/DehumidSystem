@@ -3,11 +3,12 @@ package edu.ncku.uscc.process;
 import java.io.OutputStream;
 
 import edu.ncku.uscc.io.DehumidRoomController;
+import edu.ncku.uscc.process.dehumidifier.NotifyDeviceIDCmd;
 import edu.ncku.uscc.util.DataStoreManager;
 
 public abstract class Command {
 
-	private static int TIME_OUT = 400;
+	private static int TIME_OUT = 600;
 
 	public static final int UNACK = -1;
 	public static final int SKIP = -1;
@@ -179,10 +180,10 @@ public abstract class Command {
 		synchronized (referenceLock) {
 			OutputStream output = controller.getOutputStream();
 			if (output != null) {
-//				if (this.getClass().getSimpleName().equals(NotifyDeviceIDCmd.class.getSimpleName()))
-//					controller.log_debug(String.format("\ntxBuf : %x, %d", txBuf, controller.getRoomIndex()));
-//				else
-//					controller.log_debug(String.format(this.getClass().getSimpleName() + " txBuf : %x", txBuf));
+				if (this.getClass().getSimpleName().equals(NotifyDeviceIDCmd.class.getSimpleName()))
+					controller.log_debug(String.format("\ntxBuf : %x, %d", txBuf, controller.getRoomIndex()));
+				else
+					controller.log_debug(String.format(this.getClass().getSimpleName() + " txBuf : %x", txBuf));
 				output.write(txBuf);
 			} else {
 				 throw new NullPointerException("OutputSream is null");
@@ -191,10 +192,10 @@ public abstract class Command {
 			
 			/* The hook method which handles reply */
 			ack = replyHandler(controller.getRxBuf());
-//			if (this.getClass().getSimpleName().equals(NotifyDeviceIDCmd.class.getSimpleName()))
-//				controller.log_debug(String.format("rxBuf : %x, %d\n", controller.getRxBuf(), controller.getRoomIndex()));
-//			else
-//				controller.log_debug(String.format(this.getClass().getSimpleName() + " rxBuf : %x", controller.getRxBuf()));
+			if (this.getClass().getSimpleName().equals(NotifyDeviceIDCmd.class.getSimpleName()))
+				controller.log_debug(String.format("rxBuf : %x, %d\n", controller.getRxBuf(), controller.getRoomIndex()));
+			else
+				controller.log_debug(String.format(this.getClass().getSimpleName() + " rxBuf : %x", controller.getRxBuf()));
 		}
 	}
 
