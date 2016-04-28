@@ -8,9 +8,7 @@ import java.io.OutputStream;
 import java.util.Properties;
 
 import edu.ncku.uscc.process.panel.SynPanelPowerCmd;
-import edu.ncku.uscc.process.panel.SynPanelModeCmd;
 import edu.ncku.uscc.process.panel.SynPanelHumiditySetCmd;
-import edu.ncku.uscc.process.panel.SynPanelTimerSetCmd;
 
 public class PanelBackupSet {
 
@@ -21,7 +19,6 @@ public class PanelBackupSet {
 	
 	private static final String DEFALUT = FALSE;
 	private static final String DEFALUT_DEHUMID_VALUE = "4";
-	private static final String DEFALUT_VALUE = "0";
 
 	private static final Object lock = new Object();
 
@@ -60,23 +57,8 @@ public class PanelBackupSet {
 		return strToBool(value);
 	}
 
-	public static boolean getModeDehumidCP(int roomIndex) {
-		String value = checkpoint.getProperty(roomIndex + SynPanelModeCmd.class.getSimpleName(), DEFALUT);
-		return strToBool(value);
-	}
-
-	public static boolean getModeDryCP(int roomIndex) {
-		String value = checkpoint.getProperty(roomIndex + SynPanelModeCmd.class.getSimpleName(), DEFALUT);
-		return !strToBool(value);
-	}
-
 	public static int getHumidSetValueCP(int roomIndex) {
 		String value = checkpoint.getProperty(roomIndex + SynPanelHumiditySetCmd.class.getSimpleName(), DEFALUT_DEHUMID_VALUE);
-		return Integer.valueOf(value);
-	}
-	
-	public static int getTimerSetValueCP(int roomIndex) {
-		String value = checkpoint.getProperty(roomIndex + SynPanelTimerSetCmd.class.getSimpleName(), DEFALUT_VALUE);
 		return Integer.valueOf(value);
 	}
 
@@ -134,9 +116,7 @@ public class PanelBackupSet {
 
 			for (int room = 0; room < 3; room++) {
 				checkpoint.setProperty(new String(room + SynPanelPowerCmd.class.getSimpleName()), FALSE);
-				checkpoint.setProperty(new String(room + SynPanelModeCmd.class.getSimpleName()), TRUE);
 				checkpoint.setProperty(new String(room + SynPanelHumiditySetCmd.class.getSimpleName()), DEFALUT_DEHUMID_VALUE);
-				checkpoint.setProperty(new String(room + SynPanelTimerSetCmd.class.getSimpleName()), DEFALUT_VALUE);
 			}
 
 			checkpoint.store(outputProp, null);

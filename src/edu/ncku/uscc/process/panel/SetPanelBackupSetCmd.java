@@ -16,17 +16,9 @@ public class SetPanelBackupSetCmd extends SynPanelCommand {
 		
 		panel.setOn(PanelBackupSet.getOnCheckpoint(offsetRoomIndex));
 		
-		panel.setModeDehumid(PanelBackupSet.getModeDehumidCP(offsetRoomIndex));
-		
-		panel.setModeDry(PanelBackupSet.getModeDryCP(offsetRoomIndex));
-		
 		panel.setHumidSetValue(PanelBackupSet.getHumidSetValueCP(offsetRoomIndex));
 		
-		panel.setTimerSetValue(PanelBackupSet.getTimerSetValueCP(offsetRoomIndex));
-		
-		controller.jumpCmdQueue(new SetPanelBackupTimerSetCmd(controller));
 		controller.jumpCmdQueue(new SetPanelBackupHumiditySetCmd(controller));
-		controller.jumpCmdQueue(new SetPanelBackupModeCmd(controller, panel.isModeDehumid()));
 		controller.jumpCmdQueue(new SetPanelBackupPowerCmd(controller, panel.isOn()));
 
 		// Check the power status whether iFix has changed or not

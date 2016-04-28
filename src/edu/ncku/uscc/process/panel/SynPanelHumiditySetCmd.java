@@ -49,5 +49,12 @@ public class SynPanelHumiditySetCmd extends SynPanelCommand {
 			return false;
 		}
 	}
+	
+	@Override
+	protected void finishHandler() throws Exception {
+		// TODO Auto-generated method stub
+		controller.jumpCmdQueue(new SynPanelTimerSetCmd(controller));
+		controller.nextCmd(null);
+	}
 
 }

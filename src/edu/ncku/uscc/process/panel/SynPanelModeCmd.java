@@ -1,18 +1,12 @@
 package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
-import edu.ncku.uscc.util.PanelBackupSet;
 
 public class SynPanelModeCmd extends SynPanelCommand {
 
 	public SynPanelModeCmd(DehumidRoomController controller) {
 		super(controller);
 		// TODO Auto-generated constructor stub
-	}
-	
-	private void setBackupMode() {
-		PanelBackupSet.setProp(panel.isModeDehumid(), 
-				this.getClass().getSimpleName(), offsetRoomIndex);
 	}
 
 	@Override
@@ -42,7 +36,6 @@ public class SynPanelModeCmd extends SynPanelCommand {
 			panel.setModeDehumid(true);
 			panel.setModeDry(false);
 			panel.setLive(true);
-			setBackupMode();
 			
 			controller.log_info(String.format("Panel %d is dehumid mode.",
 					offsetRoomIndex));
@@ -51,7 +44,6 @@ public class SynPanelModeCmd extends SynPanelCommand {
 			panel.setModeDehumid(false);
 			panel.setModeDry(true);
 			panel.setLive(true);
-			setBackupMode();
 			
 			controller.log_info(String.format("Panel %d is dry clothes mode.",
 					offsetRoomIndex));
@@ -61,7 +53,6 @@ public class SynPanelModeCmd extends SynPanelCommand {
 			panel.setModeDehumid(dehumid_mode);
 			panel.setModeDry(!dehumid_mode);
 			panel.setLive(true);
-			setBackupMode();
 			
 			controller.log_info(String.format("Panel %d changes mode.",
 					offsetRoomIndex));
@@ -69,6 +60,13 @@ public class SynPanelModeCmd extends SynPanelCommand {
 		} else {
 			return false;
 		}
+	}
+	
+	@Override
+	protected void finishHandler() throws Exception {
+		// TODO Auto-generated method stub
+		controller.jumpCmdQueue(new SynPanelHumiditySetCmd(controller));
+		controller.nextCmd(null);
 	}
 
 

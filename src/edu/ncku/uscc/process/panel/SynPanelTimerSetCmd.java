@@ -1,7 +1,6 @@
 package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
-import edu.ncku.uscc.util.PanelBackupSet;
 import edu.ncku.uscc.util.PanelTimerScheduler;
 
 public class SynPanelTimerSetCmd extends SynPanelCommand {
@@ -12,11 +11,6 @@ public class SynPanelTimerSetCmd extends SynPanelCommand {
 		super(controller);
 		// TODO Auto-generated constructor stub
 		this.controller = controller;
-	}
-	
-	private void setBackupTimerSet() {
-		PanelBackupSet.setProp(panel.getTimerSet(), 
-				this.getClass().getSimpleName(), offsetRoomIndex);
 	}
 
 	@Override
@@ -39,8 +33,6 @@ public class SynPanelTimerSetCmd extends SynPanelCommand {
 		if (rxBuf >= 0 && rxBuf <= 12) {
 			panel.setTimerSetValue(rxBuf);
 			
-			setBackupTimerSet();
-			
 			PanelTimerScheduler pts = PanelTimerScheduler.getInstance(controller);
 			if(rxBuf > 0 && pts.getBackupTimerSet(controller.getRoomIndex()) != panel.getTimerSet()){				
 				pts.newScheduleThread(rxBuf, controller.getRoomIndex());
@@ -58,6 +50,13 @@ public class SynPanelTimerSetCmd extends SynPanelCommand {
 		}else {
 			return false;
 		}
+	}
+	
+	@Override
+	protected void finishHandler() throws Exception {
+		// TODO Auto-generated method stub
+		controller.jumpCmdQueue(new SynPanelAbnormalCmd(controller));
+		controller.nextCmd(null);
 	}
 
 }

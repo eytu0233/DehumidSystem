@@ -17,6 +17,7 @@ public class DataStoreManager {
 	//private static final int TRICKY_OFFSET = DEVICES_A_ROOM * NUM_ROOMS * OFFSET_A_DEVICE;
 
 	private int[] backupPanel;
+	private int[][] backupDehumidifiers;
 
 	private ModbusTCPSlave modbusSlave;
 
@@ -35,6 +36,7 @@ public class DataStoreManager {
 		this.panels = new Panel[NUM_ROOMS];
 		this.backupPanel = new int[NUM_ROOMS * 4];
 		this.dehumidifiers = new Dehumidifier[NUM_ROOMS][DEHUMIDIFIER_A_ROOM];
+		this.backupDehumidifiers = new int[NUM_ROOMS][DEHUMIDIFIER_A_ROOM * 4];
 		
 		for (int room = 0; room < NUM_ROOMS; room++) {
 			panels[room] = new Panel(room);
@@ -116,7 +118,23 @@ public class DataStoreManager {
 
 	private void setPanelBackup(int value, int room, int offset) {
 		backupPanel[room * OFFSET_A_DEVICE + offset] = value;
-	}	
+	}
+	
+	private int getDehumidifiersBackupStatus(int room, int device) {
+		return backupDehumidifiers[room][device * OFFSET_A_DEVICE + ADDR_STATUS];
+	}
+	
+	private int getDehumidifiersBackupHumidSet(int room, int device) {
+		return backupDehumidifiers[room][device * OFFSET_A_DEVICE + ADDR_HUMID_SET];
+	}
+
+	private int getDehumidifiersBackupTimerSet(int room, int device) {
+		return backupDehumidifiers[room][device * OFFSET_A_DEVICE + ADDR_TIMER_SET];
+	}
+
+	private void setDehumidifiersBackup(int value, int room, int device, int offset) {
+		backupDehumidifiers[room][device * OFFSET_A_DEVICE + offset] = value;
+	}
 	
 	private void waitIFix(){
 		try {

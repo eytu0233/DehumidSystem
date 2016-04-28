@@ -50,6 +50,23 @@ public class SynPanelPowerCmd extends SynPanelCommand {
 		}
 	}
 	
+	@Override
+	protected void finishHandler() throws Exception {
+		// TODO Auto-generated method stub
+		controller.jumpCmdQueue(new SynPanelModeCmd(controller));
+		controller.nextCmd(this);
+	}
+	
+	@Override
+	protected void timeoutHandler() throws Exception {
+		// TODO Auto-generated method stub
+		panel.setLive(false);
+		controller.nextCmd(this);
+		
+		controller.log_warn(String.format("Panel %d is not live.", 
+				offsetRoomIndex));
+	}
+	
 	private void setBackupOn() {
 		PanelBackupSet.setProp(panel.isOn(), 
 				this.getClass().getSimpleName(), offsetRoomIndex);

@@ -10,12 +10,12 @@ import java.util.List;
 import edu.ncku.uscc.process.Command;
 import edu.ncku.uscc.process.ScanRoomCmd;
 import edu.ncku.uscc.process.panel.SetPanelBackupSetCmd;
-import edu.ncku.uscc.process.panel.SynPanelAbnormalCmd;
-import edu.ncku.uscc.process.panel.SynPanelHumidityCmd;
-import edu.ncku.uscc.process.panel.SynPanelHumiditySetCmd;
-import edu.ncku.uscc.process.panel.SynPanelModeCmd;
+//import edu.ncku.uscc.process.panel.SynPanelAbnormalCmd;
+//import edu.ncku.uscc.process.panel.SynPanelHumidityCmd;
+//import edu.ncku.uscc.process.panel.SynPanelHumiditySetCmd;
+//import edu.ncku.uscc.process.panel.SynPanelModeCmd;
 import edu.ncku.uscc.process.panel.SynPanelPowerCmd;
-import edu.ncku.uscc.process.panel.SynPanelTimerSetCmd;
+//import edu.ncku.uscc.process.panel.SynPanelTimerSetCmd;
 import edu.ncku.uscc.util.DataStoreManager;
 import edu.ncku.uscc.util.Log;
 import gnu.io.SerialPort;
@@ -232,11 +232,11 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 
 		addCmdQueue(new SetPanelBackupSetCmd(this));
 		addCmdQueue(new SynPanelPowerCmd(this));
-		addCmdQueue(new SynPanelModeCmd(this));
-		addCmdQueue(new SynPanelHumiditySetCmd(this));
-		addCmdQueue(new SynPanelTimerSetCmd(this));
-		addCmdQueue(new SynPanelAbnormalCmd(this));
-		addCmdQueue(new SynPanelHumidityCmd(this));
+//		addCmdQueue(new SynPanelModeCmd(this));
+//		addCmdQueue(new SynPanelHumiditySetCmd(this));
+//		addCmdQueue(new SynPanelTimerSetCmd(this));
+//		addCmdQueue(new SynPanelAbnormalCmd(this));
+//		addCmdQueue(new SynPanelHumidityCmd(this));
 	}
 
 	/**

@@ -95,5 +95,12 @@ public class SynPanelAbnormalCmd extends SynPanelCommand {
 			return false;
 		}
 	}
+	
+	@Override
+	protected void finishHandler() throws Exception {
+		// TODO Auto-generated method stub
+		controller.jumpCmdQueue(new SynPanelHumidityCmd(controller));
+		controller.nextCmd(null);
+	}
 
 }
