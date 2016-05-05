@@ -57,7 +57,7 @@ public class ModbusTCPSlave {
 		if(null != slaveListener && slaveListener.isListening()){
 			slaveListener.stop();
 		}
-		slaveListener = new ModbusTCPListener(5);
+		slaveListener = new ModbusTCPListener(25);
 		slaveListener.setPort(port);
 		slaveListener.start();
 	}

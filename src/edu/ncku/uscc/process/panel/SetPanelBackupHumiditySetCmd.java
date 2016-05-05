@@ -30,18 +30,5 @@ public class SetPanelBackupHumiditySetCmd extends SynPanelCommand {
 			return false;
 		}
 	}
-	
-	@Override
-	protected void finishHandler() throws Exception {
-		// TODO Auto-generated method stub
-		controller.nextCmd(null);
-	}
-	
-	@Override
-	protected void timeoutHandler() throws Exception {
-		// TODO Auto-generated method stub
-		controller.nextCmd(null);
-		controller.log_warn(String.format("Panel %d is not live.", offsetRoomIndex));
-	}
 
 }

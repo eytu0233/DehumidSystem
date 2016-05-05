@@ -232,11 +232,6 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 
 		addCmdQueue(new SetPanelBackupSetCmd(this));
 		addCmdQueue(new SynPanelPowerCmd(this));
-//		addCmdQueue(new SynPanelModeCmd(this));
-//		addCmdQueue(new SynPanelHumiditySetCmd(this));
-//		addCmdQueue(new SynPanelTimerSetCmd(this));
-//		addCmdQueue(new SynPanelAbnormalCmd(this));
-//		addCmdQueue(new SynPanelHumidityCmd(this));
 	}
 
 	/**

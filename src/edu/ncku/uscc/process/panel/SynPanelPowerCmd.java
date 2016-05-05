@@ -1,9 +1,12 @@
 package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
+import edu.ncku.uscc.process.dehumidifier.SynDehumidifierByItselfPowerCmd;
 import edu.ncku.uscc.util.PanelBackupSet;
 
 public class SynPanelPowerCmd extends SynPanelCommand {
+	
+	private static final int DEHUMIDIFIERS_A_ROOM = 8;
 
 	public SynPanelPowerCmd(DehumidRoomController controller) {
 		super(controller);
@@ -13,7 +16,6 @@ public class SynPanelPowerCmd extends SynPanelCommand {
 	@Override
 	protected byte requestHandler() throws Exception {
 		// TODO Auto-generated method stub
-
 		// Check the power status whether iFix has changed or not
 		if (dataStoreManager.isPanelONOFFChange(offsetRoomIndex)) {
 			/*
@@ -61,15 +63,30 @@ public class SynPanelPowerCmd extends SynPanelCommand {
 	protected void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
 		panel.setLive(false);
+		dehumidifierFate();
 		controller.nextCmd(this);
 		
-		controller.log_warn(String.format("Panel %d is not live.", 
+		controller.log_warn(String.format("Panel %d power cmd is timeout.", 
 				offsetRoomIndex));
 	}
 	
 	private void setBackupOn() {
 		PanelBackupSet.setProp(panel.isOn(), 
 				this.getClass().getSimpleName(), offsetRoomIndex);
+	}
+	
+	/**
+	 * If there are no panel in this room
+	 * Decides whether the dehumidifier can add command or not
+	 */
+	private void dehumidifierFate() {
+
+		for (int did = DEHUMIDIFIERS_A_ROOM - 1; did >= 0; did--) {
+			if (controller.getCheckRate(did) >= (int) (Math.random() * 100)) {
+				controller.jumpCmdQueue(new SynDehumidifierByItselfPowerCmd(controller, did));
+			}
+		}
+
 	}
 
 }

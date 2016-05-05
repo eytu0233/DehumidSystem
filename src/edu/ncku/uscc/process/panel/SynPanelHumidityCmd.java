@@ -67,12 +67,6 @@ public class SynPanelHumidityCmd extends SynPanelCommand {
 			return false;
 		}
 	}
-	
-	@Override
-	protected void finishHandler() throws Exception {
-		// TODO Auto-generated method stub
-		controller.nextCmd(null);
-	}
 
 	/**
 	 * Decides whether the dehumidifier can add command or not

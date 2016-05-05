@@ -77,8 +77,8 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 					did, offsetRoomIndex));
 			return true;
 		default:
-			controller.log_debug(String.format("The dehumidifier %d in room %d time out.", 
-					did, offsetRoomIndex));
+//			controller.log_debug(String.format("The dehumidifier %d in room %d time out.", 
+//					did, offsetRoomIndex));
 			return false;
 		}
 	}
@@ -93,8 +93,8 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 	protected void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
 		
-		controller.log_warn(String.format("The dehumidifier %d in room %d overs tolerance in notification.", 
-				did, offsetRoomIndex));
+//		controller.log_warn(String.format("The dehumidifier %d in room %d overs tolerance in notification.", 
+//				did, offsetRoomIndex));
 		
 		dehumidifier.setLive(false);
 		controller.dropRate(did);

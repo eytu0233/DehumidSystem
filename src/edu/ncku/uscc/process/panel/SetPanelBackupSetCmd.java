@@ -30,12 +30,5 @@ public class SetPanelBackupSetCmd extends SynPanelCommand {
 		// TODO Auto-generated method stub
 		return false;
 	}
-	
-	@Override
-	protected void finishHandler() throws Exception {
-		// TODO Auto-generated method stub
-		controller.nextCmd(null);
-		controller.log_warn(String.format("Panel %d is not live.", offsetRoomIndex));
-	}
 
 }

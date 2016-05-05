@@ -17,7 +17,7 @@ public class DataStoreManager {
 	//private static final int TRICKY_OFFSET = DEVICES_A_ROOM * NUM_ROOMS * OFFSET_A_DEVICE;
 
 	private int[] backupPanel;
-	private int[][] backupDehumidifiers;
+	private int[] backupDehumidifiers;
 
 	private ModbusTCPSlave modbusSlave;
 
@@ -36,7 +36,7 @@ public class DataStoreManager {
 		this.panels = new Panel[NUM_ROOMS];
 		this.backupPanel = new int[NUM_ROOMS * 4];
 		this.dehumidifiers = new Dehumidifier[NUM_ROOMS][DEHUMIDIFIER_A_ROOM];
-		this.backupDehumidifiers = new int[NUM_ROOMS][DEHUMIDIFIER_A_ROOM * 4];
+		this.backupDehumidifiers = new int[NUM_ROOMS * DEHUMIDIFIER_A_ROOM * 4];
 		
 		for (int room = 0; room < NUM_ROOMS; room++) {
 			panels[room] = new Panel(room);
@@ -84,10 +84,6 @@ public class DataStoreManager {
 		return panels[room];
 	}
 
-	public Device getDehumidifier(int room, int deviceID) {
-		return dehumidifiers[room][deviceID];
-	}
-
 	private int getPanelStatus(int room) {
 		return modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM);
 	}
@@ -120,20 +116,86 @@ public class DataStoreManager {
 		backupPanel[room * OFFSET_A_DEVICE + offset] = value;
 	}
 	
+	
+	
+	public Device getDehumidifier(int room, int deviceID) {
+		return dehumidifiers[room][deviceID];
+	}
+	
+	public boolean isDehumidifiersONOFFChange(int room, int device) {
+		waitIFix();
+		return (getDehumidifiersStatus(room, device) & Device.POWER_MASK)
+				!= (getDehumidifiersBackupStatus(room, device) & Device.POWER_MASK);
+	}
+
+	public boolean isDehumidifiersModeChange(int room, int device) {
+		waitIFix();
+		return (getDehumidifiersStatus(room, device) & Device.MODE_DEHUMID_MASK)
+				!= (getDehumidifiersBackupStatus(room, device) & Device.MODE_DEHUMID_MASK);
+	}
+
+	public boolean isDehumidifiersTimerSetFlagChange(int room, int device) {
+		waitIFix();
+		return (getDehumidifiersStatus(room, device) & Device.TIMER_SET_MASK)
+				!= (getDehumidifiersBackupStatus(room, device) & Device.TIMER_SET_MASK);
+	}
+
+	public boolean isDehumidifiersHumiditySetFlagChange(int room, int device) {
+		waitIFix();
+		return (getDehumidifiersStatus(room, device) & Device.HUMID_SET_MASK)
+				!= (getDehumidifiersBackupStatus(room, device) & Device.HUMID_SET_MASK);
+	}
+
+	public boolean isDehumidifiersDehumiditySetChange(int room, int device) {
+		waitIFix();
+		return getDehumidifiersHumidSet(room, device)
+				!= getDehumidifiersBackupHumidSet(room, device);
+	}
+
+	public boolean isDehumidifiersTimerSetChange(int room, int device) {
+		waitIFix();
+		return getDehumidifiersTimerSet(room, device)
+				!= getDehumidifiersBackupTimerSet(room, device);
+	}
+	
+	private int getDehumidifiersStatus(int room, int device) {
+		return modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM
+				+ (device + NUM_PANEL) * OFFSET_A_DEVICE);
+	}
+
+//	private int getDehumidifiersHumid(int room, int device) {
+//		return modbusSlave.getResgister(ADDR_HUMID + room * OFFSET_A_DEVICE * DEVICES_A_ROOM
+//				+ (device + NUM_PANEL) * OFFSET_A_DEVICE);
+//	}
+
+	private int getDehumidifiersHumidSet(int room, int device) {
+		return modbusSlave.getResgister(ADDR_HUMID_SET + room * OFFSET_A_DEVICE * DEVICES_A_ROOM
+				+ (device + NUM_PANEL) * OFFSET_A_DEVICE);
+	}
+
+	private int getDehumidifiersTimerSet(int room, int device) {
+		return modbusSlave.getResgister(ADDR_TIMER_SET + room * OFFSET_A_DEVICE * DEVICES_A_ROOM
+				+ (device + NUM_PANEL) * OFFSET_A_DEVICE);
+	}
+	
 	private int getDehumidifiersBackupStatus(int room, int device) {
-		return backupDehumidifiers[room][device * OFFSET_A_DEVICE + ADDR_STATUS];
+		return backupDehumidifiers[room * OFFSET_A_DEVICE * DEVICES_A_ROOM
+		                           + device * OFFSET_A_DEVICE + ADDR_STATUS];
 	}
 	
 	private int getDehumidifiersBackupHumidSet(int room, int device) {
-		return backupDehumidifiers[room][device * OFFSET_A_DEVICE + ADDR_HUMID_SET];
+		return backupDehumidifiers[room * OFFSET_A_DEVICE * DEVICES_A_ROOM
+		                           + device * OFFSET_A_DEVICE + ADDR_HUMID_SET];
 	}
 
 	private int getDehumidifiersBackupTimerSet(int room, int device) {
-		return backupDehumidifiers[room][device * OFFSET_A_DEVICE + ADDR_TIMER_SET];
+		return backupDehumidifiers[room * OFFSET_A_DEVICE * DEVICES_A_ROOM
+		                           + device * OFFSET_A_DEVICE + ADDR_TIMER_SET];
 	}
 
 	private void setDehumidifiersBackup(int value, int room, int device, int offset) {
-		backupDehumidifiers[room][device * OFFSET_A_DEVICE + offset] = value;
+		backupDehumidifiers[room * OFFSET_A_DEVICE * DEVICES_A_ROOM
+		                    + device * OFFSET_A_DEVICE + offset] = value;
 	}
 	
 	private void waitIFix(){
@@ -373,9 +435,13 @@ public class DataStoreManager {
 	}
 
 	class Dehumidifier extends Device {
+		private int dehumid_device;
+		private int dehumid_room;
 
 		public Dehumidifier(int room, int deviceID) {
 			super();
+			this.dehumid_device = deviceID;
+			this.dehumid_room = room;
 			this.offset = room * DEVICES_A_ROOM * OFFSET_A_DEVICE + OFFSET_A_DEVICE * (deviceID + NUM_PANEL);
 		}
 
@@ -550,6 +616,7 @@ public class DataStoreManager {
 		public void setHumidSetValue(int humidSet) {
 			// TODO Auto-generated method stub
 			modbusSlave.setRegister(ADDR_HUMID_SET + offset, humidSet);
+			setDehumidifiersBackup(humidSet, dehumid_room, dehumid_device, ADDR_HUMID_SET);
 		}
 
 		@Override
@@ -562,12 +629,16 @@ public class DataStoreManager {
 		protected void setStatusFlag(int mask, boolean flag) {
 			// TODO Auto-generated method stub
 			int tempRegister = getDehumidifierStatus();
+			int tempBackRegister = getDehumidifiersBackupStatus(dehumid_room, dehumid_device);
 			if (flag) {
 				tempRegister |= mask;
+				tempBackRegister |= mask;
 			} else {
 				tempRegister &= ~mask;
+				tempBackRegister &= ~mask;
 			}
 			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
+			setDehumidifiersBackup(tempBackRegister, dehumid_room, dehumid_device, ADDR_STATUS);
 		}
 		
 		private int getDehumidifierStatus() {
