@@ -71,7 +71,7 @@ public class SynPanelPowerCmd extends SynPanelCommand {
 	}
 	
 	private void setBackupOn() {
-		PanelBackupSet.setProp(panel.isOn(), 
+		PanelBackupSet.setProp(panel.isOn(),
 				this.getClass().getSimpleName(), offsetRoomIndex);
 	}
 	

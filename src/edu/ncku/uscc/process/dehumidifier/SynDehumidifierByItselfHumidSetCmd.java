@@ -15,6 +15,8 @@ public class SynDehumidifierByItselfHumidSetCmd extends SynDehumidifierCmd {
 		if (dehumidifier.isOn())
 			controller.jumpCmdQueue(new AskDehumidifierHumidityCmd(controller, did));
 		
+		if (dehumidifier.getHumidSet() == 0)
+			dehumidifier.setHumidSetValue(65);
 		return (dataStoreManager.isDehumidifiersDehumiditySetChange(offsetRoomIndex, did))
 				? (byte) DEHUMID_REQ_DEHUMIDITY_SET : SKIP;
 	}

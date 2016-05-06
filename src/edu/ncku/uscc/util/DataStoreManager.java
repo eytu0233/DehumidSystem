@@ -36,7 +36,7 @@ public class DataStoreManager {
 		this.panels = new Panel[NUM_ROOMS];
 		this.backupPanel = new int[NUM_ROOMS * 4];
 		this.dehumidifiers = new Dehumidifier[NUM_ROOMS][DEHUMIDIFIER_A_ROOM];
-		this.backupDehumidifiers = new int[NUM_ROOMS * DEHUMIDIFIER_A_ROOM * 4];
+		this.backupDehumidifiers = new int[NUM_ROOMS * DEVICES_A_ROOM * OFFSET_A_DEVICE];
 		
 		for (int room = 0; room < NUM_ROOMS; room++) {
 			panels[room] = new Panel(room);
@@ -435,13 +435,12 @@ public class DataStoreManager {
 	}
 
 	class Dehumidifier extends Device {
-		private int dehumid_device;
-		private int dehumid_room;
+		private int device;
 
 		public Dehumidifier(int room, int deviceID) {
 			super();
-			this.dehumid_device = deviceID;
-			this.dehumid_room = room;
+			this.device = deviceID;
+			this.room = room;
 			this.offset = room * DEVICES_A_ROOM * OFFSET_A_DEVICE + OFFSET_A_DEVICE * (deviceID + NUM_PANEL);
 		}
 
@@ -616,7 +615,7 @@ public class DataStoreManager {
 		public void setHumidSetValue(int humidSet) {
 			// TODO Auto-generated method stub
 			modbusSlave.setRegister(ADDR_HUMID_SET + offset, humidSet);
-			setDehumidifiersBackup(humidSet, dehumid_room, dehumid_device, ADDR_HUMID_SET);
+			setDehumidifiersBackup(humidSet, room, device, ADDR_HUMID_SET);
 		}
 
 		@Override
@@ -629,7 +628,7 @@ public class DataStoreManager {
 		protected void setStatusFlag(int mask, boolean flag) {
 			// TODO Auto-generated method stub
 			int tempRegister = getDehumidifierStatus();
-			int tempBackRegister = getDehumidifiersBackupStatus(dehumid_room, dehumid_device);
+			int tempBackRegister = getDehumidifiersBackupStatus(room, device);
 			if (flag) {
 				tempRegister |= mask;
 				tempBackRegister |= mask;
@@ -638,7 +637,7 @@ public class DataStoreManager {
 				tempBackRegister &= ~mask;
 			}
 			modbusSlave.setRegister(ADDR_STATUS + offset, tempRegister);
-			setDehumidifiersBackup(tempBackRegister, dehumid_room, dehumid_device, ADDR_STATUS);
+			setDehumidifiersBackup(tempBackRegister, room, device, ADDR_STATUS);
 		}
 		
 		private int getDehumidifierStatus() {

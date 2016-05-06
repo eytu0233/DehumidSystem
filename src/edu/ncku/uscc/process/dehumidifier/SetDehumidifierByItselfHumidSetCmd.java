@@ -32,7 +32,7 @@ public class SetDehumidifierByItselfHumidSetCmd extends SynDehumidifierCmd {
 				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL || rxBuf == DEHUMID_REP_DEHUMID_ABNORMAL
 				|| rxBuf == DEHUMID_REP_FAN_ABNORMAL || rxBuf == DEHUMID_REP_COMPRESSOR_ABNORMAL) {
 			dehumidifier.setHumidSetValue(dehumidifier.getHumidSet());
-			controller.log_debug(String.format("Dehumidifier %d HumidSet is set.", did));
+			controller.log_debug(String.format("Dehumidifier %d HumidSet %d is set.", did, dehumidifier.getHumidSet()));
 			return true;
 		} else {
 			return false;
