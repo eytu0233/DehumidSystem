@@ -69,7 +69,7 @@ public class DehumidSystem {
 			
 			// start the modbus tcp slave thread
 			ModbusTCPSlave slave = new ModbusTCPSlave(NUM_ROOMS * DEVICES_A_ROOM * REGISTERS_A_DEVICE);
-			slave.initialize();
+			slave.initialize();			
 			Log.info("Modbus TCP Slave Started...");
 			
 			// the data store manager is used by all DehumidRoomController thread
@@ -117,9 +117,10 @@ public class DehumidSystem {
 								dehumid.addDisconnectListener(new SerialPortDisconnectListener(){
 
 									@Override
-									public void onDisconnectEvent(String portName) {
+									public void onDisconnectEvent(String portName, int room) {
 										// TODO Auto-generated method stub
 										portRoomAvailable.put(portName, false);
+										dataStoreManager.clearRoomDevices(room);
 										Log.info("Close " + portName);
 									}
 									

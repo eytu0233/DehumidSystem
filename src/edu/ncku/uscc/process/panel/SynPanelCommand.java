@@ -20,6 +20,7 @@ public abstract class SynPanelCommand extends Command implements IPanelProtocal{
 	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
 		controller.nextCmd(null);
+		controller.initPanelTimeoutCounter();
 	}
 
 	@Override
@@ -27,6 +28,8 @@ public abstract class SynPanelCommand extends Command implements IPanelProtocal{
 		// TODO Auto-generated method stub
 		panel.setLive(false);
 		controller.nextCmd(null);
+		if (controller.minusPanelTimeoutCounter())
+			panel.clearAll();
 		
 		controller.log_warn(String.format("Panel %d is not live.", 
 				offsetRoomIndex));

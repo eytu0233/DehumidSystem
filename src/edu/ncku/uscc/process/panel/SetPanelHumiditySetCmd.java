@@ -16,11 +16,11 @@ public class SetPanelHumiditySetCmd extends SynPanelCommand {
 			return SKIP;
 		
 		int humidSet = panel.getHumidSet();
-		if (humidSet < 50)
-			humidSet = 50;
-		else if (humidSet > 90)
-			humidSet = 90;
-		humidSet = (humidSet - 45) / 5;
+		if (humidSet != 0) {
+			humidSet = humidSet < 50 ? 50 : humidSet;
+			humidSet = humidSet > 90 ? 90 : humidSet;
+			humidSet = (humidSet - 45) / 5;
+		}
 		
 		controller.log_info(String.format("Start to change set of humidity of Panel %d %d", 
 				offsetRoomIndex, humidSet));
@@ -40,18 +40,6 @@ public class SetPanelHumiditySetCmd extends SynPanelCommand {
 		} else {
 			return false;
 		}
-	}
-	
-	@Override
-	protected void finishHandler() throws Exception {
-		// TODO Auto-generated method stub
-		controller.nextCmd(null);
-	}
-
-	@Override
-	protected void timeoutHandler() throws Exception {
-		// TODO Auto-generated method stub
-		controller.nextCmd(null);
 	}
 
 }

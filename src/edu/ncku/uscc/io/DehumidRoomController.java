@@ -10,12 +10,7 @@ import java.util.List;
 import edu.ncku.uscc.process.Command;
 import edu.ncku.uscc.process.ScanRoomCmd;
 import edu.ncku.uscc.process.panel.SetPanelBackupSetCmd;
-//import edu.ncku.uscc.process.panel.SynPanelAbnormalCmd;
-//import edu.ncku.uscc.process.panel.SynPanelHumidityCmd;
-//import edu.ncku.uscc.process.panel.SynPanelHumiditySetCmd;
-//import edu.ncku.uscc.process.panel.SynPanelModeCmd;
 import edu.ncku.uscc.process.panel.SynPanelPowerCmd;
-//import edu.ncku.uscc.process.panel.SynPanelTimerSetCmd;
 import edu.ncku.uscc.util.DataStoreManager;
 import edu.ncku.uscc.util.Log;
 import gnu.io.SerialPort;
@@ -66,6 +61,11 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 
 	/** These integers are used to count check rate */
 	private int[] checkRates = new int[DEHUMIDIFIERS_A_ROOM];
+	
+	/** A counter for panel timeout */
+	private int panelTimeoutCounter;
+	/** A counter for 8 dehumidifiers */
+	private int[] dehumidTimeoutCounter = new int[DEHUMIDIFIERS_A_ROOM];
 
 	/**
 	 * Constructor
@@ -75,10 +75,22 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	 */
 	public DehumidRoomController(DataStoreManager dataStoreManager, SerialPort serialPort, String logCommand) {
 		super();
-		this.dataStoreManager = dataStoreManager;
+		this.dataStoreManager = dataStoreManager;		
 		this.serialPort = serialPort;
 		this.logCommand = logCommand;
+		JVMShutdownHook jvmShutdownHook = new JVMShutdownHook(serialPort);
+		Runtime.getRuntime().addShutdownHook(jvmShutdownHook);
 	}
+	
+	private static class JVMShutdownHook extends Thread {
+		private SerialPort serialPort;
+		public JVMShutdownHook(SerialPort serialPort) {
+			this.serialPort = serialPort;
+		}
+	    public void run() {
+	    	serialPort.close();
+	    }
+	  }
 
 	public SerialPort getSerialPort() {
 		SerialPort sp;
@@ -108,8 +120,14 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 		return is;
 	}
 
-	public void setRoomIndex(int roomIndex) {
-		this.roomIndex = roomIndex;
+	public void setRoomIndex(final int roomIndex) {
+		this.roomIndex = roomIndex;		
+		/*this.dataStoreManager.addListener(new Listener(){
+		 * 		@override
+		 * 		public void modifyEvent(int addr, int value){
+		 * 			此時利用拿到的roomIndex針對特定addr的register值變化做對應處理
+		 * 		}
+		 * });*/
 	}
 
 	public int getRoomIndex() {
@@ -131,6 +149,40 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	public int getCheckRate(int did) {
 		return checkRates[did];
 	}
+	
+	public boolean isPanelTimeoutCounter() {
+		return panelTimeoutCounter < 0 ? true : false;
+	}
+	
+	public boolean minusPanelTimeoutCounter() {
+		if (panelTimeoutCounter >= 0) {
+			panelTimeoutCounter -= 1;
+			return false;
+		} else
+			return true;
+	}
+	
+	public void initPanelTimeoutCounter() {
+		panelTimeoutCounter = 10;
+	}
+	
+	public boolean isDehumidTimeoutCounter(int did) {
+		return dehumidTimeoutCounter[did] < 0 ? true : false;
+	}
+	
+	public boolean minusDehumidTimeoutCounter(int did) {
+		if (dehumidTimeoutCounter[did] >= 0) {
+			dehumidTimeoutCounter[did] -= 1;
+			return false;
+		} else
+			return true;
+	}
+	
+	public void initDehumidTimeoutCounter(int did) {
+		dehumidTimeoutCounter[did] = 10;
+	}
+	
+	
 
 	/**
 	 * Initializes the check rate
@@ -251,6 +303,12 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 		// initial check rate
 		for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; initCheckRate(did++))
 			;
+		
+		// initial dehumid timeout rate
+		for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; initDehumidTimeoutCounter(did++))
+			;
+		
+		panelTimeoutCounter = 10;
 
 		// initial scanRoomQueue
 		for (int roomScanIndex = ROOM_ID_MIN; roomScanIndex <= ROOM_ID_MAX; roomScanIndex++) {
@@ -296,7 +354,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 		} catch (Exception e) {
 			Log.error(e, e);
 			for (SerialPortDisconnectListener listener : listeners) {
-				listener.onDisconnectEvent(serialPort.getName());
+				listener.onDisconnectEvent(serialPort.getName(), roomIndex);
 			}
 		} finally {
 			try {
@@ -360,7 +418,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 			} catch (IOException e) {
 				Log.error(serialPort.getName() + " disconnected!", e);
 				for (SerialPortDisconnectListener listener : listeners) {
-					listener.onDisconnectEvent(serialPort.getName());
+					listener.onDisconnectEvent(serialPort.getName(), roomIndex);
 				}
 				try {
 					close();

@@ -2,6 +2,7 @@ package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.process.dehumidifier.SynDehumidifierByItselfPowerCmd;
+import edu.ncku.uscc.util.IReferenceable;
 import edu.ncku.uscc.util.PanelBackupSet;
 
 public class SynPanelPowerCmd extends SynPanelCommand {
@@ -55,6 +56,14 @@ public class SynPanelPowerCmd extends SynPanelCommand {
 	@Override
 	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
+		if (controller.isPanelTimeoutCounter()) {
+			for (int did = 0; did < DehumidRoomController.DEHUMIDIFIERS_A_ROOM; did++) {
+				IReferenceable dehumidifier = dataStoreManager.getDehumidifier(
+						offsetRoomIndex, did);
+				dehumidifier.clearAll();
+			}
+		}
+		controller.initPanelTimeoutCounter();
 		controller.jumpCmdQueue(new SynPanelModeCmd(controller));
 		controller.nextCmd(this);
 	}
@@ -63,7 +72,10 @@ public class SynPanelPowerCmd extends SynPanelCommand {
 	protected void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
 		panel.setLive(false);
-		dehumidifierFate();
+		if (controller.minusPanelTimeoutCounter()) {
+			panel.clearAll();			
+			dehumidifierFate();
+		}
 		controller.nextCmd(this);
 		
 		controller.log_warn(String.format("Panel %d power cmd is timeout.", 

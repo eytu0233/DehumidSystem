@@ -3,6 +3,7 @@ package edu.ncku.uscc.process;
 import java.io.OutputStream;
 
 import edu.ncku.uscc.io.DehumidRoomController;
+//import edu.ncku.uscc.process.panel.SynPanelPowerCmd;
 import edu.ncku.uscc.util.DataStoreManager;
 
 public abstract class Command {
@@ -179,12 +180,14 @@ public abstract class Command {
 		synchronized (referenceLock) {
 			OutputStream output = controller.getOutputStream();
 			if (output != null) {
+				controller.log_info(String.format("\ntxBuf : %x", txBuf));
 				output.write(txBuf);
 			} else {
 				 throw new NullPointerException("OutputSream is null");
 			}
 			referenceLock.wait(TIME_OUT);
 			
+			controller.log_info(String.format("rxBuf : %x\n", controller.getRxBuf()));
 			/* The hook method which handles reply */
 			ack = replyHandler(controller.getRxBuf());
 		}

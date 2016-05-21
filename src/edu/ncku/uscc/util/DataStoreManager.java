@@ -158,6 +158,14 @@ public class DataStoreManager {
 				!= getDehumidifiersBackupTimerSet(room, device);
 	}
 	
+	public void clearRoomDevices(int room){
+		panels[room].clearAll();
+		Dehumidifier[] dehumids = dehumidifiers[room];
+		for(Dehumidifier dehumid : dehumids){
+			dehumid.clearAll();
+		}
+	}
+	
 	private int getDehumidifiersStatus(int room, int device) {
 		return modbusSlave.getResgister(ADDR_STATUS + room * OFFSET_A_DEVICE * DEVICES_A_ROOM
 				+ (device + NUM_PANEL) * OFFSET_A_DEVICE);
@@ -220,6 +228,7 @@ public class DataStoreManager {
 		public static final int FAN_WARN_MASK = 0x01 << 8;
 		public static final int COMPRESSOR_WARN_MASK = 0x01 << 9;
 		public static final int LIVE_MASK = 0x01 << 10;
+		public static final int ALL_MASK = 0x07ff;
 
 		protected int room;
 		protected int offset;
@@ -431,6 +440,17 @@ public class DataStoreManager {
 			modbusSlave.setRegister(ADDR_TIMER_SET + offset, timerSet);
 			setPanelBackup(timerSet, room, ADDR_TIMER_SET);
 		}
+		
+		@Override
+		public void clearAll() {
+			setStatusFlag(ALL_MASK, false);
+			modbusSlave.setRegister(ADDR_HUMID + offset, 0);
+			setPanelBackup(0, room, ADDR_HUMID);
+			modbusSlave.setRegister(ADDR_HUMID_SET + offset, 0);
+			setPanelBackup(0, room, ADDR_HUMID_SET);
+			modbusSlave.setRegister(ADDR_TIMER_SET + offset, 0);
+			setPanelBackup(0, room, ADDR_TIMER_SET);
+		}
 
 	}
 
@@ -622,6 +642,15 @@ public class DataStoreManager {
 		public void setTimerSetValue(int timerSet) {
 			// TODO Auto-generated method stub
 			modbusSlave.setRegister(ADDR_TIMER_SET + offset, timerSet);
+		}
+		
+		@Override
+		public void clearAll() {
+			setStatusFlag(ALL_MASK, false);
+			modbusSlave.setRegister(ADDR_HUMID + offset, 0);
+			modbusSlave.setRegister(ADDR_HUMID_SET + offset, 0);
+			setDehumidifiersBackup(0, room, device, ADDR_HUMID_SET);
+			modbusSlave.setRegister(ADDR_TIMER_SET + offset, 0);
 		}
 
 		@Override

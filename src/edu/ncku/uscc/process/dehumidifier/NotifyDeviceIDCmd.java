@@ -87,6 +87,7 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
 		// Notify command doesn't need to implement finishHandler method
+		controller.initDehumidTimeoutCounter(did);
 	}
 
 	@Override
@@ -95,6 +96,8 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 		
 //		controller.log_warn(String.format("The dehumidifier %d in room %d overs tolerance in notification.", 
 //				did, offsetRoomIndex));
+		if (controller.minusDehumidTimeoutCounter(did))
+			dehumidifier.clearAll();
 		
 		dehumidifier.setLive(false);
 		controller.dropRate(did);

@@ -37,13 +37,7 @@ public class SynPanelTimerCountDownFinishCmd extends SynPanelCommand {
 	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
 		controller.nextCmd(null);
-	}
-
-	@Override
-	protected void timeoutHandler() throws Exception {
-		// TODO Auto-generated method stub
-//		Log.warn(String.format("Panel %d is not live.", offsetRoomIndex));
-		controller.nextCmd(null);
+		controller.initPanelTimeoutCounter();
 	}
 
 }

@@ -16,7 +16,8 @@ public class SetPanelBackupSetCmd extends SynPanelCommand {
 		
 		panel.setOn(PanelBackupSet.getOnCheckpoint(offsetRoomIndex));
 		
-		panel.setHumidSetValue(PanelBackupSet.getHumidSetValueCP(offsetRoomIndex));
+		panel.setHumidSetValue(panel.isOn() ?
+				PanelBackupSet.getHumidSetValueCP(offsetRoomIndex) : 0);
 		
 		controller.jumpCmdQueue(new SetPanelBackupHumiditySetCmd(controller));
 		controller.jumpCmdQueue(new SetPanelBackupPowerCmd(controller, panel.isOn()));

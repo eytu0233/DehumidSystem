@@ -12,13 +12,13 @@ import edu.ncku.uscc.process.panel.SynPanelHumiditySetCmd;
 
 public class PanelBackupSet {
 
-	private static final String PROPERTY_FILE_NAME = "./backupSet4panel.properties";
+	private static final String PROPERTY_FILE_NAME = "/home/pi/workspace/backupSet4panel.properties";
 
 	private static final String TRUE = "true";
 	private static final String FALSE = "false";
 	
 	private static final String DEFALUT = FALSE;
-	private static final String DEFALUT_DEHUMID_VALUE = "4";
+	private static final String DEFALUT_DEHUMID_VALUE = "0";
 
 	private static final Object lock = new Object();
 

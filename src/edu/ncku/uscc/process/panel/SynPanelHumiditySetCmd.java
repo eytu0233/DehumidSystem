@@ -55,6 +55,7 @@ public class SynPanelHumiditySetCmd extends SynPanelCommand {
 		// TODO Auto-generated method stub
 		controller.jumpCmdQueue(new SynPanelTimerSetCmd(controller));
 		controller.nextCmd(null);
+		controller.initPanelTimeoutCounter();
 	}
 
 }

@@ -55,6 +55,7 @@ public class SynPanelTimerSetCmd extends SynPanelCommand {
 	@Override
 	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
+		controller.initPanelTimeoutCounter();
 		controller.jumpCmdQueue(new SynPanelAbnormalCmd(controller));
 		controller.nextCmd(null);
 	}

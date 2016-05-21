@@ -33,4 +33,6 @@ public interface IReferenceable {
 	public int getTimerSet();
 	public void setTimerSetValue(int timer);
 	
+	public void clearAll();
+	
 }

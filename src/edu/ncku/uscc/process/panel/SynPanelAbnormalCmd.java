@@ -101,6 +101,7 @@ public class SynPanelAbnormalCmd extends SynPanelCommand {
 		// TODO Auto-generated method stub
 		controller.jumpCmdQueue(new SynPanelHumidityCmd(controller));
 		controller.nextCmd(null);
+		controller.initPanelTimeoutCounter();
 	}
 
 }
