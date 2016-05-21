@@ -78,19 +78,8 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 		this.dataStoreManager = dataStoreManager;		
 		this.serialPort = serialPort;
 		this.logCommand = logCommand;
-		JVMShutdownHook jvmShutdownHook = new JVMShutdownHook(serialPort);
-		Runtime.getRuntime().addShutdownHook(jvmShutdownHook);
+		Runtime.getRuntime().addShutdownHook(new JVMShutdownHook(serialPort));
 	}
-	
-	private static class JVMShutdownHook extends Thread {
-		private SerialPort serialPort;
-		public JVMShutdownHook(SerialPort serialPort) {
-			this.serialPort = serialPort;
-		}
-	    public void run() {
-	    	serialPort.close();
-	    }
-	  }
 
 	public SerialPort getSerialPort() {
 		SerialPort sp;
