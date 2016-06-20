@@ -1,6 +1,7 @@
 package edu.ncku.uscc.util;
 
 import edu.ncku.uscc.io.ModbusTCPSlave;
+//import edu.ncku.uscc.io.ModifiedEventListener;
 
 public class DataStoreManager {
 
@@ -49,6 +50,10 @@ public class DataStoreManager {
 			
 		}
 	}
+	
+//	public setModifiedEventListener(ModifiedEventListener listener){
+//		modbusSlave.addModifiedEventListener(listener);
+//	}
 
 	public boolean isPanelONOFFChange(int room) {
 		waitIFix();

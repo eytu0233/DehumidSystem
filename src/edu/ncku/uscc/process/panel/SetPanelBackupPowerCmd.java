@@ -1,22 +1,23 @@
 package edu.ncku.uscc.process.panel;
 
+import edu.ncku.uscc.io.BackupData;
 import edu.ncku.uscc.io.DehumidRoomController;
 
 public class SetPanelBackupPowerCmd extends SynPanelCommand {
 	
-	private boolean backupONOFF;
+	private BackupData data;
 
-	public SetPanelBackupPowerCmd(DehumidRoomController controller, boolean b) {
+	public SetPanelBackupPowerCmd(DehumidRoomController controller, BackupData data) {
 		super(controller);
 		// TODO Auto-generated constructor stub
-		this.backupONOFF = b;
+		this.data = data;
 	}
 
 	@Override
 	protected byte requestHandler() throws Exception {
 		// TODO Auto-generated method stub
 
-		return backupONOFF ? (byte) PANEL_REQ_START : (byte) PANEL_REQ_SHUTDOWM;
+		return data.isPanelOn() ? (byte) PANEL_REQ_START : (byte) PANEL_REQ_SHUTDOWM;
 	}
 
 	@Override
@@ -31,8 +32,17 @@ public class SetPanelBackupPowerCmd extends SynPanelCommand {
 			panel.setLive(true);
 			return true;
 		} else {
+			panel.setLive(false);
 			return false;
 		}
+	}
+	
+	@Override
+	protected void finishHandler() throws Exception {
+		// TODO Auto-generated method stub
+		controller.jumpCmdQueue(new SetPanelBackupModeCmd(controller, data));
+		controller.nextCmd(null);
+		controller.initPanelTimeoutCounter();
 	}
 
 }

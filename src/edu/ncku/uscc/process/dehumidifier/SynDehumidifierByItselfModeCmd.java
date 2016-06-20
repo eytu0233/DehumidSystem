@@ -12,17 +12,12 @@ public class SynDehumidifierByItselfModeCmd extends SynDehumidifierCmd {
 	@Override
 	protected byte requestHandler() throws Exception {
 		// TODO Auto-generated method stub
-		if (dehumidifier.isOn())
-			controller.jumpCmdQueue(new SynDehumidifierByItselfHumidSetCmd(controller, did));
-		if (dataStoreManager.isDehumidifiersModeChange(offsetRoomIndex, did)) {
-			if (dehumidifier.isModeDehumid())
-				return (byte) DEHUMID_REQ_DEHUMID_MODE;
-			else if (dehumidifier.isModeDry())
-				return (byte) DEHUMID_REQ_DRY_CLOTHES_MODE;
-			else
-				return SKIP;
-		}
-		return SKIP;
+		if (dehumidifier.isModeDehumid())
+			return (byte) DEHUMID_REQ_DEHUMID_MODE;
+		else if (dehumidifier.isModeDry())
+			return (byte) DEHUMID_REQ_DRY_CLOTHES_MODE;
+		else
+			return SKIP;
 	}
 
 	@Override
@@ -31,9 +26,8 @@ public class SynDehumidifierByItselfModeCmd extends SynDehumidifierCmd {
 		if (rxBuf == DEHUMID_REP_OK || rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
 				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL || rxBuf == DEHUMID_REP_DEHUMID_ABNORMAL
 				|| rxBuf == DEHUMID_REP_FAN_ABNORMAL || rxBuf == DEHUMID_REP_COMPRESSOR_ABNORMAL) {
-			dehumidifier.setModeDehumid(dehumidifier.isModeDehumid());
-			dehumidifier.setModeDry(dehumidifier.isModeDry());
-			controller.log_debug(String.format("Dehumidifier %d Mode is set.", did));
+//			controller.log_debug(String.format("Dehumidifier %d Mode is set.", did));
+			controller.jumpCmdQueue(new SynDehumidifierByItselfHumidSetCmd(controller, did));
 			return true;
 		} else {
 			return false;

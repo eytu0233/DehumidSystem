@@ -36,49 +36,50 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 			dehumidifier.setHumidWarn(false);
 			dehumidifier.setFanWarn(false);
 			dehumidifier.setCompressorWarn(false);
-			dehumidifier.setLive(true);
-			controller.initCheckRate(did);
+//			dehumidifier.setLive(true);
+//			controller.initCheckRate(did);
 			controller.log_info(String.format("The dehumidifier %d in room %d OK", 
 					did, offsetRoomIndex));
 			return true;
 		case DEHUMID_REP_HIGH_TEMP_ABNORMAL:
 			dehumidifier.setHighTempWarn(true);
-			dehumidifier.setLive(true);
-			controller.initCheckRate(did);
+//			dehumidifier.setLive(true);
+//			controller.initCheckRate(did);
 			controller.log_warn(String.format("The dehumidifier %d in room %d acks high temp abnormal.", 
 					did, offsetRoomIndex));
 			return true;
 		case DEHUMID_REP_DEFROST_TEMP_ABNORMAL:
 			dehumidifier.setDeforstTempWarn(true);
-			dehumidifier.setLive(true);
-			controller.initCheckRate(did);
+//			dehumidifier.setLive(true);
+//			controller.initCheckRate(did);
 			controller.log_warn(String.format("The dehumidifier %d in room %d acks defrost temp abnormal.", 
 					did, offsetRoomIndex));
 			return true;
 		case DEHUMID_REP_DEHUMID_ABNORMAL:
 			dehumidifier.setHumidWarn(true);
-			dehumidifier.setLive(true);
-			controller.initCheckRate(did);
+//			dehumidifier.setLive(true);
+//			controller.initCheckRate(did);
 			controller.log_warn(String.format("The dehumidifier %d in room %d acks dehumid abnormal.", 
 					did, offsetRoomIndex));
 			return true;
 		case DEHUMID_REP_FAN_ABNORMAL:
 			dehumidifier.setFanWarn(true);
-			dehumidifier.setLive(true);
-			controller.initCheckRate(did);
+//			dehumidifier.setLive(true);
+//			controller.initCheckRate(did);
 			controller.log_warn(String.format("The dehumidifier %d in room %d acks fan abnormal.", 
 					did, offsetRoomIndex));
 			return true;
 		case DEHUMID_REP_COMPRESSOR_ABNORMAL:
 			dehumidifier.setCompressorWarn(true);
-			dehumidifier.setLive(true);
-			controller.initCheckRate(did);
+//			dehumidifier.setLive(true);
+//			controller.initCheckRate(did);
 			controller.log_warn(String.format("The dehumidifier %d in room %d acks compressor abnormal.", 
 					did, offsetRoomIndex));
 			return true;
 		default:
-//			controller.log_debug(String.format("The dehumidifier %d in room %d time out.", 
-//					did, offsetRoomIndex));
+			if (controller.getCheckRate(did) > 50)
+				controller.log_debug(String.format("The dehumidifier %d in room %d time out.", 
+						did, offsetRoomIndex));
 			return false;
 		}
 	}
@@ -87,7 +88,10 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
 		// Notify command doesn't need to implement finishHandler method
-		controller.initDehumidTimeoutCounter(did);
+		if (controller.getCheckRate(did) < 10 && controller.isPanelTimeoutCounter())
+			controller.backupDataDeSerialization(did);
+		controller.initCheckRate(did);
+		dehumidifier.setLive(true);
 	}
 
 	@Override
@@ -96,12 +100,12 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 		
 //		controller.log_warn(String.format("The dehumidifier %d in room %d overs tolerance in notification.", 
 //				did, offsetRoomIndex));
-		if (controller.minusDehumidTimeoutCounter(did))
-			dehumidifier.clearAll();
 		
 		dehumidifier.setLive(false);
 		controller.dropRate(did);
 		controller.nextCmd(null);
+		if (controller.getCheckRate(did) < 10)
+			dehumidifier.clearAll();
 	}
 
 }

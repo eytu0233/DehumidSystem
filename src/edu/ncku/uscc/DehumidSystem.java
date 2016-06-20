@@ -12,7 +12,6 @@ import edu.ncku.uscc.io.ModbusTCPSlave;
 import edu.ncku.uscc.io.SerialPortDisconnectListener;
 import edu.ncku.uscc.util.DataStoreManager;
 import edu.ncku.uscc.util.Log;
-import edu.ncku.uscc.util.PanelBackupSet;
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 
@@ -61,7 +60,6 @@ public class DehumidSystem {
 				logCommand = LOG_COMMAND_DEFAULT;
 			
 			Log.init(logCommand);
-			PanelBackupSet.init();
 
 			for(String portName : PORT_NAMES){
 				portRoomAvailable.put(portName, false);
@@ -69,7 +67,7 @@ public class DehumidSystem {
 			
 			// start the modbus tcp slave thread
 			ModbusTCPSlave slave = new ModbusTCPSlave(NUM_ROOMS * DEVICES_A_ROOM * REGISTERS_A_DEVICE);
-			slave.initialize();			
+			slave.initialize();
 			Log.info("Modbus TCP Slave Started...");
 			
 			// the data store manager is used by all DehumidRoomController thread
@@ -126,7 +124,7 @@ public class DehumidSystem {
 									
 								});
 								dehumid.initialize();
-							}	
+							}
 
 							break;
 						}

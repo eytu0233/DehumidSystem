@@ -61,5 +61,9 @@ public class ModbusTCPSlave {
 		slaveListener.setPort(port);
 		slaveListener.start();
 	}
+	
+//	public void setModifiedEventListener(ModifiedEventListener listener){
+//		slaveListener.addModifiedEventListener(listener);
+//	}
 
 }

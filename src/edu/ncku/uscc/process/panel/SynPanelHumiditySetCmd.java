@@ -1,7 +1,6 @@
 package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
-import edu.ncku.uscc.util.PanelBackupSet;
 
 public class SynPanelHumiditySetCmd extends SynPanelCommand {
 
@@ -9,16 +8,11 @@ public class SynPanelHumiditySetCmd extends SynPanelCommand {
 		super(controller);
 		// TODO Auto-generated constructor stub
 	}
-	
-	private void setBackupHumiditySet() {
-		PanelBackupSet.setProp(panel.getHumidSet(), 
-				this.getClass().getSimpleName(), offsetRoomIndex);
-	}
 
 	@Override
 	protected byte requestHandler() throws Exception {
 		// TODO Auto-generated method stub
-		if (!panel.isOn()) {
+		if (!panel.isLive()) {
 			return SKIP;
 		}
 
@@ -39,8 +33,6 @@ public class SynPanelHumiditySetCmd extends SynPanelCommand {
 		} else if (rxBuf > 0 && rxBuf < 10) {
 			panel.setHumidSetValue(45 + 5 * (int) rxBuf);
 			panel.setLive(true);
-			
-			setBackupHumiditySet();
 			
 			controller.log_info(String.format("The humidity set of Panel %d is %d.",
 					offsetRoomIndex, (int) rxBuf));

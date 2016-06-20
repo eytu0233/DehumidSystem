@@ -13,7 +13,7 @@ public class SynPanelAbnormalCmd extends SynPanelCommand {
 	@Override
 	protected byte requestHandler() throws Exception {
 		// TODO Auto-generated method stub
-		if (!panel.isOn()) {
+		if (!panel.isLive()) {
 			return SKIP;
 		}
 

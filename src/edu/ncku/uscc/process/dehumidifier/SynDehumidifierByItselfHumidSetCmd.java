@@ -12,13 +12,10 @@ public class SynDehumidifierByItselfHumidSetCmd extends SynDehumidifierCmd {
 	@Override
 	protected byte requestHandler() throws Exception {
 		// TODO Auto-generated method stub
-		if (dehumidifier.isOn())
-			controller.jumpCmdQueue(new AskDehumidifierHumidityCmd(controller, did));
 		
-		if (dehumidifier.getHumidSet() == 0)
-			dehumidifier.setHumidSetValue(65);
-		return (dataStoreManager.isDehumidifiersDehumiditySetChange(offsetRoomIndex, did))
-				? (byte) DEHUMID_REQ_DEHUMIDITY_SET : SKIP;
+//		if (dehumidifier.getHumidSet() == 0)
+//			dehumidifier.setHumidSetValue(65);
+		return (byte) DEHUMID_REQ_DEHUMIDITY_SET;
 	}
 
 	@Override
@@ -28,6 +25,7 @@ public class SynDehumidifierByItselfHumidSetCmd extends SynDehumidifierCmd {
 				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL || rxBuf == DEHUMID_REP_DEHUMID_ABNORMAL
 				|| rxBuf == DEHUMID_REP_FAN_ABNORMAL || rxBuf == DEHUMID_REP_COMPRESSOR_ABNORMAL) {
 			followCmd(new SetDehumidifierByItselfHumidSetCmd(controller, did), null);
+			controller.jumpCmdQueue(new AskDehumidifierHumidityCmd(controller, did));
 			return true;
 		} else {
 			return false;

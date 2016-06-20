@@ -17,11 +17,9 @@ public class SetDehumidifierHumidSetCmd extends SynDehumidifierCmd {
 		// TODO Auto-generated method stub
 		
 		int humidSet = panel.getHumidSet();
-		if (humidSet < 50)
-			humidSet = 50;
-		else if (humidSet > 90)
-			humidSet = 90;
+		humidSet = humidSet <= 50 ? 50 : humidSet >= 90 ? 90 : humidSet;
 		humidSet = (humidSet - 45) / 5;
+		
 		return (byte) humidSet;
 	}
 

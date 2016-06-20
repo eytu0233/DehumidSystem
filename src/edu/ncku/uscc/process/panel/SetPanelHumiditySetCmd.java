@@ -3,27 +3,32 @@ package edu.ncku.uscc.process.panel;
 import edu.ncku.uscc.io.DehumidRoomController;
 
 public class SetPanelHumiditySetCmd extends SynPanelCommand {
+	
+	private boolean isBackup = false;
 
 	public SetPanelHumiditySetCmd(DehumidRoomController controller) {
 		super(controller);
 		// TODO Auto-generated constructor stub
 	}
+	
+//	public SetPanelHumiditySetCmd(DehumidRoomController controller, boolean isBackup) {
+//		super(controller);
+//		// TODO Auto-generated constructor stub
+//		this.isBackup = isBackup;
+//	}
 
 	@Override
 	protected byte requestHandler() throws Exception {
 		// TODO Auto-generated method stub
-		if (!panel.isOn())
+		if (!panel.isLive())
 			return SKIP;
 		
 		int humidSet = panel.getHumidSet();
-		if (humidSet != 0) {
-			humidSet = humidSet < 50 ? 50 : humidSet;
-			humidSet = humidSet > 90 ? 90 : humidSet;
-			humidSet = (humidSet - 45) / 5;
-		}
+		humidSet = humidSet <= 50 ? 50 : humidSet >= 90 ? 90 : humidSet;
+		humidSet = (humidSet - 45) / 5;
 		
-		controller.log_info(String.format("Start to change set of humidity of Panel %d %d", 
-				offsetRoomIndex, humidSet));
+//		controller.log_info(String.format("Start to change set of humidity of Panel %d %d", 
+//				offsetRoomIndex, humidSet));
 		return (byte) humidSet;
 	}
 
@@ -32,7 +37,7 @@ public class SetPanelHumiditySetCmd extends SynPanelCommand {
 		// TODO Auto-generated method stub
 		if (rxBuf == PANEL_REP_OK) {
 			panel.setLive(true);
-			panel.setHumidSetValue(panel.getHumidSet());
+//			panel.setHumidSetValue(panel.getHumidSet());
 			
 			controller.log_info(String.format("Change set of humidity of Panel %d success", 
 					offsetRoomIndex));

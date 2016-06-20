@@ -21,8 +21,7 @@ public class SynDehumidifierHumidSetCmd extends SynDehumidifierCmd {
 		if (rxBuf == DEHUMID_REP_OK || rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
 				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL || rxBuf == DEHUMID_REP_DEHUMID_ABNORMAL
 				|| rxBuf == DEHUMID_REP_FAN_ABNORMAL || rxBuf == DEHUMID_REP_COMPRESSOR_ABNORMAL) {
-			if (panel.isOn())
-				controller.jumpCmdQueue(new AskDehumidifierHumidityCmd(controller, did));
+			controller.jumpCmdQueue(new AskDehumidifierHumidityCmd(controller, did));
 			followCmd(new SetDehumidifierHumidSetCmd(controller, did), null);
 			return true;
 		} else {

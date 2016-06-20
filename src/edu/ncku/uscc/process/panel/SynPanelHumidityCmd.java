@@ -23,7 +23,7 @@ public class SynPanelHumidityCmd extends SynPanelCommand {
 		// TODO Auto-generated method stub
 		dehumidifierFate();
 
-		if (!panel.isOn()) {
+		if (!panel.isLive()) {
 			return SKIP;
 		}
 

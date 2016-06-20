@@ -12,14 +12,8 @@ public class SynDehumidifierByItselfPowerCmd extends SynDehumidifierCmd {
 	@Override
 	protected byte requestHandler() throws Exception {
 		// TODO Auto-generated method stub
-		if (dehumidifier.isOn())
-			controller.jumpCmdQueue(new SynDehumidifierByItselfModeCmd(controller, did));
-		if (dataStoreManager.isDehumidifiersONOFFChange(offsetRoomIndex, did)) {
-			return (dehumidifier.isOn()) ? (byte) DEHUMID_REQ_ON
-					: (byte) DEHUMID_REQ_OFF;
-		}
 		
-		return SKIP;
+		return (dehumidifier.isOn()) ? (byte) DEHUMID_REQ_ON : (byte) DEHUMID_REQ_OFF;
 	}
 
 	@Override
@@ -28,8 +22,8 @@ public class SynDehumidifierByItselfPowerCmd extends SynDehumidifierCmd {
 		if (rxBuf == DEHUMID_REP_OK || rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
 				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL || rxBuf == DEHUMID_REP_DEHUMID_ABNORMAL
 				|| rxBuf == DEHUMID_REP_FAN_ABNORMAL || rxBuf == DEHUMID_REP_COMPRESSOR_ABNORMAL) {
-			dehumidifier.setOn(dehumidifier.isOn());
-			controller.log_debug(String.format("Dehumidifier %d Power is set.", did));
+			controller.jumpCmdQueue(new SynDehumidifierByItselfModeCmd(controller, did));
+//			controller.log_debug(String.format("Dehumidifier %d Power is set.", did));
 			return true;
 		} else {
 			return false;

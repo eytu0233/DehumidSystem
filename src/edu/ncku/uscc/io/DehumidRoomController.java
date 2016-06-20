@@ -1,15 +1,24 @@
 package edu.ncku.uscc.io;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
+import edu.ncku.uscc.process.BackupDataCmd;
 import edu.ncku.uscc.process.Command;
 import edu.ncku.uscc.process.ScanRoomCmd;
-import edu.ncku.uscc.process.panel.SetPanelBackupSetCmd;
+import edu.ncku.uscc.process.dehumidifier.SetDehumidifierBackupByItselfPowerCmd;
+import edu.ncku.uscc.process.panel.SetPanelBackupPowerCmd;
 import edu.ncku.uscc.process.panel.SynPanelPowerCmd;
 import edu.ncku.uscc.util.DataStoreManager;
 import edu.ncku.uscc.util.Log;
@@ -31,6 +40,13 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	private static final double DROP_RATIO = 0.5;
 
 //	private static final long DELAY_TIME = 500;
+	
+	private static final String FILE_ADDRESS[] = {
+			"/home/pi/workspace/backupD1",
+			"/home/pi/workspace/backupD2",
+			"/home/pi/workspace/backupD3",
+			"/home/pi/workspace/backupD4"
+	};
 
 	/** A synchronization lock */
 	private final Object lock = new Object();
@@ -64,8 +80,8 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	
 	/** A counter for panel timeout */
 	private int panelTimeoutCounter;
-	/** A counter for 8 dehumidifiers */
-	private int[] dehumidTimeoutCounter = new int[DEHUMIDIFIERS_A_ROOM];
+//	/** A counter for 8 dehumidifiers */
+//	private int[] dehumidTimeoutCounter = new int[DEHUMIDIFIERS_A_ROOM];
 
 	/**
 	 * Constructor
@@ -87,6 +103,10 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 			sp = serialPort;
 		}
 		return sp;
+	}
+	
+	public DehumidRoomController getController() {
+		return this;
 	}
 
 	public DataStoreManager getDataStoreManager() {
@@ -110,7 +130,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	}
 
 	public void setRoomIndex(final int roomIndex) {
-		this.roomIndex = roomIndex;		
+		this.roomIndex = roomIndex;
 		/*this.dataStoreManager.addListener(new Listener(){
 		 * 		@override
 		 * 		public void modifyEvent(int addr, int value){
@@ -146,7 +166,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	public boolean minusPanelTimeoutCounter() {
 		if (panelTimeoutCounter >= 0) {
 			panelTimeoutCounter -= 1;
-			return false;
+			return panelTimeoutCounter == -1 ? true : false;
 		} else
 			return true;
 	}
@@ -155,21 +175,21 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 		panelTimeoutCounter = 10;
 	}
 	
-	public boolean isDehumidTimeoutCounter(int did) {
-		return dehumidTimeoutCounter[did] < 0 ? true : false;
-	}
-	
-	public boolean minusDehumidTimeoutCounter(int did) {
-		if (dehumidTimeoutCounter[did] >= 0) {
-			dehumidTimeoutCounter[did] -= 1;
-			return false;
-		} else
-			return true;
-	}
-	
-	public void initDehumidTimeoutCounter(int did) {
-		dehumidTimeoutCounter[did] = 10;
-	}
+//	public boolean isDehumidTimeoutCounter(int did) {
+//		return dehumidTimeoutCounter[did] < 0 ? true : false;
+//	}
+//	
+//	public boolean minusDehumidTimeoutCounter(int did) {
+//		if (dehumidTimeoutCounter[did] >= 0) {
+//			dehumidTimeoutCounter[did] -= 1;
+//			return false;
+//		} else
+//			return true;
+//	}
+//	
+//	public void initDehumidTimeoutCounter(int did) {
+//		dehumidTimeoutCounter[did] = 4;
+//	}
 	
 	
 
@@ -269,9 +289,15 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	 * Initializes the command queue field
 	 */
 	public void initCmdQueue() {
+		
+		// clear the first backup data command
+		Executors.newScheduledThreadPool(1).scheduleAtFixedRate(
+				new BackupDataTask(), 30, 30, TimeUnit.MINUTES);
+		
 		clearQueue();
-
-		addCmdQueue(new SetPanelBackupSetCmd(this));
+		
+		backupDataDeSerialization();
+		
 		addCmdQueue(new SynPanelPowerCmd(this));
 	}
 
@@ -293,11 +319,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 		for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; initCheckRate(did++))
 			;
 		
-		// initial dehumid timeout rate
-		for (int did = 0; did < DEHUMIDIFIERS_A_ROOM; initDehumidTimeoutCounter(did++))
-			;
-		
-		panelTimeoutCounter = 10;
+		initPanelTimeoutCounter();
 
 		// initial scanRoomQueue
 		for (int roomScanIndex = ROOM_ID_MIN; roomScanIndex <= ROOM_ID_MAX; roomScanIndex++) {
@@ -465,6 +487,110 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	 */
 	private void addCmdQueue(Command cmd) {
 		cmdQueue.add(cmd);
+	}
+	
+	public void backupDataSerialization(BackupData data) {
+		try {
+			ObjectOutputStream oos = new ObjectOutputStream(
+					new FileOutputStream(FILE_ADDRESS[getRoomIndex() - 2]));
+			oos.writeObject(data);
+			oos.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void backupDataDeSerialization() {
+		try {
+			ObjectInputStream ois = new ObjectInputStream(
+					new FileInputStream(FILE_ADDRESS[getRoomIndex() - 2]));
+			BackupData data = (BackupData) ois.readObject();
+			ois.close();
+			
+			if (isPanelTimeoutCounter()) {
+				// no panel mode
+				for (int did = DEHUMIDIFIERS_A_ROOM - 1; did >= 0; did--) {
+					if (getCheckRate(did) >= (int) (Math.random() * 100))
+						jumpCmdQueue(new SetDehumidifierBackupByItselfPowerCmd(this, did, data));
+				}
+			} else {
+				// panel mode
+				jumpCmdQueue(new SetPanelBackupPowerCmd(this, data));
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+//			e.printStackTrace();
+			Log.warn("Backup file not found, creat a new one.");
+			initBackupDataSerialization();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void backupDataDeSerialization(int did) {
+		try {
+			ObjectInputStream ois = new ObjectInputStream(
+					new FileInputStream(FILE_ADDRESS[getRoomIndex() - 2]));
+			BackupData data = (BackupData) ois.readObject();
+			ois.close();
+
+			// no panel mode
+			jumpCmdQueue(new SetDehumidifierBackupByItselfPowerCmd(this, did, data));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+//			e.printStackTrace();
+			Log.warn("Backup file not found, creat a new one.");
+			initBackupDataSerialization();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void initBackupDataSerialization() {
+		try {
+			BackupData data = new BackupData();
+			data.setDefaultValue();
+			ObjectOutputStream oos = new ObjectOutputStream(
+					new FileOutputStream(FILE_ADDRESS[getRoomIndex() - 2]));
+			oos.writeObject(data);
+			oos.close();
+			
+			if (isPanelTimeoutCounter()) {
+				// no panel mode
+				for (int did = DEHUMIDIFIERS_A_ROOM - 1; did >= 0; did--) {
+					if (getCheckRate(did) >= (int) (Math.random() * 100))
+						jumpCmdQueue(new SetDehumidifierBackupByItselfPowerCmd(this, did, data));
+				}
+			} else {
+				// panel mode
+				jumpCmdQueue(new SetPanelBackupPowerCmd(this, data));
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public class BackupDataTask extends Thread {
+		@Override
+		public void run() {
+			addCmdQueue(new BackupDataCmd(getController()));
+		}
 	}
 
 }

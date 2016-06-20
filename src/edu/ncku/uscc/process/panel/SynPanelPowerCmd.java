@@ -2,8 +2,6 @@ package edu.ncku.uscc.process.panel;
 
 import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.process.dehumidifier.SynDehumidifierByItselfPowerCmd;
-import edu.ncku.uscc.util.IReferenceable;
-import edu.ncku.uscc.util.PanelBackupSet;
 
 public class SynPanelPowerCmd extends SynPanelCommand {
 	
@@ -16,7 +14,7 @@ public class SynPanelPowerCmd extends SynPanelCommand {
 
 	@Override
 	protected byte requestHandler() throws Exception {
-		// TODO Auto-generated method stub
+		// TODO Auto-generated method stub		
 		// Check the power status whether iFix has changed or not
 		if (dataStoreManager.isPanelONOFFChange(offsetRoomIndex)) {
 			/*
@@ -37,14 +35,12 @@ public class SynPanelPowerCmd extends SynPanelCommand {
 		if (rxBuf == PANEL_REP_ON) {
 			panel.setOn(true);
 			panel.setLive(true);
-			setBackupOn();
 			
 			controller.log_info(String.format("Panel %d is ON.", offsetRoomIndex));
 			return true;
 		} else if (rxBuf == PANEL_REP_OFF) {
 			panel.setOn(false);
 			panel.setLive(true);
-			setBackupOn();
 			
 			controller.log_info(String.format("Panel %d is OFF.", offsetRoomIndex));
 			return true;
@@ -57,11 +53,11 @@ public class SynPanelPowerCmd extends SynPanelCommand {
 	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
 		if (controller.isPanelTimeoutCounter()) {
-			for (int did = 0; did < DehumidRoomController.DEHUMIDIFIERS_A_ROOM; did++) {
-				IReferenceable dehumidifier = dataStoreManager.getDehumidifier(
-						offsetRoomIndex, did);
-				dehumidifier.clearAll();
-			}
+			dataStoreManager.clearRoomDevices(offsetRoomIndex);
+			// let backup data deserialization know it is panel mode
+			controller.initPanelTimeoutCounter();
+//			controller.log_error("backup panel finish");
+			controller.backupDataDeSerialization();
 		}
 		controller.initPanelTimeoutCounter();
 		controller.jumpCmdQueue(new SynPanelModeCmd(controller));
@@ -71,20 +67,22 @@ public class SynPanelPowerCmd extends SynPanelCommand {
 	@Override
 	protected void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
-		panel.setLive(false);
-		if (controller.minusPanelTimeoutCounter()) {
-			panel.clearAll();			
+		
+		if (controller.isPanelTimeoutCounter()) {
 			dehumidifierFate();
+			panel.clearAll();
+		} else if (controller.minusPanelTimeoutCounter()) {
+			// first time in no-Panel Mode
+			// deSerialization
+			dataStoreManager.clearRoomDevices(offsetRoomIndex);
+//			controller.log_error("backup panel timeout");
+			controller.backupDataDeSerialization();
 		}
+		panel.setLive(false);
 		controller.nextCmd(this);
 		
 		controller.log_warn(String.format("Panel %d power cmd is timeout.", 
 				offsetRoomIndex));
-	}
-	
-	private void setBackupOn() {
-		PanelBackupSet.setProp(panel.isOn(),
-				this.getClass().getSimpleName(), offsetRoomIndex);
 	}
 	
 	/**
