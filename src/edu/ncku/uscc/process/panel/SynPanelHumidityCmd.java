@@ -58,6 +58,7 @@ public class SynPanelHumidityCmd extends SynPanelCommand {
 	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if (rxBuf == PANEL_REP_OK) {
+			panel.setLive(true);
 			panel.setHumid(avgHumidity);
 
 			controller.log_info(String.format("The humidity of Panel %d is %d.", 

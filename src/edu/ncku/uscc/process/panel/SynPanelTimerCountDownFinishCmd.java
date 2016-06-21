@@ -23,6 +23,7 @@ public class SynPanelTimerCountDownFinishCmd extends SynPanelCommand {
 	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if (rxBuf == PANEL_REP_OFF) {
+			panel.setLive(true);
 			panel.setOn(false);
 			
 			controller.log_info(String.format("Panel %d is turned off by timer.",
@@ -31,13 +32,6 @@ public class SynPanelTimerCountDownFinishCmd extends SynPanelCommand {
 		} else {
 			return false;
 		}
-	}
-	
-	@Override
-	protected void finishHandler() throws Exception {
-		// TODO Auto-generated method stub
-		controller.nextCmd(null);
-		controller.initPanelTimeoutCounter();
 	}
 
 }

@@ -4,7 +4,7 @@ import edu.ncku.uscc.io.DehumidRoomController;
 
 public class SetPanelTimerSetCmd extends SynPanelCommand {
 	
-	private boolean isBackup = false;
+//	private boolean isBackup = false;
 
 	public SetPanelTimerSetCmd(DehumidRoomController controller) {
 		super(controller);
@@ -32,7 +32,7 @@ public class SetPanelTimerSetCmd extends SynPanelCommand {
 		// TODO Auto-generated method stub
 		if (rxBuf == PANEL_REP_OK) {
 			panel.setLive(true);
-//			panel.setTimerSetValue(panel.getTimerSet());
+			panel.setTimerSetValue(panel.getTimerSet());
 			
 			controller.log_info(String.format("Change set of timer of Panel %d success", 
 					offsetRoomIndex));

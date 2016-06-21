@@ -77,11 +77,15 @@ public class DataStoreManager {
 
 	public boolean isPanelDehumiditySetChange(int room) {
 		waitIFix();
+		System.out.println(String.valueOf(getPanelHumidSet(room)));
+		System.out.println(String.valueOf(getPanelBackupHumidSet(room)));
 		return getPanelHumidSet(room) != getPanelBackupHumidSet(room);
 	}
 
 	public boolean isPanelTimerSetChange(int room) {
 		waitIFix();
+//		System.out.println(String.valueOf(getPanelTimerSet(room)));
+//		System.out.println(String.valueOf(getPanelBackupTimerSet(room)));
 		return getPanelTimerSet(room) != getPanelBackupTimerSet(room);
 	}
 

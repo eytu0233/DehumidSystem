@@ -5,12 +5,12 @@ import edu.ncku.uscc.util.PanelTimerScheduler;
 
 public class SynPanelTimerCountDownCmd extends SynPanelCommand {
 	
-	private DehumidRoomController controller;
+//	private DehumidRoomController controller;
 
 	public SynPanelTimerCountDownCmd(DehumidRoomController controller) {
 		super(controller);
 		// TODO Auto-generated constructor stub
-		this.controller = controller;
+//		this.controller = controller;
 	}
 
 	@Override
@@ -27,6 +27,7 @@ public class SynPanelTimerCountDownCmd extends SynPanelCommand {
 	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if (rxBuf == PANEL_REP_OK) {
+			panel.setLive(true);
 			PanelTimerScheduler pts = PanelTimerScheduler.getInstance(controller);
 			pts.backpuTimerMinusOne(controller.getRoomIndex());
 			panel.setTimerSetValue(pts.getBackupTimerSet(controller.getRoomIndex()));
@@ -37,12 +38,5 @@ public class SynPanelTimerCountDownCmd extends SynPanelCommand {
 		} else {
 			return false;
 		}
-	}
-
-	@Override
-	protected void finishHandler() throws Exception {
-		// TODO Auto-generated method stub
-		controller.nextCmd(null);
-		controller.initPanelTimeoutCounter();
 	}
 }

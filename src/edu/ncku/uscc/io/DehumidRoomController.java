@@ -38,6 +38,8 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	private static final int INITIAL_RATE = 100;
 	private static final int RATE_CONSTANT = 4;
 	private static final double DROP_RATIO = 0.5;
+	
+	private static final int BACKUP_DATA_PERIOD_MINUTES = 30;
 
 //	private static final long DELAY_TIME = 500;
 	
@@ -292,7 +294,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 		
 		// clear the first backup data command
 		Executors.newScheduledThreadPool(1).scheduleAtFixedRate(
-				new BackupDataTask(), 30, 30, TimeUnit.MINUTES);
+				new BackupDataTask(), BACKUP_DATA_PERIOD_MINUTES, BACKUP_DATA_PERIOD_MINUTES, TimeUnit.MINUTES);
 		
 		clearQueue();
 		

@@ -31,17 +31,10 @@ public class BackupDataCmd extends Command implements IDehumidProtocal {
 		data.setPanelModeDry(panel.isModeDry());
 		data.setPanelTimerSet(panel.getTimerSet());
 		data.setPanelHumidSet(panel.getHumidSet());
-		controller.log_error(data.isPanelOn());
-		controller.log_error(data.isPanelModeDry());
-		controller.log_error(data.getPanelHumidSet());
-		controller.log_error(data.getPanelTimerSet());
 		for (int did = 0; did < DehumidRoomController.DEHUMIDIFIERS_A_ROOM; did++) {
 			data.setDehumidOn(did, dehumidifier[did].isOn());
 			data.setDehumidModeDry(did, dehumidifier[did].isModeDry());
 			data.setDehumidHumid(did, dehumidifier[did].getHumidSet());
-			controller.log_error(data.isDehumidOn(did));
-			controller.log_error(data.isDehumidModeDry(did));
-			controller.log_error(data.getDehumidHumidSet(did));
 		}
 		
 		

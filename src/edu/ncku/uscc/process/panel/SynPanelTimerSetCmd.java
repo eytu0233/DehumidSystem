@@ -4,13 +4,10 @@ import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.util.PanelTimerScheduler;
 
 public class SynPanelTimerSetCmd extends SynPanelCommand {
-
-	private DehumidRoomController controller;
 	
 	public SynPanelTimerSetCmd(DehumidRoomController controller) {
 		super(controller);
 		// TODO Auto-generated constructor stub
-		this.controller = controller;
 	}
 
 	@Override
@@ -31,6 +28,7 @@ public class SynPanelTimerSetCmd extends SynPanelCommand {
 	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if (rxBuf >= 0 && rxBuf <= 12) {
+			panel.setLive(true);
 			panel.setTimerSetValue(rxBuf);
 			
 			PanelTimerScheduler pts = PanelTimerScheduler.getInstance(controller);
@@ -38,13 +36,14 @@ public class SynPanelTimerSetCmd extends SynPanelCommand {
 				pts.newScheduleThread(rxBuf, controller.getRoomIndex());
 			}
 			
-			controller.log_info(String.format("The timer set of Panel %d is %d.",
+			controller.log_debug(String.format("The timer set of Panel %d is %d.",
 					offsetRoomIndex, rxBuf));
 			return true;
 		} else if(rxBuf == PANEL_REP_OK) {
+			panel.setLive(true);
 			followCmd(new SetPanelTimerSetCmd(controller), this);
 			
-			controller.log_info(String.format("Add change command set of timer of Panel %d", 
+			controller.log_warn(String.format("Add change command set of timer of Panel %d", 
 					offsetRoomIndex));
 			return true;
 		}else {

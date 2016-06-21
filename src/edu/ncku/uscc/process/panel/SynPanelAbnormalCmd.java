@@ -99,6 +99,7 @@ public class SynPanelAbnormalCmd extends SynPanelCommand {
 	@Override
 	protected void finishHandler() throws Exception {
 		// TODO Auto-generated method stub
+		panel.setLive(true);
 		controller.jumpCmdQueue(new SynPanelHumidityCmd(controller));
 		controller.nextCmd(null);
 		controller.initPanelTimeoutCounter();

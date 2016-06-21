@@ -4,7 +4,7 @@ import edu.ncku.uscc.io.DehumidRoomController;
 
 public class SetPanelHumiditySetCmd extends SynPanelCommand {
 	
-	private boolean isBackup = false;
+//	private boolean isBackup = false;
 
 	public SetPanelHumiditySetCmd(DehumidRoomController controller) {
 		super(controller);

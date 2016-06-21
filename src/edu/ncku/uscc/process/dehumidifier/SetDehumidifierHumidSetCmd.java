@@ -30,6 +30,7 @@ public class SetDehumidifierHumidSetCmd extends SynDehumidifierCmd {
 				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL || rxBuf == DEHUMID_REP_DEHUMID_ABNORMAL
 				|| rxBuf == DEHUMID_REP_FAN_ABNORMAL || rxBuf == DEHUMID_REP_COMPRESSOR_ABNORMAL) {
 			dehumidifier.setHumidSetValue(panel.getHumidSet());
+//			controller.log_debug(String.format("Dehumid %d in panel %d humid set", did, offsetRoomIndex));
 			return true;
 		} else {
 			return false;
