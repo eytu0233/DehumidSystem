@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 
 import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.io.ModbusTCPSlave;
+import edu.ncku.uscc.io.SerialPortConnectListener;
 import edu.ncku.uscc.io.SerialPortDisconnectListener;
 import edu.ncku.uscc.util.DataStoreManager;
 import edu.ncku.uscc.util.Log;
@@ -48,6 +49,8 @@ public class DehumidSystem {
 	
 	private static final String LOG_COMMAND_DEFAULT = "-Dew1234";
 	private static String logCommand = "";
+	
+	private static int[] is_room_live = new int[NUM_ROOMS];
 		
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -64,6 +67,9 @@ public class DehumidSystem {
 			for(String portName : PORT_NAMES){
 				portRoomAvailable.put(portName, false);
 			}
+			
+			for (int i = 0; i < NUM_ROOMS; i++)
+				is_room_live[i] = 0;
 			
 			// start the modbus tcp slave thread
 			ModbusTCPSlave slave = new ModbusTCPSlave(NUM_ROOMS * DEVICES_A_ROOM * REGISTERS_A_DEVICE);
@@ -92,6 +98,10 @@ public class DehumidSystem {
 			try{
 				@SuppressWarnings("unchecked")
 				Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier.getPortIdentifiers();
+				for (int i = 0; i < NUM_ROOMS; i++) {
+					if (is_room_live[i] == 0)
+						dataStoreManager.clearRoomDevices(i);
+				}
 
 				// iterate through, looking for the port
 				while (portEnum.hasMoreElements()) {
@@ -118,10 +128,19 @@ public class DehumidSystem {
 									public void onDisconnectEvent(String portName, int room) {
 										// TODO Auto-generated method stub
 										portRoomAvailable.put(portName, false);
-										dataStoreManager.clearRoomDevices(room);
+										dataStoreManager.clearRoomDevices(room-2);
+										is_room_live[room-2] = 0;
 										Log.info("Close " + portName);
 									}
 									
+								});
+								dehumid.addConnectListener(new SerialPortConnectListener() {
+									
+									@Override
+									public void onConnectEvent(String portName, int room) {
+										// TODO Auto-generated method stub
+										is_room_live[room-2] = 1;
+									}
 								});
 								dehumid.initialize();
 							}

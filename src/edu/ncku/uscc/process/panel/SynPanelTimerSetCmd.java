@@ -36,14 +36,17 @@ public class SynPanelTimerSetCmd extends SynPanelCommand {
 				pts.newScheduleThread(rxBuf, controller.getRoomIndex());
 			}
 			
-			controller.log_debug(String.format("The timer set of Panel %d is %d.",
+			controller.log_info(String.format("The timer set of Panel %d is %d.",
 					offsetRoomIndex, rxBuf));
 			return true;
 		} else if(rxBuf == PANEL_REP_OK) {
 			panel.setLive(true);
+			controller.initPanelTimeoutCounter();
+			controller.jumpCmdQueue(new SynPanelAbnormalCmd(controller));
+			// followCmd will not exec finishHandler()
 			followCmd(new SetPanelTimerSetCmd(controller), this);
 			
-			controller.log_warn(String.format("Add change command set of timer of Panel %d", 
+			controller.log_debug(String.format("Add change command set of timer of Panel %d", 
 					offsetRoomIndex));
 			return true;
 		}else {

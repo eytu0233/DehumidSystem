@@ -61,8 +61,8 @@ public class SynPanelHumidityCmd extends SynPanelCommand {
 			panel.setLive(true);
 			panel.setHumid(avgHumidity);
 
-			controller.log_info(String.format("The humidity of Panel %d is %d.", 
-					offsetRoomIndex, avgHumidity));
+//			controller.log_info(String.format("The humidity of Panel %d is %d.", 
+//					offsetRoomIndex, avgHumidity));
 			return true;
 		} else {
 			return false;

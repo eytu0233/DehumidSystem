@@ -6,7 +6,7 @@ import edu.ncku.uscc.util.Log;
 //import gnu.io.SerialPort;
 
 public class ScanRoomCmd extends Command implements IDehumidProtocal {
-
+	
 	private static final String LCK_REMOVE_CMD = "sudo rm -f /var/lock/LCK..ttyUSB";
 	// private SerialPort serialPort;
 	private int roomScanIndex;
@@ -67,6 +67,7 @@ public class ScanRoomCmd extends Command implements IDehumidProtocal {
 	protected void timeoutHandler() throws Exception {
 		// TODO Auto-generated method stub
 		controller.nextScanRoomCmd(this);
+		
 	}
 
 }

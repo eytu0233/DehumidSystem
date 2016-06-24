@@ -4,13 +4,10 @@ import edu.ncku.uscc.io.DehumidRoomController;
 import edu.ncku.uscc.util.PanelTimerScheduler;
 
 public class SynPanelTimerCountDownCmd extends SynPanelCommand {
-	
-//	private DehumidRoomController controller;
 
 	public SynPanelTimerCountDownCmd(DehumidRoomController controller) {
 		super(controller);
 		// TODO Auto-generated constructor stub
-//		this.controller = controller;
 	}
 
 	@Override

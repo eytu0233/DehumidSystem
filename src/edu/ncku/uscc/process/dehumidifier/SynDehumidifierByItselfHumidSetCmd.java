@@ -13,8 +13,6 @@ public class SynDehumidifierByItselfHumidSetCmd extends SynDehumidifierCmd {
 	protected byte requestHandler() throws Exception {
 		// TODO Auto-generated method stub
 		
-//		if (dehumidifier.getHumidSet() == 0)
-//			dehumidifier.setHumidSetValue(65);
 		return (byte) DEHUMID_REQ_DEHUMIDITY_SET;
 	}
 
@@ -24,8 +22,8 @@ public class SynDehumidifierByItselfHumidSetCmd extends SynDehumidifierCmd {
 		if (rxBuf == DEHUMID_REP_OK || rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
 				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL || rxBuf == DEHUMID_REP_DEHUMID_ABNORMAL
 				|| rxBuf == DEHUMID_REP_FAN_ABNORMAL || rxBuf == DEHUMID_REP_COMPRESSOR_ABNORMAL) {
-			followCmd(new SetDehumidifierByItselfHumidSetCmd(controller, did), null);
 			controller.jumpCmdQueue(new AskDehumidifierHumidityCmd(controller, did));
+			followCmd(new SetDehumidifierByItselfHumidSetCmd(controller, did), null);
 			return true;
 		} else {
 			return false;

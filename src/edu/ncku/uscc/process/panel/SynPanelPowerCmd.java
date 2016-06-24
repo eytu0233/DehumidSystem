@@ -56,7 +56,6 @@ public class SynPanelPowerCmd extends SynPanelCommand {
 			dataStoreManager.clearRoomDevices(offsetRoomIndex);
 			// let backup data deserialization know it is panel mode
 			controller.initPanelTimeoutCounter();
-//			controller.log_error("backup panel finish");
 			controller.backupDataDeSerialization();
 		}
 		controller.initPanelTimeoutCounter();
@@ -71,18 +70,18 @@ public class SynPanelPowerCmd extends SynPanelCommand {
 		if (controller.isPanelTimeoutCounter()) {
 			dehumidifierFate();
 			panel.clearAll();
+//			controller.log_debug(String.format("Room %x is no panel mode", offsetRoomIndex));
 		} else if (controller.minusPanelTimeoutCounter()) {
 			// first time in no-Panel Mode
 			// deSerialization
 			dataStoreManager.clearRoomDevices(offsetRoomIndex);
-//			controller.log_error("backup panel timeout");
 			controller.backupDataDeSerialization();
+			
+			controller.log_warn(String.format("Panel %d power cmd is timeout.", 
+					offsetRoomIndex));
 		}
 		panel.setLive(false);
 		controller.nextCmd(this);
-		
-		controller.log_warn(String.format("Panel %d power cmd is timeout.", 
-				offsetRoomIndex));
 	}
 	
 	/**

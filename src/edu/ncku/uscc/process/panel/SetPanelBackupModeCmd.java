@@ -29,7 +29,7 @@ public class SetPanelBackupModeCmd extends SynPanelCommand {
 			panel.setModeDehumid(dehumid_mode);
 			panel.setModeDry(!dehumid_mode);
 			panel.setLive(true);
-//			Log.info(String.format("Panel %d changes mode.",
+//			controller.log_info(String.format("Panel %d changes mode.",
 //					offsetRoomIndex));
 			return true;
 		} else {

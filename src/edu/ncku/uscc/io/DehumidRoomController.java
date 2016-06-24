@@ -61,6 +61,8 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	private SerialPort serialPort;
 	/** DisconnectListeners List to trigger disconnection event */
 	private List<SerialPortDisconnectListener> listeners = new ArrayList<SerialPortDisconnectListener>();
+	/** ConnectListeners List to trigger Connection event */
+	private List<SerialPortConnectListener> connect_listeners = new ArrayList<SerialPortConnectListener>();
 	/** A interface to manager modbus dataStore for DehumidSystem */
 	private DataStoreManager dataStoreManager;
 	/** Buffered input stream from the port */
@@ -82,8 +84,9 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	
 	/** A counter for panel timeout */
 	private int panelTimeoutCounter;
-//	/** A counter for 8 dehumidifiers */
-//	private int[] dehumidTimeoutCounter = new int[DEHUMIDIFIERS_A_ROOM];
+	
+	/** A counter for scan room command if there is a ttyUSB but no device */
+	private int scanRoomCounter = 40;
 
 	/**
 	 * Constructor
@@ -133,6 +136,9 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 
 	public void setRoomIndex(final int roomIndex) {
 		this.roomIndex = roomIndex;
+		for (SerialPortConnectListener listener : connect_listeners) {
+			listener.onConnectEvent(serialPort.getName(), roomIndex);
+		}
 		/*this.dataStoreManager.addListener(new Listener(){
 		 * 		@override
 		 * 		public void modifyEvent(int addr, int value){
@@ -177,22 +183,13 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 		panelTimeoutCounter = 10;
 	}
 	
-//	public boolean isDehumidTimeoutCounter(int did) {
-//		return dehumidTimeoutCounter[did] < 0 ? true : false;
-//	}
-//	
-//	public boolean minusDehumidTimeoutCounter(int did) {
-//		if (dehumidTimeoutCounter[did] >= 0) {
-//			dehumidTimeoutCounter[did] -= 1;
-//			return false;
-//		} else
-//			return true;
-//	}
-//	
-//	public void initDehumidTimeoutCounter(int did) {
-//		dehumidTimeoutCounter[did] = 4;
-//	}
-	
+	public boolean minusScanRoomTimeoutCounter() {
+		if (scanRoomCounter >= 0) {
+			scanRoomCounter -= 1;
+			return scanRoomCounter == -1 ? true : false;
+		} else
+			return true;
+	}
 	
 
 	/**
@@ -242,8 +239,8 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	 * @throws NullPointerException
 	 */
 	public synchronized void followCmd(Command flwCmd, Command cmd) throws NullPointerException{
-		if (cmd != null)
-			cmdQueue.add(cmd);
+//		if (cmd != null)
+//			cmdQueue.add(cmd);
 
 		if (flwCmd != null)
 			currentCmd = flwCmd;
@@ -291,11 +288,10 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	 * Initializes the command queue field
 	 */
 	public void initCmdQueue() {
-		
-		// clear the first backup data command
 		Executors.newScheduledThreadPool(1).scheduleAtFixedRate(
 				new BackupDataTask(), BACKUP_DATA_PERIOD_MINUTES, BACKUP_DATA_PERIOD_MINUTES, TimeUnit.MINUTES);
 		
+		// clear the first backup data command
 		clearQueue();
 		
 		backupDataDeSerialization();
@@ -352,6 +348,16 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	 */
 	public void removeDisconnectListener(SerialPortDisconnectListener listener) throws Exception {
 		listeners.remove(listener);
+	}
+	
+	/**
+	 * Adds connect listener
+	 * 
+	 * @param listener
+	 * @throws Exception
+	 */
+	public void addConnectListener(SerialPortConnectListener listener) throws Exception {
+		connect_listeners.add(listener);
 	}
 
 	@Override
@@ -591,7 +597,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	public class BackupDataTask extends Thread {
 		@Override
 		public void run() {
-			addCmdQueue(new BackupDataCmd(getController()));
+			cmdQueue.add(new BackupDataCmd(getController()));
 		}
 	}
 

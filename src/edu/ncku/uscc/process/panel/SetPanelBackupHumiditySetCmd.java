@@ -27,6 +27,7 @@ public class SetPanelBackupHumiditySetCmd extends SynPanelCommand {
 		// TODO Auto-generated method stub
 		if (rxBuf == PANEL_REP_OK) {
 			// set backup humidity set value
+			controller.initPanelTimeoutCounter();
 			followCmd(new SetPanelHumiditySetCmd(controller), this);
 			panel.setLive(true);
 			return true;

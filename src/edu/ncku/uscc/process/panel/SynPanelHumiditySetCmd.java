@@ -27,6 +27,9 @@ public class SynPanelHumiditySetCmd extends SynPanelCommand {
 	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if (rxBuf == PANEL_REP_OK) {
+			controller.jumpCmdQueue(new SynPanelTimerSetCmd(controller));
+			controller.initPanelTimeoutCounter();
+			// followCmd will not exec finishHandler()
 			followCmd(new SetPanelHumiditySetCmd(controller), this);
 			panel.setLive(true);
 			return true;

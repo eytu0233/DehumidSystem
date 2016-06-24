@@ -27,8 +27,9 @@ public class SetPanelBackupTimerSetCmd extends SynPanelCommand {
 		// TODO Auto-generated method stub
 		if(rxBuf == PANEL_REP_OK) {
 			panel.setLive(true);
-//			Log.info(String.format("Add change command set of timer of Panel %d", offsetRoomIndex));
-			// set panel backup timer set
+			controller.initPanelTimeoutCounter();
+			controller.jumpCmdQueue(new SetPanelBackupHumiditySetCmd(controller, data));
+			// followCmd will not exec finishHandler()
 			followCmd(new SetPanelTimerSetCmd(controller), this);
 			return true;
 		}else {
