@@ -98,6 +98,7 @@ public class DehumidSystem {
 			try{
 				@SuppressWarnings("unchecked")
 				Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier.getPortIdentifiers();
+				
 				for (int i = 0; i < NUM_ROOMS; i++) {
 					if (is_room_live[i] == 0)
 						dataStoreManager.clearRoomDevices(i);
@@ -137,27 +138,21 @@ public class DehumidSystem {
 								dehumid.addConnectListener(new SerialPortConnectListener() {
 									
 									@Override
-									public void onConnectEvent(String portName, int room) {
+									public void onConnectEvent(int room) {
 										// TODO Auto-generated method stub
 										is_room_live[room-2] = 1;
 									}
 								});
 								dehumid.initialize();
 							}
-
 							break;
 						}
 					}
-				}		
-				
-				
-				
+				}
 			}catch(Exception e){
 				Log.error(e, e);
 				LATCH.countDown();
 			}
 		}
-		
 	}
-
 }

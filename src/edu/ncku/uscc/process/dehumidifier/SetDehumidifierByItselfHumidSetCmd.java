@@ -18,6 +18,7 @@ public class SetDehumidifierByItselfHumidSetCmd extends SynDehumidifierCmd {
 		
 		int humidSet = dehumidifier.getHumidSet();
 		humidSet = humidSet <= 50 ? 50 : humidSet >= 90 ? 90 : humidSet;
+		dehumidifier.setHumidSetValue(humidSet);
 		humidSet = (humidSet - 45) / 5;
 		
 		return (byte) humidSet;

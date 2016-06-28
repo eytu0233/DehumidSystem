@@ -137,7 +137,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	public void setRoomIndex(final int roomIndex) {
 		this.roomIndex = roomIndex;
 		for (SerialPortConnectListener listener : connect_listeners) {
-			listener.onConnectEvent(serialPort.getName(), roomIndex);
+			listener.onConnectEvent(roomIndex);
 		}
 		/*this.dataStoreManager.addListener(new Listener(){
 		 * 		@override
