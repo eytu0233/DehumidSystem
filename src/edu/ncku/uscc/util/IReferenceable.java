@@ -34,5 +34,6 @@ public interface IReferenceable {
 	public void setTimerSetValue(int timer);
 	
 	public void clearAll();
+	public boolean isDeviceStateAllZero();
 	
 }

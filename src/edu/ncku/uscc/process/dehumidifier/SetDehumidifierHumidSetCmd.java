@@ -18,7 +18,6 @@ public class SetDehumidifierHumidSetCmd extends SynDehumidifierCmd {
 		
 		int humidSet = panel.getHumidSet();
 		humidSet = humidSet <= 50 ? 50 : humidSet >= 90 ? 90 : humidSet;
-		panel.setHumidSetValue(humidSet);
 		humidSet = (humidSet - 45) / 5;
 		
 		return (byte) humidSet;

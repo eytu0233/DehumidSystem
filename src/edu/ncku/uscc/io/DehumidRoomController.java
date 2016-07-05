@@ -497,6 +497,34 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 		cmdQueue.add(cmd);
 	}
 	
+	public BackupData getBackupData() {
+		
+		BackupData data = new BackupData();
+		
+		try {
+			ObjectInputStream ois = new ObjectInputStream(
+					new FileInputStream(FILE_ADDRESS[getRoomIndex() - 2]));
+			data = (BackupData) ois.readObject();
+			ois.close();
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+//			e.printStackTrace();
+			Log.warn("Backup file not found, creat a new one.");
+			data.setDefaultValue();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			data.setDefaultValue();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			data.setDefaultValue();
+		}
+		
+		return data;
+	}
+	
 	public void backupDataSerialization(BackupData data) {
 		try {
 			ObjectOutputStream oos = new ObjectOutputStream(
@@ -513,85 +541,26 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	}
 	
 	public void backupDataDeSerialization() {
-		try {
-			ObjectInputStream ois = new ObjectInputStream(
-					new FileInputStream(FILE_ADDRESS[getRoomIndex() - 2]));
-			BackupData data = (BackupData) ois.readObject();
-			ois.close();
-			
-			if (isPanelTimeoutCounter()) {
-				// no panel mode
-				for (int did = DEHUMIDIFIERS_A_ROOM - 1; did >= 0; did--) {
-					if (getCheckRate(did) >= (int) (Math.random() * 100))
-						jumpCmdQueue(new SetDehumidifierBackupByItselfPowerCmd(this, did, data));
+		BackupData data = getBackupData();
+
+		if (isPanelTimeoutCounter()) {
+			// no panel mode
+			for (int did = DEHUMIDIFIERS_A_ROOM - 1; did >= 0; did--) {
+				if (getCheckRate(did) >= (int) (Math.random() * 100)) {
+					jumpCmdQueue(new SetDehumidifierBackupByItselfPowerCmd(this, did, data));
 				}
-			} else {
-				// panel mode
-				jumpCmdQueue(new SetPanelBackupPowerCmd(this, data));
 			}
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-//			e.printStackTrace();
-			Log.warn("Backup file not found, creat a new one.");
-			initBackupDataSerialization();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} else {
+			// panel mode
+			jumpCmdQueue(new SetPanelBackupPowerCmd(this, data));
 		}
 	}
 	
 	public void backupDataDeSerialization(int did) {
-		try {
-			ObjectInputStream ois = new ObjectInputStream(
-					new FileInputStream(FILE_ADDRESS[getRoomIndex() - 2]));
-			BackupData data = (BackupData) ois.readObject();
-			ois.close();
+		BackupData data = getBackupData();
 
-			// no panel mode
-			jumpCmdQueue(new SetDehumidifierBackupByItselfPowerCmd(this, did, data));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-//			e.printStackTrace();
-			Log.warn("Backup file not found, creat a new one.");
-			initBackupDataSerialization();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	public void initBackupDataSerialization() {
-		try {
-			BackupData data = new BackupData();
-			data.setDefaultValue();
-			ObjectOutputStream oos = new ObjectOutputStream(
-					new FileOutputStream(FILE_ADDRESS[getRoomIndex() - 2]));
-			oos.writeObject(data);
-			oos.close();
-			
-			if (isPanelTimeoutCounter()) {
-				// no panel mode
-				for (int did = DEHUMIDIFIERS_A_ROOM - 1; did >= 0; did--) {
-					if (getCheckRate(did) >= (int) (Math.random() * 100))
-						jumpCmdQueue(new SetDehumidifierBackupByItselfPowerCmd(this, did, data));
-				}
-			} else {
-				// panel mode
-				jumpCmdQueue(new SetPanelBackupPowerCmd(this, data));
-			}
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		// no panel mode
+		jumpCmdQueue(new SetDehumidifierBackupByItselfPowerCmd(this, did, data));
 	}
 	
 	public class BackupDataTask extends Thread {

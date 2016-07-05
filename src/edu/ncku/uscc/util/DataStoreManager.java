@@ -379,6 +379,16 @@ public class DataStoreManager {
 			setPanelBackup(0, room, ADDR_TIMER_SET);
 		}
 
+		@Override
+		public boolean isDeviceStateAllZero() {
+			// TODO Auto-generated method stub
+			if (getPanelStatus(room) == 0 && getPanelHumid(room) == 0 && getPanelHumidSet(room) == 0 
+					&& getPanelTimerSet(room) == 0)
+				return true;
+			
+			return false;
+		}
+
 	}
 
 	class Dehumidifier extends Device {
@@ -590,6 +600,16 @@ public class DataStoreManager {
 		
 		private int getDehumidifierStatus() {
 			return modbusSlave.getResgister(ADDR_STATUS + offset);
+		}
+
+		@Override
+		public boolean isDeviceStateAllZero() {
+			// TODO Auto-generated method stub
+			if (getDehumidifierStatus() == 0 && modbusSlave.getResgister(ADDR_HUMID + offset) == 0
+					&& modbusSlave.getResgister(ADDR_HUMID_SET + offset) == 0)
+				return true;
+			
+			return false;
 		}
 	}
 

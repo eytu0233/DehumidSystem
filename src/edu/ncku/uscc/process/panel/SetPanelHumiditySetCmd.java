@@ -17,7 +17,6 @@ public class SetPanelHumiditySetCmd extends SynPanelCommand {
 		
 		int humidSet = panel.getHumidSet();
 		humidSet = humidSet <= 50 ? 50 : humidSet >= 90 ? 90 : humidSet;
-		panel.setHumidSetValue(humidSet);
 		humidSet = (humidSet - 45) / 5;
 		
 		return (byte) humidSet;
@@ -28,7 +27,7 @@ public class SetPanelHumiditySetCmd extends SynPanelCommand {
 		// TODO Auto-generated method stub
 		if (rxBuf == PANEL_REP_OK) {
 			panel.setLive(true);
-			panel.setHumidSetValue(panel.getHumidSet());
+//			panel.setHumidSetValue(panel.getHumidSet());
 			
 			controller.log_info(String.format("Change set of humidity of Panel %d success", 
 					offsetRoomIndex));

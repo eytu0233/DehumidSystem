@@ -26,12 +26,19 @@ public class BackupDataCmd extends Command implements IDehumidProtocal {
 	@Override
 	protected byte requestHandler() throws Exception {
 		// TODO Auto-generated method stub
-		BackupData data = new BackupData();
-		data.setPanelOn(panel.isOn());
-		data.setPanelModeDry(panel.isModeDry());
-		data.setPanelTimerSet(panel.getTimerSet());
-		data.setPanelHumidSet(panel.getHumidSet());
+		BackupData data = controller.getBackupData();
+		
+		if (!panel.isDeviceStateAllZero()) {
+			data.setPanelOn(panel.isOn());
+			data.setPanelModeDry(panel.isModeDry());
+			data.setPanelTimerSet(panel.getTimerSet());
+			data.setPanelHumidSet(panel.getHumidSet());
+		}
+
 		for (int did = 0; did < DehumidRoomController.DEHUMIDIFIERS_A_ROOM; did++) {
+			if (dehumidifier[did].isDeviceStateAllZero())
+				continue;
+			
 			data.setDehumidOn(did, dehumidifier[did].isOn());
 			data.setDehumidModeDry(did, dehumidifier[did].isModeDry());
 			data.setDehumidHumid(did, dehumidifier[did].getHumidSet());
