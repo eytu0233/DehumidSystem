@@ -109,7 +109,6 @@ public abstract class Command {
 	 * @throws Exception
 	 */
 	public final void start() throws Exception {
-		controller.log_error(this.getClass().getSimpleName());
 
 		// Run the command first before this command 
 		if (preCommand != null) {
