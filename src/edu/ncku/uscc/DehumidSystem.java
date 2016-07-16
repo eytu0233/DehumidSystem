@@ -1,7 +1,6 @@
 package edu.ncku.uscc;
 
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import edu.ncku.uscc.io.ModbusTCPSlave;
 import edu.ncku.uscc.io.PortScanTask;
 import edu.ncku.uscc.util.DataStoreManager;
@@ -49,6 +48,7 @@ public class DehumidSystem {
 			// the data store manager is used by all DehumidRoomController thread
 			dataStoreManager = new DataStoreManager(slave);
 			
+			
 			/*
 			 * Date : 2016/7/16
 			 * Author : Steve Chen
@@ -59,9 +59,9 @@ public class DehumidSystem {
 			 * 2. If and only if a exception of PortScanTask occurs, the get method will return.
 			 * At that time we use catch like line 66 in this class to handle exception.
 			 */
-			Future<Void> future = Executors.newSingleThreadExecutor().submit(new PortScanTask(dataStoreManager, NUM_ROOMS, logCommand));
 			Log.info("PortScanTask Started...");
-			future.get();
+			Executors.newSingleThreadExecutor().submit(new PortScanTask(dataStoreManager, NUM_ROOMS, logCommand)).get();
+			
 			
 		}catch(Exception e){
 			Log.error(e, e);

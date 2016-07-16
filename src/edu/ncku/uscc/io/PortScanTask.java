@@ -47,6 +47,11 @@ public class PortScanTask implements Callable<Void> {
 			@SuppressWarnings("unchecked")
 			Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier.getPortIdentifiers();
 
+			for (int i = 0; i < isRoomLive.length; i++) {
+				if (!isRoomLive[i])
+					dataStoreManager.clearRoomDevices(i);
+			}
+
 			// iterate through, looking for the port
 			while (portEnum.hasMoreElements()) {
 				CommPortIdentifier currPortId = portEnum.nextElement();
