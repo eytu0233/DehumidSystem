@@ -28,7 +28,7 @@ public class PortScanTask implements Callable<Void> {
 		private static final long serialVersionUID = 1L;
 		{
 			for (String portName : PORT_NAMES) {
-				portRoomAvailable.put(portName, false);
+				put(portName, false);
 			}
 		}
 	};

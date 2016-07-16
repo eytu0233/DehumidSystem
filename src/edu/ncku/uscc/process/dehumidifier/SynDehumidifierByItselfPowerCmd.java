@@ -23,7 +23,7 @@ public class SynDehumidifierByItselfPowerCmd extends SynDehumidifierCmd {
 				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL || rxBuf == DEHUMID_REP_DEHUMID_ABNORMAL
 				|| rxBuf == DEHUMID_REP_FAN_ABNORMAL || rxBuf == DEHUMID_REP_COMPRESSOR_ABNORMAL) {
 			controller.jumpCmdQueue(new SynDehumidifierByItselfModeCmd(controller, did));
-//			controller.log_debug(String.format("Dehumidifier %d Power is set.", did));
+//			controller.log_debug(String.format("Dehumidifier %d Power is set. %x", did, getTxBuf()));
 			return true;
 		} else {
 			return false;

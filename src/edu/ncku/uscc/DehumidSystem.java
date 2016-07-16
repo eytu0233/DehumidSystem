@@ -18,7 +18,7 @@ import edu.ncku.uscc.util.Log;
  */
 public class DehumidSystem {
 	
-	private static final String LOG_COMMAND_DEFAULT = "-Dew1234";
+	private static final String LOG_COMMAND_DEFAULT = "-Dew";
 
 	private static final int NUM_ROOMS = 4;
 	private static final int REGISTERS_A_DEVICE = 4;

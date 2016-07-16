@@ -19,7 +19,7 @@ public class Log{
 	public static void init(String logCommand){
 		Properties logp = new Properties();
 		try {
-			logp.load(new FileInputStream(new File("./log4j.properties")));
+			logp.load(new FileInputStream(new File("/home/pi/workspace/log4j.properties")));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
