@@ -1,20 +1,11 @@
 package edu.ncku.uscc;
 
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-
-import edu.ncku.uscc.io.DehumidRoomController;
+import java.util.concurrent.Future;
 import edu.ncku.uscc.io.ModbusTCPSlave;
-import edu.ncku.uscc.io.SerialPortConnectListener;
-import edu.ncku.uscc.io.SerialPortDisconnectListener;
+import edu.ncku.uscc.io.PortScanTask;
 import edu.ncku.uscc.util.DataStoreManager;
 import edu.ncku.uscc.util.Log;
-import gnu.io.CommPortIdentifier;
-import gnu.io.SerialPort;
 
 /**
  * 
@@ -27,49 +18,28 @@ import gnu.io.SerialPort;
  *
  */
 public class DehumidSystem {
+	
+	private static final String LOG_COMMAND_DEFAULT = "-Dew1234";
 
 	private static final int NUM_ROOMS = 4;
 	private static final int REGISTERS_A_DEVICE = 4;
 	private static final int DEVICES_A_ROOM = 9;
-	private static final int TIME_OUT = 2000;
-	private static final int BAUD_RATE = 9600;
-
-	private static final String PORT_NAMES[] = { 
-			"/dev/ttyUSB0", // Linux
-			"/dev/ttyUSB1",
-			"/dev/ttyUSB2",
-			"/dev/ttyUSB3"
-	};
 	
-	private static Map<String, Boolean> portRoomAvailable = new HashMap<String, Boolean>();
 	/** A interface to manager modbus dataStore for DehumidSystem */
-	private static DataStoreManager dataStoreManager;
+	private static DataStoreManager dataStoreManager;	
 	
-	private final static CountDownLatch LATCH = new CountDownLatch(1);
-	
-	private static final String LOG_COMMAND_DEFAULT = "-Dew1234";
 	private static String logCommand = "";
-	
-	private static int[] is_room_live = new int[NUM_ROOMS];
 		
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		
-		try{
-			
+		try{			
 			for (String arg : args)
 				logCommand = logCommand.concat(arg);
 			if (!logCommand.matches("-D[deiw]+[1234]*"))
 				logCommand = LOG_COMMAND_DEFAULT;
 			
 			Log.init(logCommand);
-
-			for(String portName : PORT_NAMES){
-				portRoomAvailable.put(portName, false);
-			}
-			
-			for (int i = 0; i < NUM_ROOMS; i++)
-				is_room_live[i] = 0;
 			
 			// start the modbus tcp slave thread
 			ModbusTCPSlave slave = new ModbusTCPSlave(NUM_ROOMS * DEVICES_A_ROOM * REGISTERS_A_DEVICE);
@@ -79,80 +49,24 @@ public class DehumidSystem {
 			// the data store manager is used by all DehumidRoomController thread
 			dataStoreManager = new DataStoreManager(slave);
 			
-			Executors.newScheduledThreadPool(1).scheduleAtFixedRate(new PortScanTask(), 0, 1, TimeUnit.SECONDS);
+			/*
+			 * Date : 2016/7/16
+			 * Author : Steve Chen
+			 * Here is a new code to simplify how PortScanTask class is initialized, and how to 
+			 * lock main thread with future.get() method.
+			 * There are two advantages to use this Future class.
+			 * 1. We can use get method to lock main thread.
+			 * 2. If and only if a exception of PortScanTask occurs, the get method will return.
+			 * At that time we use catch like line 66 in this class to handle exception.
+			 */
+			Future<Void> future = Executors.newSingleThreadExecutor().submit(new PortScanTask(dataStoreManager, NUM_ROOMS, logCommand));
 			Log.info("PortScanTask Started...");
-			LATCH.await();
+			future.get();
 			
 		}catch(Exception e){
 			Log.error(e, e);
 		}
 		
 		Log.debug("System stop!");
-	}
-	
-	public static class PortScanTask extends Thread {
-
-		@Override
-		public void run() {
-			// TODO Auto-generated method stub
-			try{
-				@SuppressWarnings("unchecked")
-				Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier.getPortIdentifiers();
-				
-				for (int i = 0; i < NUM_ROOMS; i++) {
-					if (is_room_live[i] == 0)
-						dataStoreManager.clearRoomDevices(i);
-				}
-
-				// iterate through, looking for the port
-				while (portEnum.hasMoreElements()) {
-					CommPortIdentifier currPortId = (CommPortIdentifier) portEnum.nextElement();
-					for (String portName : PORT_NAMES) {
-						if (currPortId.getName().equals(portName)) {							
-							if(!portRoomAvailable.get(portName)){
-								portRoomAvailable.put(portName, true);
-								Log.info("Open " + portName);
-								
-								// open serial port, and use class name for the appName.
-								SerialPort serialPort = (SerialPort) currPortId.open(this.getClass().getName(),
-										TIME_OUT);
-								
-								// set port parameters
-								serialPort.setSerialPortParams(BAUD_RATE, SerialPort.DATABITS_8,
-										SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-								
-								DehumidRoomController dehumid = new DehumidRoomController(dataStoreManager,
-										serialPort, logCommand);
-								dehumid.addDisconnectListener(new SerialPortDisconnectListener(){
-
-									@Override
-									public void onDisconnectEvent(String portName, int room) {
-										// TODO Auto-generated method stub
-										portRoomAvailable.put(portName, false);
-										dataStoreManager.clearRoomDevices(room-2);
-										is_room_live[room-2] = 0;
-										Log.info("Close " + portName);
-									}
-									
-								});
-								dehumid.addConnectListener(new SerialPortConnectListener() {
-									
-									@Override
-									public void onConnectEvent(int room) {
-										// TODO Auto-generated method stub
-										is_room_live[room-2] = 1;
-									}
-								});
-								dehumid.initialize();
-							}
-							break;
-						}
-					}
-				}
-			}catch(Exception e){
-				Log.error(e, e);
-				LATCH.countDown();
-			}
-		}
-	}
+	}	
 }
