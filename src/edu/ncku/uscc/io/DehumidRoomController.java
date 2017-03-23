@@ -239,9 +239,6 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	 * @throws NullPointerException
 	 */
 	public synchronized void followCmd(Command flwCmd, Command cmd) throws NullPointerException{
-//		if (cmd != null)
-//			cmdQueue.add(cmd);
-
 		if (flwCmd != null)
 			currentCmd = flwCmd;
 		else
