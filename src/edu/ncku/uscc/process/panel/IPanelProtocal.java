@@ -26,6 +26,7 @@ public interface IPanelProtocal {
 	public static final int PANEL_REQ_HUMID_ABNORMAL = 0x8D;
 	public static final int PANEL_REQ_FAN_ABNORMAL = 0x8E;
 	public static final int PANEL_REQ_COMPRESSOR_ABNORMAL = 0x8F;
+	public static final int PANEL_REQ_MULTIPLE_ABNORMAL = 0x8C;
 	public static final int PANEL_REQ_SETTING_HUMID_Set = 0xCE;
 	public static final int PANEL_REQ_SETTING_TIMER = 0xCF;
 	

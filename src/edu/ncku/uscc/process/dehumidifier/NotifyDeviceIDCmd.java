@@ -32,6 +32,12 @@ public class NotifyDeviceIDCmd extends Command implements IDehumidProtocal {
 	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		switch (rxBuf) {
+		// if return compressor running, then the dehumidifier must be ok
+		case DEHUMID_REP_COMPRESSOR_RUNNING:
+			dehumidifier.setCompressorRunning(true);
+			controller.log_debug(String.format("The dehumidifier %d in room %d acks compressor running.", 
+					did, offsetRoomIndex));
+//			return true;
 		case DEHUMID_REP_OK:
 			dehumidifier.setHighTempWarn(false);
 			dehumidifier.setDeforstTempWarn(false);

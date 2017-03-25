@@ -22,9 +22,15 @@ public class SetDehumidifierBackupByItselfPowerCmd extends SynDehumidifierCmd {
 	@Override
 	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
+		
+		dehumidifier.setCompressorRunning(rxBuf == DEHUMID_REP_COMPRESSOR_RUNNING);
+		controller.log_debug(String.format("dehumid %d receive compressor running %b", 
+				did, rxBuf == DEHUMID_REP_COMPRESSOR_RUNNING));
+		
 		if (rxBuf == DEHUMID_REP_OK || rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
 				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL || rxBuf == DEHUMID_REP_DEHUMID_ABNORMAL
-				|| rxBuf == DEHUMID_REP_FAN_ABNORMAL || rxBuf == DEHUMID_REP_COMPRESSOR_ABNORMAL) {
+				|| rxBuf == DEHUMID_REP_FAN_ABNORMAL || rxBuf == DEHUMID_REP_COMPRESSOR_ABNORMAL
+				|| rxBuf == DEHUMID_REP_COMPRESSOR_RUNNING) {
 			dehumidifier.setOn(data.isDehumidOn(did));
 //			controller.log_debug(String.format("Dehumidifier %d Power is set.", did));
 			return true;

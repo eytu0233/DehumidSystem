@@ -30,39 +30,24 @@ public class SynPanelAbnormalCmd extends SynPanelCommand {
 			if (controller.getCheckRate(did) > CHECKRATE_THRESHOLD) {
 				IReferenceable dehumidifier = dataStoreManager.getDehumidifier(
 						offsetRoomIndex, did);
-				if (dehumidifier.isHighTempWarning()) {
+				if (dehumidifier.isHighTempWarning() && !is_temp_abnormal) {
 					tmpTxBuf = (byte) PANEL_REQ_TEMP_ABNORMAL;
-					if (is_temp_abnormal)
-						continue;
-					
 					is_temp_abnormal = true;
 					++countAbnormal;
-				} else if (dehumidifier.isDeforstTempWarning()) {
+				} else if (dehumidifier.isDeforstTempWarning() && !is_defrost_abnormal) {
 					tmpTxBuf = (byte) PANEL_REQ_DEFROST_TEMP_ABNORMAL;
-					if (is_defrost_abnormal)
-						continue;
-					
 					is_defrost_abnormal = true;
 					++countAbnormal;
-				} else if (dehumidifier.isHumidWarning()) {
+				} else if (dehumidifier.isHumidWarning() && !is_humid_abnormal) {
 					tmpTxBuf = (byte) PANEL_REQ_HUMID_ABNORMAL;
-					if (is_humid_abnormal)
-						continue;
-					
 					is_humid_abnormal = true;
 					++countAbnormal;
-				} else if (dehumidifier.isFanWarning()) {
+				} else if (dehumidifier.isFanWarning() && !is_fan_abnormal) {
 					tmpTxBuf = (byte) PANEL_REQ_FAN_ABNORMAL;
-					if (is_fan_abnormal)
-						continue;
-					
 					is_fan_abnormal = true;
 					++countAbnormal;
-				} else if (dehumidifier.isCompressorWarning()) {
+				} else if (dehumidifier.isCompressorWarning() && !is_compressor_abnormal) {
 					tmpTxBuf = (byte) PANEL_REQ_COMPRESSOR_ABNORMAL;
-					if (is_compressor_abnormal)
-						continue;
-					
 					is_compressor_abnormal = true;
 					++countAbnormal;
 				}
@@ -75,29 +60,10 @@ public class SynPanelAbnormalCmd extends SynPanelCommand {
 			panel.setHumidWarn(false);
 			panel.setFanWarn(false);
 			panel.setCompressorWarn(false);
-			
 			return SKIP;
 		} else {
-			if (!is_temp_abnormal) 
-				panel.setHighTempWarn(false);
-			
-			if (!is_defrost_abnormal)
-				panel.setDeforstTempWarn(false);
-				
-			if (!is_humid_abnormal)
-				panel.setHumidWarn(false);
-
-			if (!is_fan_abnormal)
-				panel.setFanWarn(false);
-
-			if (!is_compressor_abnormal)
-				panel.setCompressorWarn(false);
-			
-			if (countAbnormal == 1)
-				return (byte) tmpTxBuf;
-			
-			// multiple abnormal
-			return SKIP;
+			return (countAbnormal == 1) ? (byte) tmpTxBuf : // one abnormal
+				(byte) PANEL_REQ_MULTIPLE_ABNORMAL;			// multiple abnormal
 		}
 		
 	}
@@ -108,36 +74,38 @@ public class SynPanelAbnormalCmd extends SynPanelCommand {
 		if (rxBuf == PANEL_REP_OK) {
 			switch (getTxBuf()) {
 			case (byte) PANEL_REQ_TEMP_ABNORMAL:
-				panel.setHighTempWarn(true);
-				controller.log_debug(String.format(
-						"Panel %d is high temperature abnormal.",
+				panel.setHighTempWarn(is_temp_abnormal);
+				controller.log_debug(String.format("Panel %d is high temperature abnormal.",
 						offsetRoomIndex));
-				is_temp_abnormal = false;
 				break;
 			case (byte) PANEL_REQ_DEFROST_TEMP_ABNORMAL:
-				panel.setDeforstTempWarn(true);
-				controller.log_debug(String.format(
-						"Panel %d is defrost temperature abnormal.",
+				panel.setDeforstTempWarn(is_defrost_abnormal);
+				controller.log_debug(String.format("Panel %d is defrost temperature abnormal.",
 						offsetRoomIndex));
-				is_defrost_abnormal = false;
 				break;
 			case (byte) PANEL_REQ_HUMID_ABNORMAL:
-				panel.setHumidWarn(true);
+				panel.setHumidWarn(is_humid_abnormal);
 				controller.log_debug(String.format("Panel %d is humid abnormal.",
 						offsetRoomIndex));
-				is_humid_abnormal = false;
 				break;
 			case (byte) PANEL_REQ_FAN_ABNORMAL:
-				panel.setFanWarn(true);
+				panel.setFanWarn(is_fan_abnormal);
 				controller.log_debug(String.format("Panel %d is fan abnormal.",
 						offsetRoomIndex));
-				is_fan_abnormal = false;
 				break;
 			case (byte) PANEL_REQ_COMPRESSOR_ABNORMAL:
-				panel.setCompressorWarn(true);
+				panel.setCompressorWarn(is_compressor_abnormal);
 				controller.log_debug(String.format("Panel %d is compressor abnormal.",
 						offsetRoomIndex));
-				is_compressor_abnormal = false;
+				break;
+			case (byte) PANEL_REQ_MULTIPLE_ABNORMAL:
+				panel.setHighTempWarn(is_temp_abnormal);
+				panel.setDeforstTempWarn(is_defrost_abnormal);
+				panel.setHumidWarn(is_humid_abnormal);
+				panel.setFanWarn(is_fan_abnormal);
+				panel.setCompressorWarn(is_compressor_abnormal);
+				controller.log_debug(String.format("Panel %d is multi abnormal.",
+						offsetRoomIndex));
 				break;
 			}
 			return true;
@@ -153,28 +121,6 @@ public class SynPanelAbnormalCmd extends SynPanelCommand {
 		controller.jumpCmdQueue(new SynPanelHumidityCmd(controller));
 		controller.nextCmd(null);
 		controller.initPanelTimeoutCounter();
-		if (countAbnormal > 1) {
-			if (is_temp_abnormal) 
-				controller.jumpCmdQueue(new SetPanelAbnormalCmd(
-						controller, true, false, false, false, false));
-			
-			if (is_defrost_abnormal)
-				controller.jumpCmdQueue(new SetPanelAbnormalCmd(
-						controller, false, true, false, false, false));
-				
-			if (is_humid_abnormal)
-				controller.jumpCmdQueue(new SetPanelAbnormalCmd(
-						controller, false, false, true, false, false));
-
-			if (is_fan_abnormal)
-				controller.jumpCmdQueue(new SetPanelAbnormalCmd(
-						controller, false, false, false, true, false));
-
-			if (is_compressor_abnormal)
-				controller.jumpCmdQueue(new SetPanelAbnormalCmd(
-						controller, false, false, false, false, true));
-
-		}
 	}
 
 }

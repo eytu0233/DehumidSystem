@@ -155,7 +155,8 @@ public class DataStoreManager {
 		public static final int FAN_WARN_MASK = 0x01 << 8;
 		public static final int COMPRESSOR_WARN_MASK = 0x01 << 9;
 		public static final int LIVE_MASK = 0x01 << 10;
-		public static final int ALL_MASK = 0x07ff;
+		public static final int COMPRESSOR_RUNNING_MASK = 0x01 << 11;
+		public static final int ALL_MASK = 0x0fff;
 
 		protected int room;
 		protected int offset;
@@ -389,6 +390,19 @@ public class DataStoreManager {
 			return false;
 		}
 
+		@Override
+		public boolean isCompressorRunning() {
+			// TODO Auto-generated method stub
+			int register = getPanelStatus(room) & COMPRESSOR_RUNNING_MASK;
+			return register == COMPRESSOR_RUNNING_MASK;
+		}
+
+		@Override
+		public void setCompressorRunning(boolean CompressorRunning) {
+			// TODO Auto-generated method stub
+			setStatusFlag(COMPRESSOR_RUNNING_MASK, CompressorRunning);
+		}
+
 	}
 
 	class Dehumidifier extends Device {
@@ -475,6 +489,13 @@ public class DataStoreManager {
 			int register = getDehumidifierStatus() & LIVE_MASK;
 			return register == LIVE_MASK;
 		}
+		
+		@Override
+		public boolean isCompressorRunning() {
+			// TODO Auto-generated method stub
+			int register = getDehumidifierStatus() & COMPRESSOR_RUNNING_MASK;
+			return register == COMPRESSOR_RUNNING_MASK;
+		}
 
 		@Override
 		public int getHumid() {
@@ -559,6 +580,12 @@ public class DataStoreManager {
 			// TODO Auto-generated method stub
 			setStatusFlag(LIVE_MASK, live);
 		}
+		
+		@Override
+		public void setCompressorRunning(boolean CompressorRunning) {
+			// TODO Auto-generated method stub
+			setStatusFlag(COMPRESSOR_RUNNING_MASK, CompressorRunning);
+		}
 
 		@Override
 		public void setHumid(int humid) {
@@ -611,6 +638,8 @@ public class DataStoreManager {
 			
 			return false;
 		}
+
+		
 	}
 
 }

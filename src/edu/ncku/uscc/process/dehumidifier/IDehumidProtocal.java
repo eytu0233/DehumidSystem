@@ -8,6 +8,7 @@ public interface IDehumidProtocal {
 	public static final int DEHUMID_REP_DEHUMID_ABNORMAL = 0x58;
 	public static final int DEHUMID_REP_FAN_ABNORMAL = 0x59;
 	public static final int DEHUMID_REP_COMPRESSOR_ABNORMAL = 0x5A;
+	public static final int DEHUMID_REP_COMPRESSOR_RUNNING = 0x5E;
 
 	public static final int DEHUMID_REQ_ON = 0x30;
 	public static final int DEHUMID_REQ_OFF = 0x31;

@@ -17,6 +17,9 @@ public interface IReferenceable {
 	public boolean isDeforstTempWarning();
 	public void setDeforstTempWarn(boolean tempWarn);
 	
+	public boolean isCompressorRunning();
+	public void setCompressorRunning(boolean CompressorRunning);
+	
 	public boolean isHumidWarning();
 	public void setHumidWarn(boolean HumidWarn);
 	public boolean isFanWarning();
