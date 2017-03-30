@@ -168,15 +168,14 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	}
 	
 	public boolean isPanelTimeoutCounter() {
-		return panelTimeoutCounter < 0 ? true : false;
+		return (panelTimeoutCounter < 0);
 	}
 	
 	public boolean minusPanelTimeoutCounter() {
 		if (panelTimeoutCounter >= 0) {
 			panelTimeoutCounter -= 1;
-			return panelTimeoutCounter == -1 ? true : false;
-		} else
-			return true;
+		}
+		return (panelTimeoutCounter < 0);
 	}
 	
 	public void initPanelTimeoutCounter() {
@@ -186,9 +185,8 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 	public boolean minusScanRoomTimeoutCounter() {
 		if (scanRoomCounter >= 0) {
 			scanRoomCounter -= 1;
-			return scanRoomCounter == -1 ? true : false;
-		} else
-			return true;
+		}
+		return (scanRoomCounter < 0);
 	}
 	
 
