@@ -41,7 +41,7 @@ public class DehumidSystem {
 			Log.init(logCommand);
 			
 			// start the modbus tcp slave thread
-			ModbusTCPSlave slave = new ModbusTCPSlave(NUM_ROOMS * DEVICES_A_ROOM * REGISTERS_A_DEVICE);
+			ModbusTCPSlave slave = new ModbusTCPSlave(NUM_ROOMS * DEVICES_A_ROOM * REGISTERS_A_DEVICE + 1);
 			slave.initialize();
 			Log.info("Modbus TCP Slave Started...");
 			

@@ -23,6 +23,7 @@ public class DataStoreManager {
 
 	private Panel[] panels;
 	private Dehumidifier[][] dehumidifiers;
+	private RaspberryPi raspberryPi;
 
 	/**
 	 * Constructor
@@ -36,6 +37,7 @@ public class DataStoreManager {
 		this.panels = new Panel[NUM_ROOMS];
 		this.backupPanel = new int[NUM_ROOMS * 4];
 		this.dehumidifiers = new Dehumidifier[NUM_ROOMS][DEHUMIDIFIER_A_ROOM];
+		this.raspberryPi = new RaspberryPi();
 		
 		for (int room = 0; room < NUM_ROOMS; room++) {
 			panels[room] = new Panel(room);
@@ -52,6 +54,10 @@ public class DataStoreManager {
 //	public setModifiedEventListener(ModifiedEventListener listener){
 //		modbusSlave.addModifiedEventListener(listener);
 //	}
+	
+	public RaspberryPi getRaspberryPi() {
+		return raspberryPi;
+	}
 
 	public boolean isPanelONOFFChange(int room) {
 		waitIFix();
@@ -639,6 +645,44 @@ public class DataStoreManager {
 			return false;
 		}
 
+		
+	}
+	
+	public class RaspberryPi {
+		private static final int PI_STATUS_ADDRS = NUM_ROOMS * DEVICES_A_ROOM * OFFSET_A_DEVICE;
+		
+		private static final int PI_STATUS_RUNNING_MASK = 0x01 << 0;
+		private static final int PI_STATUS_SHUTDOWN_MASK = 0x01 << 1;
+		
+		public RaspberryPi() {
+			// raspberry pi running status always true
+			setStatusFlag(PI_STATUS_RUNNING_MASK, true);
+			// if shutdown mask has been set once, then shutdown
+			setStatusFlag(PI_STATUS_SHUTDOWN_MASK, false);
+		}
+		
+		public void setShutdown(boolean shutdown) {
+			setStatusFlag(PI_STATUS_SHUTDOWN_MASK, shutdown);
+		}
+		
+		public boolean isShutdown() {
+			int register = getRaspberryPiStatus() & PI_STATUS_SHUTDOWN_MASK;
+			return register == PI_STATUS_SHUTDOWN_MASK;
+		}
+		
+		private int getRaspberryPiStatus() {
+			return modbusSlave.getResgister(PI_STATUS_ADDRS);
+		}
+		
+		protected void setStatusFlag(int mask, boolean flag) {
+			int tempRegister = getRaspberryPiStatus();
+			if (flag) {
+				tempRegister |= mask;
+			} else {
+				tempRegister &= ~mask;
+			}
+			modbusSlave.setRegister(PI_STATUS_ADDRS, tempRegister);
+		}
 		
 	}
 

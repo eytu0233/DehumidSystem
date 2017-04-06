@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import edu.ncku.uscc.process.BackupDataCmd;
 import edu.ncku.uscc.process.Command;
+import edu.ncku.uscc.process.RaspberryPiStatusCmd;
 import edu.ncku.uscc.process.ScanRoomCmd;
 import edu.ncku.uscc.process.dehumidifier.SetDehumidifierBackupByItselfPowerCmd;
 import edu.ncku.uscc.process.panel.SetPanelBackupPowerCmd;
@@ -291,6 +292,7 @@ public class DehumidRoomController extends Thread implements SerialPortEventList
 		
 		backupDataDeSerialization();
 		
+		addCmdQueue(new RaspberryPiStatusCmd(this));
 		addCmdQueue(new SynPanelPowerCmd(this));
 	}
 
