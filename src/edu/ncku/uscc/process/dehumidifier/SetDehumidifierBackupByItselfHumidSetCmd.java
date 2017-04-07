@@ -25,9 +25,12 @@ public class SetDehumidifierBackupByItselfHumidSetCmd extends SynDehumidifierCmd
 	@Override
 	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
+		dehumidifier.setCompressorRunning(rxBuf == DEHUMID_REP_COMPRESSOR_RUNNING);
+		
 		if (rxBuf == DEHUMID_REP_OK || rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
 				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL || rxBuf == DEHUMID_REP_DEHUMID_ABNORMAL
-				|| rxBuf == DEHUMID_REP_FAN_ABNORMAL || rxBuf == DEHUMID_REP_COMPRESSOR_ABNORMAL) {
+				|| rxBuf == DEHUMID_REP_FAN_ABNORMAL || rxBuf == DEHUMID_REP_COMPRESSOR_ABNORMAL
+				|| rxBuf == DEHUMID_REP_COMPRESSOR_RUNNING) {
 			followCmd(new SetDehumidifierByItselfHumidSetCmd(controller, did), null);
 			return true;
 		} else {

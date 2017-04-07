@@ -39,7 +39,9 @@ public class ScanRoomCmd extends Command implements IDehumidProtocal {
 	protected boolean replyHandler(byte rxBuf) throws Exception {
 		// TODO Auto-generated method stub
 		if (rxBuf == DEHUMID_REP_OK || rxBuf == DEHUMID_REP_HIGH_TEMP_ABNORMAL
-				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL) {
+				|| rxBuf == DEHUMID_REP_DEFROST_TEMP_ABNORMAL || rxBuf == DEHUMID_REP_DEHUMID_ABNORMAL
+				|| rxBuf == DEHUMID_REP_FAN_ABNORMAL || rxBuf == DEHUMID_REP_COMPRESSOR_ABNORMAL
+				|| rxBuf == DEHUMID_REP_COMPRESSOR_RUNNING) {
 			Log.info("Scan room index : " + roomScanIndex + " from " + controller.getSerialPort().getName());
 			controller.setRoomIndex(roomScanIndex);
 			controller.detectLogRoomIndex();
